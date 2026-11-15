@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { computeStudyAnalytics, type ErrorInput, type MockSummaryInput } from '../analytics/engine';
+import { GoalProximityMeter } from '../components/GoalProximityMeter';
 import { useSyncCollection } from '../hooks/useSyncStore';
 import type { CardRecord } from '../memory/types';
 import { syncEngine } from '../sync/syncEngine';
@@ -21,7 +22,8 @@ export type ScreenId =
   | 'watchlists'
   | 'update_centre'
   | 'settings'
-  | 'memory';
+  | 'memory'
+  | 'open_source_hub';
 
 interface Props {
   onNavigate: (id: ScreenId) => void;
@@ -79,8 +81,12 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
     [mocks, errors, cards]
   );
 
+  const targetScore = Number(settingsMap.targetScore || 790);
+  const targetCollegeName = String(settingsMap.targetCollegeName || 'MAIDS New Delhi (2026 R1 OMFS)');
+  const targetCollegeMarks = Number(settingsMap.targetCollegeMarks || targetScore || 810);
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto fluid-screen">
       <div>
         <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Today</h1>
         <p className="text-xs text-slate-400 mt-1">
@@ -89,6 +95,16 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
             : 'NEET-MDS 2027 - not announced yet (set planning date in Settings)'}
         </p>
       </div>
+
+      {/* Real-Time Goal & College % Proximity Meter */}
+      <GoalProximityMeter
+        currentScore={analytics.latestMockScore}
+        targetScore={targetScore}
+        targetCollegeName={targetCollegeName}
+        targetCollegeMarks={targetCollegeMarks}
+        weakSubject={analytics.weakestSubjects[0]?.subject}
+        onNavigate={onNavigate}
+      />
 
       {!syncInfo?.userEmail && (
         <div className="p-3.5 px-4 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between gap-3 text-slate-300">
@@ -119,10 +135,10 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 num-tabular">
         <div className="glass-card rounded-2xl p-4">
           <span className="text-[11px] font-bold text-sky-400 uppercase tracking-wider">Target Benchmark</span>
-          <h3 className="text-3xl font-extrabold text-white mt-1">{String(settingsMap.targetScore || 790)} <span className="text-xs font-normal text-slate-400">/ 960</span></h3>
+          <h3 className="text-3xl font-extrabold text-white mt-1">{targetCollegeMarks} <span className="text-xs font-normal text-slate-400">/ 960</span></h3>
           <p className="text-[11px] text-emerald-400 mt-1 font-semibold">AIR 10 in 2026: 765</p>
         </div>
         <div className="glass-card rounded-2xl p-4">

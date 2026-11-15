@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { GOVT_COLLEGES_DATA, type CollegeRow } from '../data/questions';
 import { useSyncCollection } from '../hooks/useSyncStore';
 
@@ -8,17 +9,51 @@ interface ShortlistEntry {
   notes: string;
 }
 
+export function estimateMarksForRank(closingRank: number): number {
+  if (closingRank <= 1) return 810;
+  if (closingRank <= 5) return 790;
+  if (closingRank <= 10) return 765;
+  if (closingRank <= 25) return 745;
+  if (closingRank <= 55) return 720;
+  if (closingRank <= 85) return 698;
+  if (closingRank <= 120) return 678;
+  return 658;
+}
+
 export default function CollegesScreen() {
   const { items, putItem, deleteItem } = useSyncCollection<ShortlistEntry>('shortlist');
+  const { items: settingsRows, putItem: putSetting } = useSyncCollection<{ value: unknown }>('settings');
+  const { items: mocks } = useSyncCollection<{ totalScore: number; date: string }>('mocks');
+
   const sorted = [...items].sort((a, b) => (a.data.priority || 999) - (b.data.priority || 999));
+
+  const latestMockScore = useMemo(() => {
+    if (mocks.length === 0) return null;
+    const s = [...mocks].sort((a, b) => a.data.date.localeCompare(b.data.date));
+    return s[s.length - 1].data.totalScore;
+  }, [mocks]);
+
+  const targetCollegeId = useMemo(() => {
+    const r = settingsRows.find((s) => s.id === 'targetCollegeId');
+    return r?.data?.value ? String(r.data.value) : 'c17';
+  }, [settingsRows]);
+
+  const handleSetGoalCollege = async (c: CollegeRow) => {
+    const reqMarks = estimateMarksForRank(c.closingRank);
+    await putSetting('targetCollegeId', { value: c.id });
+    await putSetting('targetCollegeName', { value: c.name });
+    await putSetting('targetCollegeMarks', { value: reqMarks });
+    await putSetting('targetScore', { value: reqMarks });
+  };
 
   const handleAdd = async (c: CollegeRow) => {
     if (sorted.some((s) => s.id === c.id)) return;
+    const reqMarks = estimateMarksForRank(c.closingRank);
     await putItem(c.id, {
       id: c.id,
       name: c.name,
       priority: sorted.length + 1,
-      notes: `AIQ R1 Rank: ${c.closingRank} | Stipend: Rs ${c.stipendMonthly.toLocaleString()}/mo`
+      notes: `AIQ R1 Rank: ${c.closingRank} (~${reqMarks}/960 marks) | Stipend: Rs ${c.stipendMonthly.toLocaleString()}/mo`
     });
   };
 
@@ -32,10 +67,12 @@ export default function CollegesScreen() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto fluid-screen">
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Colleges & Priority Shortlist</h1>
-        <p className="text-xs text-slate-400 mt-1">16 AIQ Govt Colleges + MAIDS. Shortlist persists in IndexedDB and syncs via HLC + tombstones.</p>
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">Colleges, Cutoffs & Required Marks</h1>
+        <p className="text-xs text-slate-400 mt-1">
+          2026 Baseline Cutoffs & Safe Marks out of 960. Set any college as your Primary Goal to drive your Today % Proximity Meter.
+        </p>
       </div>
 
       <div className="glass-card rounded-3xl p-6 space-y-3 border border-sky-500/30">
@@ -70,27 +107,58 @@ export default function CollegesScreen() {
             <tr>
               <th className="py-2 px-3">Institute</th>
               <th className="py-2 px-3">State</th>
-              <th className="py-2 px-3">Closing Rank</th>
+              <th className="py-2 px-3">R1 Rank</th>
+              <th className="py-2 px-3">Est. Marks Req</th>
+              <th className="py-2 px-3">Your Gap</th>
               <th className="py-2 px-3">Stipend/Mo</th>
-              <th className="py-2 px-3">Bond</th>
-              <th className="py-2 px-3 text-right">Action</th>
+              <th className="py-2 px-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
-            {GOVT_COLLEGES_DATA.map((c) => (
-              <tr key={c.id}>
-                <td className="py-2.5 px-3 font-semibold text-white">{c.name}</td>
-                <td className="py-2.5 px-3">{c.state}</td>
-                <td className="py-2.5 px-3 font-mono text-sky-400">{c.closingRank}</td>
-                <td className="py-2.5 px-3 font-mono text-emerald-400">Rs {c.stipendMonthly.toLocaleString()}</td>
-                <td className="py-2.5 px-3">{c.bondYears > 0 ? `${c.bondYears}y` : 'None'}</td>
-                <td className="py-2.5 px-3 text-right">
-                  <button onClick={() => void handleAdd(c)} className="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 font-bold">
-                    + Shortlist
-                  </button>
-                </td>
-              </tr>
-            ))}
+          <tbody className="divide-y divide-white/5 num-tabular">
+            {GOVT_COLLEGES_DATA.map((c) => {
+              const reqMarks = estimateMarksForRank(c.closingRank);
+              const isGoal = targetCollegeId === c.id;
+              const diffPct =
+                latestMockScore !== null ? Math.round(((latestMockScore - reqMarks) / reqMarks) * 1000) / 10 : null;
+              return (
+                <tr key={c.id} className={isGoal ? 'bg-sky-500/10' : ''}>
+                  <td className="py-2.5 px-3 font-semibold text-white">
+                    {c.name}
+                    {isGoal && (
+                      <span className="ml-2 px-2 py-0.5 rounded-full bg-sky-500 text-white text-[10px] font-extrabold">
+                        ACTIVE GOAL
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-2.5 px-3">{c.state}</td>
+                  <td className="py-2.5 px-3 font-mono text-sky-400">AIR {c.closingRank}</td>
+                  <td className="py-2.5 px-3 font-mono font-bold text-white">{reqMarks} / 960</td>
+                  <td className="py-2.5 px-3 font-mono font-bold">
+                    {diffPct === null ? (
+                      <span className="text-slate-400">Log mock</span>
+                    ) : diffPct >= 0 ? (
+                      <span className="text-emerald-400">+{diffPct}% (Safe)</span>
+                    ) : (
+                      <span className="text-amber-300">{diffPct}% ({latestMockScore! - reqMarks}m)</span>
+                    )}
+                  </td>
+                  <td className="py-2.5 px-3 font-mono text-emerald-400">Rs {c.stipendMonthly.toLocaleString()}</td>
+                  <td className="py-2.5 px-3 text-right space-x-1.5 whitespace-nowrap">
+                    <button
+                      onClick={() => void handleSetGoalCollege(c)}
+                      className={`px-2.5 py-1 rounded-lg font-bold ${
+                        isGoal ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-200 hover:bg-white/20'
+                      }`}
+                    >
+                      {isGoal ? 'Goal Set' : 'Set as Goal'}
+                    </button>
+                    <button onClick={() => void handleAdd(c)} className="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 font-bold">
+                      + Shortlist
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

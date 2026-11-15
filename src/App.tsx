@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useMemo, useState, type ComponentType, type LazyExoticComponent } from 'react';
+import { CornerTipsCoach, HIGH_YIELD_TIPS } from './components/CornerTipsCoach';
 import { SyncStatusChip } from './components/SyncStatusChip';
 import { useSyncCollection, useSyncStatus } from './hooks/useSyncStore';
 import type { ScreenId } from './screens/TodayScreen';
@@ -20,6 +21,7 @@ const ChecklistsScreen = lazy(() => import('./screens/ChecklistsScreen'));
 const UpdateCentreScreen = lazy(() => import('./screens/UpdateCentreScreen'));
 const SettingsScreen = lazy(() => import('./screens/SettingsScreen'));
 const MemoryScreen = lazy(() => import('./screens/MemoryScreen'));
+const OpenSourceHubScreen = lazy(() => import('./screens/OpenSourceHubScreen'));
 
 interface NavItem {
   id: ScreenId;
@@ -30,8 +32,9 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'dashboard', label: 'Today', group: 'Core' },
-  { id: 'plan', label: '23-Week Plan', group: 'Core' },
+  { id: 'plan', label: 'Smart Timetable & Plan', group: 'Core' },
   { id: 'curriculum', label: '17 Subjects', group: 'Core' },
+  { id: 'open_source_hub', label: '7-Repo Exam Hub', group: 'Practice' },
   { id: 'memory', label: 'Memory (FSRS)', group: 'Practice' },
   { id: 'daily_quiz', label: 'Daily Quiz', group: 'Practice' },
   { id: 'cbt_mock', label: 'CBT & Mocks', group: 'Practice' },
@@ -55,6 +58,7 @@ const MOBILE_TABS: { id: ScreenId; label: string }[] = [
 ];
 
 const SIMPLE_SCREENS: Record<Exclude<ScreenId, 'dashboard'>, LazyExoticComponent<ComponentType<Record<string, never>>>> = {
+  open_source_hub: OpenSourceHubScreen,
   memory: MemoryScreen,
   daily_quiz: DailyQuizScreen,
   plan: PlanScreen,
@@ -142,6 +146,7 @@ export default function App() {
   }, [cmdQuery]);
 
   const ActiveSimple = activeScreen === 'dashboard' ? null : SIMPLE_SCREENS[activeScreen];
+  const loadingTip = HIGH_YIELD_TIPS[Math.floor(Date.now() / 10000) % HIGH_YIELD_TIPS.length];
 
   return (
     <div className="min-h-screen relative flex flex-col lg:flex-row">
@@ -155,7 +160,7 @@ export default function App() {
         <div className="space-y-4 overflow-y-auto pr-1">
           <div className="px-2 pt-1 pb-2 border-b border-white/10">
             <div className="text-xs font-bold uppercase tracking-widest text-sky-400">MDS OS</div>
-            <div className="text-sm font-extrabold text-white">NEET-MDS Planner</div>
+            <div className="text-sm font-extrabold text-white">Liquid Glass Edition</div>
           </div>
 
           {(['Core', 'Practice', 'Strategy', 'System'] as const).map((group) => (
@@ -230,22 +235,31 @@ export default function App() {
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-6 pb-24 lg:pb-10">
+        <main className="flex-1 p-4 md:p-6 pb-24 lg:pb-16">
           <Suspense
             fallback={
-              <div className="glass-card rounded-3xl p-8 max-w-xl mx-auto text-center text-xs text-slate-400">
-                Loading screen...
+              <div className="glass-card rounded-3xl p-8 max-w-xl mx-auto text-center space-y-2 fluid-screen">
+                <div className="text-[10px] font-extrabold uppercase tracking-wider text-sky-400">
+                  Loading Module - {loadingTip.tag}
+                </div>
+                <div className="text-sm font-bold text-white">{loadingTip.title}</div>
+                <p className="text-xs text-slate-300">{loadingTip.tip}</p>
               </div>
             }
           >
-            {activeScreen === 'dashboard' ? (
-              <TodayScreen onNavigate={navigate} syncInfo={syncInfo} />
-            ) : (
-              ActiveSimple && <ActiveSimple />
-            )}
+            <div key={activeScreen} className="fluid-screen">
+              {activeScreen === 'dashboard' ? (
+                <TodayScreen onNavigate={navigate} syncInfo={syncInfo} />
+              ) : (
+                ActiveSimple && <ActiveSimple />
+              )}
+            </div>
           </Suspense>
         </main>
       </div>
+
+      {/* Floating Corner High-Yield Tips Coach */}
+      <CornerTipsCoach />
 
       {/* Mobile 5-Tab Bottom Bar (< 1024px) */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 glass-tab-bar safe-bottom px-2 pt-2 flex items-center justify-around">
@@ -280,11 +294,11 @@ export default function App() {
           onClick={() => setMoreOpen(false)}
         >
           <div
-            className="w-full glass-card rounded-t-3xl p-5 safe-bottom max-h-[80vh] overflow-y-auto space-y-4"
+            className="w-full glass-card rounded-t-3xl p-5 safe-bottom max-h-[80vh] overflow-y-auto space-y-4 fluid-screen"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
-              <strong className="text-sm font-extrabold text-white">All 15 Screens</strong>
+              <strong className="text-sm font-extrabold text-white">All 16 Screens</strong>
               <button onClick={() => setMoreOpen(false)} className="text-xs text-slate-400 font-bold">
                 Close
               </button>
@@ -315,7 +329,7 @@ export default function App() {
           onClick={() => setCmdOpen(false)}
         >
           <div
-            className="w-full max-w-lg glass-card rounded-3xl p-4 space-y-3"
+            className="w-full max-w-lg glass-card rounded-3xl p-4 space-y-3 fluid-screen"
             onClick={(e) => e.stopPropagation()}
           >
             <input
@@ -323,7 +337,7 @@ export default function App() {
               autoFocus
               value={cmdQuery}
               onChange={(e) => setCmdQuery(e.target.value)}
-              placeholder="Jump to screen (e.g. Mock, Atlas, Settings)..."
+              placeholder="Jump to screen (e.g. Mock, Atlas, Timetable, Colleges)..."
               className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white"
             />
             <div className="max-h-72 overflow-y-auto space-y-1">
