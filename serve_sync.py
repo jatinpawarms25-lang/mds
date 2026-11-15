@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# NEET-MDS Top-10 Planner — Local Server & Sync Relay
+# NEET-MDS Top-10 Planner - Local Server & Sync Relay
 # Built with Python standard library only (No external dependencies required)
 # Supports: Static file serving, /api/ip, /api/sync, and /api/update-proxy
 # Strict ASCII Quotes Only
@@ -200,7 +200,7 @@ if __name__ == '__main__':
     url = f"http://{local_ip}:{PORT}"
     
     print("=" * 60)
-    print("  MDS Desktop OS — AIR 1-10 Universal Workstation")
+    print("  MDS Desktop OS - AIR 1-10 Universal Workstation")
     print("=" * 60)
     print(f"  Mac / Desktop URL : http://localhost:{PORT}")
     print(f"  Android Phone URL : {url}")

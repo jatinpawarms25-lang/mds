@@ -1,8 +1,8 @@
 // ==============================================================================
-// NEET-MDS Top-10 Planner — Serverless Update & Notice Proxy
+// NEET-MDS Top-10 Planner - Serverless Update & Notice Proxy
 // Fetches Live from NBEMS, MCC, and DCI Portals
 // Handles Cloudflare Bot Challenges Honestly ("Manual check needed")
-// Strict ASCII Quotes Only • 30-Minute Cache Header
+// Strict ASCII Quotes Only - 30-Minute Cache Header
 // ==============================================================================
 
 const https = require('https');

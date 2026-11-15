@@ -6,15 +6,19 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 01: Baseline Diagnostic & Public Health Dentistry",
     "subjects": "PHD (Indices, Fluoride) + Baseline Full Mock",
     "goal": "Take Ecdentistry Free Weekly Mock as diagnostic; Master DMFT, CPITN, OHI-S & Fluoridation",
-    "phaseName": "Phase 1: First Pass"
+    "phaseName": "Phase 1: First Pass",
+    "work": "Take Ecdentistry Free Weekly Mock as diagnostic; Master DMFT, CPITN, OHI-S & Fluoridation",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 2,
     "phase": 1,
     "title": "Week 02: Public Health Dentistry & Biostatistics",
     "subjects": "PHD (Epidemiology, Biostatistics, Health Programs)",
-    "goal": "SE = SD/\u221an, levels of prevention, Nalgonda technique, dental manpower ratios",
-    "phaseName": "Phase 1: First Pass"
+    "goal": "SE = SD/sqrtn, levels of prevention, Nalgonda technique, dental manpower ratios",
+    "phaseName": "Phase 1: First Pass",
+    "work": "SE = SD/sqrtn, levels of prevention, Nalgonda technique, dental manpower ratios",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 3,
@@ -22,7 +26,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 03: General Human Physiology (Weak Area)",
     "subjects": "General Physiology (Blood, CVS, Respiration)",
     "goal": "Coagulation cascade, action potentials, neuromuscular transmission, cardiac cycle",
-    "phaseName": "Phase 1: First Pass"
+    "phaseName": "Phase 1: First Pass",
+    "work": "Coagulation cascade, action potentials, neuromuscular transmission, cardiac cycle",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 4,
@@ -30,7 +36,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 04: General Human Biochemistry (Weak Area)",
     "subjects": "Biochemistry (Enzymes, Rate-Limiters, Vitamins, Minerals)",
     "goal": "PFK-1, CPS-I, HMG-CoA reductase, Vitamin D/PTH calcium regulation, Gly in collagen",
-    "phaseName": "Phase 1: First Pass"
+    "phaseName": "Phase 1: First Pass",
+    "work": "PFK-1, CPS-I, HMG-CoA reductase, Vitamin D/PTH calcium regulation, Gly in collagen",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 5,
@@ -38,7 +46,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 05: Dental Materials (Hardest Subject - Part 1)",
     "subjects": "Dental Materials (Gypsum, Impression Materials, Cements)",
     "goal": "W/P ratios (Type I-V), gauging water 18.6ml, alginate vs elastomers setting reactions",
-    "phaseName": "Phase 1: First Pass"
+    "phaseName": "Phase 1: First Pass",
+    "work": "W/P ratios (Type I-V), gauging water 18.6ml, alginate vs elastomers setting reactions",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 6,
@@ -46,7 +56,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 06: Dental Materials (Part 2) & Metallurgy",
     "subjects": "Dental Materials (Amalgam, Composites, Alloys, Ceramics)",
     "goal": "Gamma-2 phase elimination by eta-prime (high Cu >6%), Bis-GMA/UDMA, casting shrinkage",
-    "phaseName": "Phase 1: First Pass"
+    "phaseName": "Phase 1: First Pass",
+    "work": "Gamma-2 phase elimination by eta-prime (high Cu >6%), Bis-GMA/UDMA, casting shrinkage",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 7,
@@ -54,7 +66,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 07: Dental Anatomy & Oral Histology (Diagnostic)",
     "subjects": "DA & DH (Chronology, Occlusion, Enamel/Dentin/Pulp)",
     "goal": "Calcification/eruption chronology tables, Angle classes, curves of Spee/Wilson, amelogenesis",
-    "phaseName": "Phase 1: First Pass"
+    "phaseName": "Phase 1: First Pass",
+    "work": "Calcification/eruption chronology tables, Angle classes, curves of Spee/Wilson, amelogenesis",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 8,
@@ -62,7 +76,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 08: General Anatomy, Embryology & Head & Neck",
     "subjects": "Anatomy (Skull base foramina, Cranial nerves V/VII, TMJ, Triangles)",
     "goal": "MALE exit via foramen ovale, middle meningeal via spinosum, pharyngeal arches derivatives",
-    "phaseName": "Phase 1: First Pass"
+    "phaseName": "Phase 1: First Pass",
+    "work": "MALE exit via foramen ovale, middle meningeal via spinosum, pharyngeal arches derivatives",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 9,
@@ -70,7 +86,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 09: General Pathology & General Microbiology",
     "subjects": "Path & Micro (Inflammation, Neoplasia, Caries, Sterilization)",
     "goal": "Hypersensitivity I-IV, wound repair, autoclave parameters, Robbins core pathways",
-    "phaseName": "Phase 1: First Pass"
+    "phaseName": "Phase 1: First Pass",
+    "work": "Hypersensitivity I-IV, wound repair, autoclave parameters, Robbins core pathways",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 10,
@@ -78,7 +96,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 10: Pharmacology & Local Anesthesia Mastery",
     "subjects": "Pharmacology (LA Doses, Antibiotics, NSAIDs, Emergencies)",
     "goal": "Lidocaine 4.4 vs 7 mg/kg, Adrenaline cardiac limit 0.04 mg (2 cartridges), Articaine thiophene",
-    "phaseName": "Phase 1: First Pass"
+    "phaseName": "Phase 1: First Pass",
+    "work": "Lidocaine 4.4 vs 7 mg/kg, Adrenaline cardiac limit 0.04 mg (2 cartridges), Articaine thiophene",
+    "mocks": "Weekly Ecdentistry diagnostic + subject test"
   },
   {
     "week": 11,
@@ -86,7 +106,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 11: Oral & Maxillofacial Surgery (OMFS Specialty)",
     "subjects": "OMFS (Impactions, Pederson Index, Le Fort Fractures, Spaces)",
     "goal": "Winter lines, Guerin sign, Ludwig angina airway priority, Champy miniplate at angle",
-    "phaseName": "Phase 2: Second Pass"
+    "phaseName": "Phase 2: Second Pass",
+    "work": "Winter lines, Guerin sign, Ludwig angina airway priority, Champy miniplate at angle",
+    "mocks": "1 full 240-Q CBT mock/week (75m + 105m)"
   },
   {
     "week": 12,
@@ -94,23 +116,29 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 12: Oral Pathology & Oral Medicine / Radiology",
     "subjects": "Oral Path & Radiology (Cysts, Tumors, Classic Radiographs)",
     "goal": "OKC vs Ameloblastoma, Sunburst, Cotton-wool, Ground-glass, SLOB rule, OPG interpretation",
-    "phaseName": "Phase 2: Second Pass"
+    "phaseName": "Phase 2: Second Pass",
+    "work": "OKC vs Ameloblastoma, Sunburst, Cotton-wool, Ground-glass, SLOB rule, OPG interpretation",
+    "mocks": "1 full 240-Q CBT mock/week (75m + 105m)"
   },
   {
     "week": 13,
     "phase": 2,
     "title": "Week 13: Periodontology & Gracey Curettes",
     "subjects": "Periodontology (AAP 2018, Gracey numbers, Bone defects, GTR)",
-    "goal": "Gracey 70\u00b0 blade offset, 1-2/3-4 Ant, 11-12 Mesial, 13-14 Distal; Stage I-IV / Grade A-C",
-    "phaseName": "Phase 2: Second Pass"
+    "goal": "Gracey 70 deg blade offset, 1-2/3-4 Ant, 11-12 Mesial, 13-14 Distal; Stage I-IV / Grade A-C",
+    "phaseName": "Phase 2: Second Pass",
+    "work": "Gracey 70 deg blade offset, 1-2/3-4 Ant, 11-12 Mesial, 13-14 Distal; Stage I-IV / Grade A-C",
+    "mocks": "1 full 240-Q CBT mock/week (75m + 105m)"
   },
   {
     "week": 14,
     "phase": 2,
     "title": "Week 14: Orthodontics & Cephalometrics",
     "subjects": "Orthodontics (Steiner norms, Growth, Functional Appliances, CVMI)",
-    "goal": "SNA 82\u00b0, SNB 80\u00b0, ANB 2\u00b0, Tweed FMA 25\u00b0, IMPA 90\u00b0, intrusion force 10-20g, Bolton ratio",
-    "phaseName": "Phase 2: Second Pass"
+    "goal": "SNA 82 deg, SNB 80 deg, ANB 2 deg, Tweed FMA 25 deg, IMPA 90 deg, intrusion force 10-20g, Bolton ratio",
+    "phaseName": "Phase 2: Second Pass",
+    "work": "SNA 82 deg, SNB 80 deg, ANB 2 deg, Tweed FMA 25 deg, IMPA 90 deg, intrusion force 10-20g, Bolton ratio",
+    "mocks": "1 full 240-Q CBT mock/week (75m + 105m)"
   },
   {
     "week": 15,
@@ -118,7 +146,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 15: Conservative Dentistry & Endodontics",
     "subjects": "Cons & Endo (Access Cavities, Vertucci Types, NiTi Metallurgy)",
     "goal": "Vertucci I-VIII canal types, access designs, irrigants (NaOCl/EDTA), rotary taper rules",
-    "phaseName": "Phase 2: Second Pass"
+    "phaseName": "Phase 2: Second Pass",
+    "work": "Vertucci I-VIII canal types, access designs, irrigants (NaOCl/EDTA), rotary taper rules",
+    "mocks": "1 full 240-Q CBT mock/week (75m + 105m)"
   },
   {
     "week": 16,
@@ -126,7 +156,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 16: Prosthodontics & General Medicine/Surgery",
     "subjects": "Prostho (RPD Kennedy, Hanau Quint) + Med/Surgery (ATLS, GCS)",
     "goal": "Applegate rules, GCS scoring, Parkland burn fluid formula, bleeding disorders in surgery",
-    "phaseName": "Phase 2: Second Pass"
+    "phaseName": "Phase 2: Second Pass",
+    "work": "Applegate rules, GCS scoring, Parkland burn fluid formula, bleeding disorders in surgery",
+    "mocks": "1 full 240-Q CBT mock/week (75m + 105m)"
   },
   {
     "week": 17,
@@ -134,7 +166,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 17: Full-Syllabus Rapid Fire Pass 01 + Mock Sprint",
     "subjects": "All 17 Subjects High-Yield Flashcards + 2 Grand Mocks",
     "goal": "60-70% question practice, analyze Part A & Part B separately in 75m + 105m time-blocks",
-    "phaseName": "Phase 3: Revision & Mocks"
+    "phaseName": "Phase 3: Revision & Mocks",
+    "work": "60-70% question practice, analyze Part A & Part B separately in 75m + 105m time-blocks",
+    "mocks": "2 full 240-Q CBT mocks/week (2-5 pm)"
   },
   {
     "week": 18,
@@ -142,7 +176,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 18: Volatile Tables & Numerical Formulas Sprint",
     "subjects": "Volatile Cheat Sheet (Malamed, Gypsum, Ceph, Fluoride)",
     "goal": "Lock all numbers: CLD 32-64 mg/kg, Duraphat 22,600 ppm, Type IV stone 0.22-0.24",
-    "phaseName": "Phase 3: Revision & Mocks"
+    "phaseName": "Phase 3: Revision & Mocks",
+    "work": "Lock all numbers: CLD 32-64 mg/kg, Duraphat 22,600 ppm, Type IV stone 0.22-0.24",
+    "mocks": "2 full 240-Q CBT mocks/week (2-5 pm)"
   },
   {
     "week": 19,
@@ -150,7 +186,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 19: Full-Syllabus Rapid Fire Pass 02 + Image Drill",
     "subjects": "15-Image Timed Drills Daily + 2 Grand Mocks (2-5 pm)",
     "goal": "Target 790+ in timed conditions, eliminate guessing penalties on Part B",
-    "phaseName": "Phase 3: Revision & Mocks"
+    "phaseName": "Phase 3: Revision & Mocks",
+    "work": "Target 790+ in timed conditions, eliminate guessing penalties on Part B",
+    "mocks": "2 full 240-Q CBT mocks/week (2-5 pm)"
   },
   {
     "week": 20,
@@ -158,15 +196,19 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 20: OMFS & Clinical Scenario Intensive",
     "subjects": "OMFS High-Yield + Emergency Protocols + Error Log Deep Clean",
     "goal": "Resolve all errors marked at +21 days; review all surgical complications",
-    "phaseName": "Phase 3: Revision & Mocks"
+    "phaseName": "Phase 3: Revision & Mocks",
+    "work": "Resolve all errors marked at +21 days; review all surgical complications",
+    "mocks": "2 full 240-Q CBT mocks/week (2-5 pm)"
   },
   {
     "week": 21,
     "phase": 4,
     "title": "Week 21: High-Yield Revision Cycles & Light Questions",
     "subjects": "Volatile Sheets + One-Page Notes + 2 Mocks",
-    "goal": "\u226450 questions/day on familiar topics; no new books or conflicting keys",
-    "phaseName": "Phase 4: Final Taper"
+    "goal": "<=50 questions/day on familiar topics; no new books or conflicting keys",
+    "phaseName": "Phase 4: Final Taper",
+    "work": "<=50 questions/day on familiar topics; no new books or conflicting keys",
+    "mocks": "Light familiar MCQs; stop full mocks 3-4 days before exam"
   },
   {
     "week": 22,
@@ -174,7 +216,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 22: Official Demo Test & Error Autopsy Final Pass",
     "subjects": "NBEMS Official Demo Test + Final Grand Mock",
     "goal": "Stop all full mocks 3-4 days before exam; visit test centre day before",
-    "phaseName": "Phase 4: Final Taper"
+    "phaseName": "Phase 4: Final Taper",
+    "work": "Stop all full mocks 3-4 days before exam; visit test centre day before",
+    "mocks": "Light familiar MCQs; stop full mocks 3-4 days before exam"
   },
   {
     "week": 23,
@@ -182,7 +226,9 @@ window.STUDY_PLAN_WEEKS = [
     "title": "Week 23: Pre-Exam Taper & Mindset Lock",
     "subjects": "Volatile Flashcards (30 min/day) + Sleep & Document Verification",
     "goal": "Pack color admit card, original valid photo ID, passport photos. Target AIR 1-10.",
-    "phaseName": "Phase 4: Final Taper"
+    "phaseName": "Phase 4: Final Taper",
+    "work": "Pack color admit card, original valid photo ID, passport photos. Target AIR 1-10.",
+    "mocks": "Light familiar MCQs; stop full mocks 3-4 days before exam"
   }
 ];
 window.HIDDEN_RULES_DATA = [
@@ -192,7 +238,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Internship Cut-off Date Swing Risk",
     "year": "2026 / 2025",
     "detail": "In 2026, cut-off was 31 May 2026. In 2025, original cut-off was 31 Mar, later extended to 30 Jun with a brief 3-day application window. If your early-May 2027 completion falls after the announced cut-off, watch NBEMS daily for discretionary extension notices.",
-    "action": "Verify early-May completion date against official 2027 bulletin on day one."
+    "action": "Verify early-May completion date against official 2027 bulletin on day one.",
+    "category": "Eligibility & Paperwork",
+    "content": "In 2026, cut-off was 31 May 2026. In 2025, original cut-off was 31 Mar, later extended to 30 Jun with a brief 3-day application window. If your early-May 2027 completion falls after the announced cut-off, watch NBEMS daily for discretionary extension notices. Action: Verify early-May completion date against official 2027 bulletin on day one."
   },
   {
     "id": "r_head_certificate",
@@ -200,7 +248,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Head of Institution Certificate Wording",
     "year": "2026 Baseline",
     "detail": "If still in internship at counselling, you must produce a certificate from the Head of the Institution certifying completion on or before the cut-off date. Colleges issue these slowly; draft and get approved early.",
-    "action": "Prepare template in advance with college academic office."
+    "action": "Prepare template in advance with college academic office.",
+    "category": "Eligibility & Paperwork",
+    "content": "If still in internship at counselling, you must produce a certificate from the Head of the Institution certifying completion on or before the cut-off date. Colleges issue these slowly; draft and get approved early. Action: Prepare template in advance with college academic office."
   },
   {
     "id": "r_state_council_reg",
@@ -208,7 +258,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "State Dental Council Registration Rules",
     "year": "2026 Baseline",
     "detail": "BDS degree + provisional or permanent DCI/State registration is mandatory. Provisional is accepted only while in internship completing by the cut-off. Some states cancel admission if state registration is not obtained within 1 month of joining.",
-    "action": "Apply for permanent state registration the very day internship ends."
+    "action": "Apply for permanent state registration the very day internship ends.",
+    "category": "Eligibility & Paperwork",
+    "content": "BDS degree + provisional or permanent DCI/State registration is mandatory. Provisional is accepted only while in internship completing by the cut-off. Some states cancel admission if state registration is not obtained within 1 month of joining. Action: Apply for permanent state registration the very day internship ends."
   },
   {
     "id": "r_scorecard_validity",
@@ -216,7 +268,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Scorecard Download 6-Month Window",
     "year": "2026 Rule",
     "detail": "NBEMS NEET-MDS scorecards are downloadable for SIX MONTHS ONLY. Afterwards, the portal closes and duplicates are not issued.",
-    "action": "Download and save 5 cloud and printed copies the moment results are declared."
+    "action": "Download and save 5 cloud and printed copies the moment results are declared.",
+    "category": "Eligibility & Paperwork",
+    "content": "NBEMS NEET-MDS scorecards are downloadable for SIX MONTHS ONLY. Afterwards, the portal closes and duplicates are not issued. Action: Download and save 5 cloud and printed copies the moment results are declared."
   },
   {
     "id": "r_uneditable_fields",
@@ -224,7 +278,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Uneditable Application Fields",
     "year": "2026 Rule",
     "detail": "Name, nationality, email ID, mobile number, and chosen test city CANNOT be edited even in correction windows. Any spelling mismatch with BDS marksheet or ID requires a gazetted affidavit.",
-    "action": "Double check character-by-character before payment submission."
+    "action": "Double check character-by-character before payment submission.",
+    "category": "Eligibility & Paperwork",
+    "content": "Name, nationality, email ID, mobile number, and chosen test city CANNOT be edited even in correction windows. Any spelling mismatch with BDS marksheet or ID requires a gazetted affidavit. Action: Double check character-by-character before payment submission."
   },
   {
     "id": "r_photo_specs",
@@ -232,7 +288,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Photo Specifications (Name & Date Stamp)",
     "year": "2026 Specs",
     "detail": "3.5 x 4.5 cm, 200 dpi, <=80 KB, white background, name and date of photograph stamped at bottom, <=3 months old. Deficient photos lead to summary rejection with entire fee forfeited.",
-    "action": "Re-shoot professional photo specifically to NBEMS specifications."
+    "action": "Re-shoot professional photo specifically to NBEMS specifications.",
+    "category": "Eligibility & Paperwork",
+    "content": "3.5 x 4.5 cm, 200 dpi, <=80 KB, white background, name and date of photograph stamped at bottom, <=3 months old. Deficient photos lead to summary rejection with entire fee forfeited. Action: Re-shoot professional photo specifically to NBEMS specifications."
   },
   {
     "id": "r_bds_percentage_tiebreak",
@@ -240,7 +298,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "BDS Aggregate % is Tie-Break (d)",
     "year": "2026 Rule",
     "detail": "There is no minimum BDS % required to sit, but the aggregate % entered is used for Tie-Break (d). If incorrect and used to break your tie, candidature is cancelled.",
-    "action": "Calculate exact total marks obtained divided by maximum marks across all 4 BDS years."
+    "action": "Calculate exact total marks obtained divided by maximum marks across all 4 BDS years.",
+    "category": "Eligibility & Paperwork",
+    "content": "There is no minimum BDS % required to sit, but the aggregate % entered is used for Tie-Break (d). If incorrect and used to break your tie, candidature is cancelled. Action: Calculate exact total marks obtained divided by maximum marks across all 4 BDS years."
   },
   {
     "id": "r_nda_penalties",
@@ -248,7 +308,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "NBEMS Non-Disclosure Agreement (NDA)",
     "year": "Official Law",
     "detail": "NEET-MDS is proprietary and confidential. Reproducing or transmitting questions in any form is prohibited. Penalty for breach is debarment for up to 14 attempts / 7 years.",
-    "action": "Do not post or discuss questions on social media post-exam."
+    "action": "Do not post or discuss questions on social media post-exam.",
+    "category": "Exam-Day Rules",
+    "content": "NEET-MDS is proprietary and confidential. Reproducing or transmitting questions in any form is prohibited. Penalty for breach is debarment for up to 14 attempts / 7 years. Action: Do not post or discuss questions on social media post-exam."
   },
   {
     "id": "r_tiebreak_order",
@@ -256,7 +318,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Official 5-Tier Tie-Break Sequence",
     "year": "2026 Bulletin",
     "detail": "Tie-break sequence: (a) Fewer incorrect responses overall; (b) Higher Part B score; (c) Fewer incorrect responses in Part B; (d) Higher BDS aggregate %; (e) Older candidate. Accuracy counts twice, and Part B accuracy is doubly weighted.",
-    "action": "Avoid blind guessing. A wrong answer damages both score and tie-break rankings."
+    "action": "Avoid blind guessing. A wrong answer damages both score and tie-break rankings.",
+    "category": "Exam-Day Rules",
+    "content": "Tie-break sequence: (a) Fewer incorrect responses overall; (b) Higher Part B score; (c) Fewer incorrect responses in Part B; (d) Higher BDS aggregate %; (e) Older candidate. Accuracy counts twice, and Part B accuracy is doubly weighted. Action: Avoid blind guessing. A wrong answer damages both score and tie-break rankings."
   },
   {
     "id": "r_timelock_enforcement",
@@ -264,7 +328,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Part A Strict 75-Minute Time-Lock",
     "year": "2025/2026",
     "detail": "Part A (100 Qs) locks permanently after 75 minutes. Unused time does not carry forward to Part B. You cannot return to Part A once Part B begins.",
-    "action": "Finish Part A in 60-65 minutes in mock practice to leave 10 minutes buffer."
+    "action": "Finish Part A in 60-65 minutes in mock practice to leave 10 minutes buffer.",
+    "category": "Exam-Day Rules",
+    "content": "Part A (100 Qs) locks permanently after 75 minutes. Unused time does not carry forward to Part B. You cannot return to Part A once Part B begins. Action: Finish Part A in 60-65 minutes in mock practice to leave 10 minutes buffer."
   },
   {
     "id": "r_counter_close",
@@ -272,7 +338,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Reporting Counter Closes 30 Mins Before Test",
     "year": "2026 Rule",
     "detail": "Reporting counter closes strictly 30 minutes before exam time (1:30 pm for a 2:00 pm test). Late arrivals are turned away with zero exceptions.",
-    "action": "Arrive at test centre 2 hours prior and visit the venue the day before."
+    "action": "Arrive at test centre 2 hours prior and visit the venue the day before.",
+    "category": "Exam-Day Rules",
+    "content": "Reporting counter closes strictly 30 minutes before exam time (1:30 pm for a 2:00 pm test). Late arrivals are turned away with zero exceptions. Action: Arrive at test centre 2 hours prior and visit the venue the day before."
   },
   {
     "id": "r_dress_code_myth",
@@ -280,7 +348,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Dress Code Myth Busting",
     "year": "Verified 2026",
     "detail": "Official bulletin contains NO blanket bans on jeans, shoes, or full sleeves. Coaching website dress code lists are largely invented. Follow only the bulletin and printed admit card.",
-    "action": "Wear comfortable, simple clothes without metal ornaments or digital watches."
+    "action": "Wear comfortable, simple clothes without metal ornaments or digital watches.",
+    "category": "Exam-Day Rules",
+    "content": "Official bulletin contains NO blanket bans on jeans, shoes, or full sleeves. Coaching website dress code lists are largely invented. Follow only the bulletin and printed admit card. Action: Wear comfortable, simple clothes without metal ornaments or digital watches."
   },
   {
     "id": "r_aiq_vs_state",
@@ -288,7 +358,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "50% AIQ (MCC) vs 50% State Quota Separation",
     "year": "MCC 2026",
     "detail": "MCC fills 50% AIQ in government colleges and 100% deemed universities. It does NOT fill the 50% state quota. Your state counselling portal has separate registration, separate fees, and its own deadlines.",
-    "action": "Register for both MCC and your State Counselling Portal."
+    "action": "Register for both MCC and your State Counselling Portal.",
+    "category": "Counselling Traps",
+    "content": "MCC fills 50% AIQ in government colleges and 100% deemed universities. It does NOT fill the 50% state quota. Your state counselling portal has separate registration, separate fees, and its own deadlines. Action: Register for both MCC and your State Counselling Portal."
   },
   {
     "id": "r_freeze_float",
@@ -296,7 +368,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Freeze vs Float Rules (New 2026 Protocol)",
     "year": "MCC 2026",
     "detail": "Round 1 & 2: Freeze = join in person, no further upgrade. Float = documents verified online, eligible for upgrade to R2 or R3. If upgraded, previous seat is permanently forfeited. After Round 3, everyone must join in person.",
-    "action": "Understand choice hierarchy before submitting choice lock."
+    "action": "Understand choice hierarchy before submitting choice lock.",
+    "category": "Counselling Traps",
+    "content": "Round 1 & 2: Freeze = join in person, no further upgrade. Float = documents verified online, eligible for upgrade to R2 or R3. If upgraded, previous seat is permanently forfeited. After Round 3, everyone must join in person. Action: Understand choice hierarchy before submitting choice lock."
   },
   {
     "id": "r_deposit_forfeiture",
@@ -304,7 +378,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Security Deposit Forfeiture & Exit Rules",
     "year": "MCC 2026",
     "detail": "Free exit is permitted in Round 1 only. Round 2 seat allotted but not joined = security deposit forfeited. Round 3 seat allotted but not joined = deposit forfeited AND debarred from all further MCC rounds that year.",
-    "action": "Never enter a college in Round 2 or 3 choices that you are unwilling to join."
+    "action": "Never enter a college in Round 2 or 3 choices that you are unwilling to join.",
+    "category": "Counselling Traps",
+    "content": "Free exit is permitted in Round 1 only. Round 2 seat allotted but not joined = security deposit forfeited. Round 3 seat allotted but not joined = deposit forfeited AND debarred from all further MCC rounds that year. Action: Never enter a college in Round 2 or 3 choices that you are unwilling to join."
   },
   {
     "id": "r_cross_blocking",
@@ -312,7 +388,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Cross-Blocking Between AIQ & State Quota",
     "year": "MCC 2026",
     "detail": "Joining a seat in Round 2 of State counselling blocks you from further rounds in MCC, and vice versa. Data is shared between MCC and State portals.",
-    "action": "Coordinate choice filling between state and AIQ rounds strategically."
+    "action": "Coordinate choice filling between state and AIQ rounds strategically.",
+    "category": "Counselling Traps",
+    "content": "Joining a seat in Round 2 of State counselling blocks you from further rounds in MCC, and vice versa. Data is shared between MCC and State portals. Action: Coordinate choice filling between state and AIQ rounds strategically."
   },
   {
     "id": "r_minor_subject_trap",
@@ -320,7 +398,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "The \"Minor Subject\" Trap (56 Marks Forfeited)",
     "year": "Strategy Advice",
     "detail": "Every Part B subject carries exactly 14 questions (56 marks). Public Health Dentistry carries the exact same marks as Prosthodontics or OMFS. Neglecting PHD or Dental Materials forfeits rank.",
-    "action": "Dedicate 30 mins daily table revision to weak subjects first thing in the morning."
+    "action": "Dedicate 30 mins daily table revision to weak subjects first thing in the morning.",
+    "category": "Study Traps",
+    "content": "Every Part B subject carries exactly 14 questions (56 marks). Public Health Dentistry carries the exact same marks as Prosthodontics or OMFS. Neglecting PHD or Dental Materials forfeits rank. Action: Dedicate 30 mins daily table revision to weak subjects first thing in the morning."
   },
   {
     "id": "r_pyq_key_trap",
@@ -328,7 +408,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Memorizing Unofficial PYQ Answer Keys",
     "year": "AglaSem Audit",
     "detail": "NBEMS never releases question papers or answer keys. All PYQs in market books are memory-based reconstructions (2024 recall had only 49 Qs; 2025 had 100 Qs without official keys). Many keys have errors.",
-    "action": "Use PYQs for topic spotting; always verify disputed answers in standard textbooks."
+    "action": "Use PYQs for topic spotting; always verify disputed answers in standard textbooks.",
+    "category": "Study Traps",
+    "content": "NBEMS never releases question papers or answer keys. All PYQs in market books are memory-based reconstructions (2024 recall had only 49 Qs; 2025 had 100 Qs without official keys). Many keys have errors. Action: Use PYQs for topic spotting; always verify disputed answers in standard textbooks."
   },
   {
     "id": "r_image_blindness",
@@ -336,7 +418,9 @@ window.HIDDEN_RULES_DATA = [
     "title": "Text-Only Revision Ignoring 15+ Image Questions",
     "year": "2025/2026 Trend",
     "detail": "Over 60% of questions are clinical or image-based (~15 direct images = 60 marks). Students reading only text synopsis consistently miss radiograph and histopath spotters.",
-    "action": "Use the Image Atlas and 15-image drill daily during Phase 2 and 3."
+    "action": "Use the Image Atlas and 15-image drill daily during Phase 2 and 3.",
+    "category": "Study Traps",
+    "content": "Over 60% of questions are clinical or image-based (~15 direct images = 60 marks). Students reading only text synopsis consistently miss radiograph and histopath spotters. Action: Use the Image Atlas and 15-image drill daily during Phase 2 and 3."
   }
 ];
 window.MASTER_CHECKLISTS = [
@@ -376,7 +460,8 @@ window.MASTER_CHECKLISTS = [
         "id": "b8",
         "text": "8. Calculate exact BDS aggregate % definition per bulletin formula."
       }
-    ]
+    ],
+    "description": "Phase verification checklist (8 items)"
   },
   {
     "id": "chk_keep_ready",
@@ -414,7 +499,8 @@ window.MASTER_CHECKLISTS = [
         "id": "k8",
         "text": "Weekly split-block mock initiated with error log notebook."
       }
-    ]
+    ],
+    "description": "Phase verification checklist (8 items)"
   },
   {
     "id": "chk_final_week",
@@ -422,7 +508,7 @@ window.MASTER_CHECKLISTS = [
     "items": [
       {
         "id": "f1",
-        "text": "Stop all full grand mocks 3\u20134 days before the exam date."
+        "text": "Stop all full grand mocks 3-4 days before the exam date."
       },
       {
         "id": "f2",
@@ -444,7 +530,8 @@ window.MASTER_CHECKLISTS = [
         "id": "f6",
         "text": "Pack printed colour admit card + original photo ID + passport photo (no watches, jewelry, bags)."
       }
-    ]
+    ],
+    "description": "Phase verification checklist (6 items)"
   },
   {
     "id": "chk_exam_day",
@@ -474,7 +561,8 @@ window.MASTER_CHECKLISTS = [
         "id": "e6",
         "text": "Strictly maintain NDA confidentiality post-exam."
       }
-    ]
+    ],
+    "description": "Phase verification checklist (6 items)"
   },
   {
     "id": "chk_after_result",
@@ -500,6 +588,7 @@ window.MASTER_CHECKLISTS = [
         "id": "a5",
         "text": "Ensure non-forfeiture of security deposit in Round 2 and Round 3."
       }
-    ]
+    ],
+    "description": "Phase verification checklist (5 items)"
   }
 ];

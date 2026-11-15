@@ -9,10 +9,10 @@ CONTENTS="$DIR/$APP_NAME/Contents"
 MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
 
-echo "📦 Recompiling Swift native application wrapper..."
+echo " Recompiling Swift native application wrapper..."
 swiftc -O "$DIR/app_native/main.swift" -o "$DIR/app_native/MDS_Desktop_OS" -framework AppKit -framework WebKit
 
-echo "📦 Assembling macOS native application bundle..."
+echo " Assembling macOS native application bundle..."
 rm -rf "$DIR/$APP_NAME"
 mkdir -p "$MACOS"
 mkdir -p "$RESOURCES"
@@ -85,7 +85,7 @@ cat << 'PLIST' > "$CONTENTS/Info.plist"
 </plist>
 PLIST
 
-echo "✍️ Ad-hoc codesigning with deep signature..."
+echo " Ad-hoc codesigning with deep signature..."
 codesign --force --deep --sign - "$DIR/$APP_NAME"
 
-echo "✅ MDS_Desktop_OS.app successfully packaged and signed!"
+echo " MDS_Desktop_OS.app successfully packaged and signed!"
