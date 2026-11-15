@@ -9,9 +9,9 @@
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --card-bg: rgba(255, 255, 255, 0.07);
-  --card-border: rgba(255, 255, 255, 0.12);
-  --card-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  --bar-bg: rgba(10, 15, 26, 0.72);
+  --card-border: rgba(255, 255, 255, 0.14);
+  --card-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.20);
+  --bar-bg: rgba(10, 15, 26, 0.74);
   --accent: #007aff;
   --ambient-1: rgba(30, 58, 138, 0.35);
   --ambient-2: rgba(88, 28, 135, 0.25);
@@ -26,13 +26,13 @@
   --bg-base: #f2f2f7;
   --text-primary: #1c1c1e;
   --text-secondary: #48484a;
-  --card-bg: rgba(255, 255, 255, 0.72);
+  --card-bg: rgba(255, 255, 255, 0.78);
   --card-border: rgba(0, 0, 0, 0.10);
-  --card-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.90);
-  --bar-bg: rgba(242, 242, 247, 0.78);
+  --card-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  --bar-bg: rgba(242, 242, 247, 0.82);
   --accent: #007aff;
-  --ambient-1: rgba(56, 189, 248, 0.35);
-  --ambient-2: rgba(167, 139, 250, 0.30);
+  --ambient-1: rgba(56, 189, 248, 0.32);
+  --ambient-2: rgba(167, 139, 250, 0.28);
 }
 
 [data-theme="light"] .text-white,
@@ -63,7 +63,7 @@
 [data-theme="light"] .bg-white\/\[0\.04\],
 [data-theme="light"] .bg-white\/5,
 [data-theme="light"] .bg-white\/10 {
-  background-color: rgba(255, 255, 255, 0.85) !important;
+  background-color: rgba(255, 255, 255, 0.88) !important;
   border-color: rgba(0, 0, 0, 0.12) !important;
 }
 
@@ -85,6 +85,7 @@ body {
 }
 
 .mono { font-family: var(--font-mono); }
+.num-tabular { font-variant-numeric: tabular-nums; }
 
 .ambient-canvas {
   position: fixed;
@@ -92,6 +93,7 @@ body {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  transform: translateZ(0);
 }
 .ambient-blob-1 {
   position: absolute;
@@ -101,6 +103,7 @@ body {
   background: radial-gradient(circle, var(--ambient-1) 0%, transparent 70%);
   filter: blur(60px);
   border-radius: 50%;
+  will-change: transform;
 }
 .ambient-blob-2 {
   position: absolute;
@@ -110,6 +113,7 @@ body {
   background: radial-gradient(circle, var(--ambient-2) 0%, transparent 70%);
   filter: blur(75px);
   border-radius: 50%;
+  will-change: transform;
 }
 
 .glass-card, .material-regular {
@@ -118,6 +122,7 @@ body {
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--card-border);
   box-shadow: var(--card-highlight), 0 8px 32px rgba(0, 0, 0, 0.12);
+  contain: layout style;
 }
 
 .glass-nav-bar {
@@ -139,9 +144,21 @@ body {
   border-top: 1px solid var(--card-border);
 }
 
+/* 60 fps Android mobile GPU optimization */
+@media (max-width: 767px) {
+  .glass-card, .material-regular, .glass-nav-bar, .glass-tab-bar {
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+  }
+  .ambient-blob-1, .ambient-blob-2 {
+    filter: blur(44px);
+  }
+}
+
 .apple-press {
   transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.16s ease;
   cursor: pointer;
+  min-height: 36px;
 }
 .apple-press:active {
   transform: scale(0.97);

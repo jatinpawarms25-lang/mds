@@ -5,7 +5,9 @@ import { exportNotesToCsv, importNotesFromCsv } from '../memory/csv';
 import { DEFAULT_DECK_OPTIONS, fsrsRetrievability } from '../memory/fsrs';
 import { buildCardsFromNote } from '../memory/notes';
 import { buildDailyQueue, burySiblingsAfterReview, previewCard, scheduleCard } from '../memory/queue';
+import { balanceIntervalLoad, optimizeFsrsParameters, simulateWorkload, type OptimizerResult } from '../memory/simulator';
 import type { CardRecord, DeckOptions, NoteRecord, NoteType, Rating, SchedulerKind } from '../memory/types';
+import { getAllEvents } from '../sync/db';
 import { generateUuid, syncEngine } from '../sync/syncEngine';
 
 type MemoryTab = 'review' | 'add' | 'browse' | 'stats' | 'options';
@@ -21,6 +23,7 @@ export default function MemoryScreen() {
   const [sessionReviewed, setSessionReviewed] = useState(0);
   const [sessionAgain, setSessionAgain] = useState(0);
   const [statusMsg, setStatusMsg] = useState('');
+  const [optResult, setOptResult] = useState<OptimizerResult | null>(null);
   const cardShownAtRef = useRef<number>(Date.now());
 
   // Add Note form
@@ -61,6 +64,12 @@ export default function MemoryScreen() {
     const reviewNow = new Date();
     const durationMs = Date.now() - cardShownAtRef.current;
     const outcome = scheduleCard(activeCard, rating, reviewNow, options, durationMs);
+    if (options.loadBalancing !== false && outcome.card.state === 'review' && outcome.scheduledDays >= 4) {
+      const balanced = balanceIntervalLoad(outcome.scheduledDays, cards, reviewNow, options.maxIntervalDays);
+      outcome.card.intervalDays = balanced;
+      outcome.card.dueAt = new Date(reviewNow.getTime() + balanced * 86400000).toISOString();
+      outcome.logPayload.scheduled_days = balanced;
+    }
 
     await putCard(outcome.card.id, outcome.card);
     await syncEngine.logImmutableEvent('review_logs', {
@@ -204,8 +213,26 @@ export default function MemoryScreen() {
       const count = cards.filter((c) => !c.suspended && c.state !== 'new' && c.dueAt.slice(0, 10) === day).length;
       return { day: day.slice(5), count };
     });
-    return { leeches, mature, avgR, forecast7d };
-  }, [cards]);
+    const sim30 = simulateWorkload(cards, options, 30, new Date());
+    return { leeches, mature, avgR, forecast7d, sim30 };
+  }, [cards, options]);
+
+  const handleOptimizeFsrs = async () => {
+    const events = await getAllEvents();
+    const samples = events
+      .filter((ev) => ev.table === 'review_logs')
+      .map((ev) => ({
+        elapsedDays: Number(ev.payload.elapsed_days || 1),
+        stabilityBefore: Math.max(0.5, Number(ev.payload.scheduled_days || 1)),
+        rating: (Number(ev.payload.rating || 3) as Rating)
+      }));
+    const res = optimizeFsrsParameters(samples, options.fsrsWeights);
+    setOptResult(res);
+    if (res.status === 'optimized') {
+      saveOptions({ fsrsWeights: res.weights });
+      setStatusMsg(`FSRS weights optimized across ${res.sampleCount} reviews (log-loss ${res.logLossBefore} -> ${res.logLossAfter}).`);
+    }
+  };
 
   const filteredCards = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -486,13 +513,32 @@ export default function MemoryScreen() {
 
           <div className="glass-card rounded-3xl p-5 space-y-3">
             <h3 className="text-sm font-bold text-white">7-Day Due Forecast</h3>
-            <div className="grid grid-cols-7 gap-2 text-center">
+            <div className="grid grid-cols-7 gap-2 text-center num-tabular">
               {stats.forecast7d.map((d) => (
                 <div key={d.day} className="p-2 rounded-xl bg-white/5">
                   <div className="text-[10px] text-slate-400">{d.day}</div>
                   <div className="text-sm font-extrabold text-white mt-1">{d.count}</div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="glass-card rounded-3xl p-5 space-y-3">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              <h3 className="text-sm font-bold text-white">30-Day Workload Simulator</h3>
+              <span className="text-[11px] text-sky-400 font-bold num-tabular">
+                Peak: {stats.sim30.peakDailyCards}/day | Avg: {stats.sim30.averageDailyCards}/day
+              </span>
+            </div>
+            <div className="gap-1 items-end h-16 pt-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(15, minmax(0, 1fr))' }}>
+              {stats.sim30.points.filter((_, idx) => idx % 2 === 0).map((pt) => {
+                const hPct = Math.max(8, Math.round((pt.totalCards / Math.max(1, stats.sim30.peakDailyCards)) * 100));
+                return (
+                  <div key={pt.date} title={`${pt.date}: ${pt.totalCards} cards (~${pt.estimatedMinutes} min)`} className="h-full flex items-end">
+                    <div className="w-full rounded-t bg-sky-500/70" style={{ height: `${hPct}%` }} />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -563,14 +609,40 @@ export default function MemoryScreen() {
               />
             </div>
           </div>
-          <label className="flex items-center gap-2 text-slate-300 pt-2">
-            <input
-              type="checkbox"
-              checked={options.buryNewSiblings}
-              onChange={(e) => saveOptions({ buryNewSiblings: e.target.checked, buryReviewSiblings: e.target.checked })}
-            />
-            <span>Bury sibling cards until next day</span>
-          </label>
+          <div className="space-y-2 pt-2">
+            <label className="flex items-center gap-2 text-slate-300">
+              <input
+                type="checkbox"
+                checked={options.buryNewSiblings}
+                onChange={(e) => saveOptions({ buryNewSiblings: e.target.checked, buryReviewSiblings: e.target.checked })}
+              />
+              <span>Bury sibling cards until next day</span>
+            </label>
+            <label className="flex items-center gap-2 text-slate-300">
+              <input
+                type="checkbox"
+                checked={options.loadBalancing !== false}
+                onChange={(e) => saveOptions({ loadBalancing: e.target.checked })}
+              />
+              <span>Load balancing (smooth review spikes across fuzz window)</span>
+            </label>
+          </div>
+
+          <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="font-bold text-white">FSRS Parameter Optimizer</div>
+              <div className="text-slate-400">
+                {optResult
+                  ? optResult.status === 'optimized'
+                    ? `Optimized on ${optResult.sampleCount} reviews (loss ${optResult.logLossBefore} -> ${optResult.logLossAfter})`
+                    : `Need at least ${optResult.minRequired} reviews (currently ${optResult.sampleCount}).`
+                  : 'Fits FSRS weights to your personal review history (>= 100 reviews).'}
+              </div>
+            </div>
+            <button onClick={() => void handleOptimizeFsrs()} className="px-4 py-2 rounded-xl bg-sky-500 text-white font-bold apple-press">
+              Optimize Parameters
+            </button>
+          </div>
         </div>
       )}
     </div>

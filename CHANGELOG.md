@@ -1,5 +1,11 @@
 # Changelog (`CHANGELOG.md`)
 
+## [3.0.0-phase3] - 2026-11-15
+
+### Added
+- **Phase 2B Memory Pro (`src/memory/simulator.ts`)**: Added 30/60/90-day workload simulator, fuzz-window load balancing (`balanceIntervalLoad`), and empirical FSRS parameter optimizer (`optimizeFsrsParameters`, >= 100 review logs) with unit tests (`simulator.test.ts`).
+- **Phase 3 Apple Glass Design System (`src/index.css`, `scripts/check_ui_tokens.mjs`)**: Refined Light/Dark glass tokens, `.num-tabular` figures, 60 fps Android mobile GPU blur optimization (`<= 767px`), `prefers-reduced-transparency` / `prefers-reduced-motion` fallbacks, and automated token verification.
+
 ## [2.0.0-phase2a] - 2026-11-15
 
 ### Added

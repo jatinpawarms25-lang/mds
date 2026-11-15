@@ -59,6 +59,7 @@ export interface DeckOptions {
   buryNewSiblings: boolean; // default true
   buryReviewSiblings: boolean; // default true
   maxAnswerSeconds: number; // default 60
+  loadBalancing?: boolean; // default true in Phase 2B
   fsrsWeights: number[];
 }
 

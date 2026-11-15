@@ -27,6 +27,7 @@ export const DEFAULT_DECK_OPTIONS: DeckOptions = {
   buryNewSiblings: true,
   buryReviewSiblings: true,
   maxAnswerSeconds: 60,
+  loadBalancing: true,
   fsrsWeights: DEFAULT_FSRS_WEIGHTS
 };
 
