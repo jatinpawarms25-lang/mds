@@ -1,0 +1,27 @@
+name: Weekly Cloud Data Backup
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Export Supabase user data to JSON
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/weekly_backup.mjs
+      - name: Upload encrypted-repo backup artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mds-os-weekly-backup
+          path: backups/*.json
+          retention-days: 90

@@ -1,1 +1,8 @@
 .DS_Store
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.log
+MDS_Desktop_OS_pre_phase0_backup.zip

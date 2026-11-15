@@ -1,5 +1,17 @@
 # Changelog (`CHANGELOG.md`)
 
+## [1.0.0-phase1] - 2026-11-15
+
+### Added
+- **Vite + React + TypeScript + Build-Time Tailwind Architecture**: Replaced CDN React/Babel/Tailwind scripts with Vite production bundling (`dist/`), `React.lazy` code splitting across all 15 screens, and strict TypeScript checking.
+- **TypeScript HLC Sync Engine (`src/sync/`)**: Implemented Hybrid Logical Clock (`hlc.ts`), IndexedDB storage via `idb` (`db.ts`), deterministic per-record merge with 90-day tombstones and restorable `syncConflicts` (`merge.ts`), and offline-first outbox + Realtime wake-up + 45s polling fallback + Magic Link / 6-digit OTP / Password auth (`syncEngine.ts`).
+- **Supabase Cloud-First Schema (`supabase/migrations/001_phase1_cloud_sync.sql`)**: Added `user_records` (PK `(user_id, collection, id)`), `upsert_user_records` RPC (higher HLC wins, rejects clocks > 5 min ahead), immutable insert-only `attempts` / `study_sessions` / `review_logs`, server-side `admin_users`, deduplicated `user_snapshots` (last 3), and `keep_alive()` RPC.
+- **CI, Keep-Alive & Backup Automation**: Added `scripts/ci_checks.mjs` (`--ascii`, `--secrets`, `--defaults`), `scripts/weekly_backup.mjs`, `scripts/rls_isolation_check.mjs`, and `.github/workflows/{ci.yml, supabase-keepalive.yml, weekly-backup.yml}`.
+- **Unit & Convergence Tests (`src/sync/__tests__/`)**: Verified HLC ordering, 3-device 10,000-operation randomized convergence with zero lost records, conflict preservation, tombstone non-resurrection, and RLS SQL policy structure (10/10 tests passing).
+
+### Removed
+- **Localhost & Native Wrapper Dependencies**: Removed `serve_sync.py`, `launch.sh`, `MDS_Desktop_OS.app`, `app_native/`, `package_desktop_app.sh`, and legacy `app.jsx`/`app.js`/`vendor/` in favor of installable HTTPS PWA (`public/manifest.json`, `public/sw.js`).
+
 ## [0.1.0-phase0] - 2026-11-15
 
 ### Added

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>NEET-MDS Top-10 Planner (Build A Static Fallback)</title>
+<style>
+:root{
+  --bg:#f4f6f5; --surface:#ffffff; --surface2:#eef2f0; --ink:#12211c; --muted:#5a6b64; --line:#dce5e1;
+  --teal:#0f766e; --teal-dark:#0b5e57; --teal-soft:#d9efec; --amber:#b45309; --amber-soft:#fef3c7;
+  --red:#b42318; --red-soft:#fee4e2; --green:#027a48; --green-soft:#dcfae6;
+  --radius:18px; --radius-s:12px;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0c1210; --surface:#151d1a; --surface2:#1c2723; --ink:#e8f0ed; --muted:#9db0a8; --line:#2a3a35;
+  --teal:#2dd4bf; --teal-dark:#5eead4; --teal-soft:#12332f; --amber:#fbbf24; --amber-soft:#3a2e0a;
+  --red:#fda29b; --red-soft:#3d1714; --green:#6ce9a6; --green-soft:#0f2e1e; }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.55;padding:24px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.btn{background:var(--teal);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer;min-height:44px}
+.btn.secondary{background:var(--surface2);color:var(--ink);border:1px solid var(--line)}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);min-height:44px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div>
+        <strong>NEET-MDS Top-10 Planner - Build A Static Planner (Local Fallback)</strong>
+        <div style="font-size:13px;color:var(--muted)">Kept usable alongside MDS OS until Phase 1 passes. Exports &amp; imports Build A JSON backups compatible with MDS OS.</div>
+      </div>
+      <a href="index.html" class="btn" style="text-decoration:none;display:inline-flex;align-items:center">Open MDS OS Universal App</a>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Mock Calculator &amp; Build A JSON Backup</h2>
+    <div class="grid3">
+      <div><label>Part A Correct (of 100)</label><input type="number" id="aC" value="82" min="0" max="100"></div>
+      <div><label>Part A Wrong</label><input type="number" id="aW" value="14" min="0" max="100"></div>
+      <div><label>Part B Correct (of 140)</label><input type="number" id="bC" value="120" min="0" max="140"></div>
+      <div><label>Part B Wrong</label><input type="number" id="bW" value="8" min="0" max="140"></div>
+      <div><label>State (for State Quota)</label><input type="text" id="sqState" placeholder="Enter state"></div>
+      <div><label>State Portal</label><input type="text" id="sqPortal" placeholder="Enter state portal URL"></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn" id="calcBtn" type="button">Calculate &amp; Add Mock</button>
+      <button class="btn secondary" id="exportBtn" type="button">Export Build A Backup (JSON)</button>
+      <button class="btn secondary" id="importBtn" type="button">Import Backup (JSON)</button>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+    </div>
+    <p id="outScore" style="font-weight:700;margin-top:12px">202 correct, 22 wrong = 786 / 960</p>
+  </div>
+</div>
+<script>
+var STORAGE_KEY = "mds_build_a_static_state";
+var state = { mocks: [], errors: [], shortlist: ["KGMU, Lucknow (UP)", "BHU, Varanasi (UP)"], counselling: [false,false,false,false], stateQuota: { state: "", portal: "", domicile: "Not checked yet" } };
+try {
+  var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if (saved) state = saved;
+} catch(e) {}
+function saveState() {
+  state.stateQuota.state = document.getElementById("sqState").value;
+  state.stateQuota.portal = document.getElementById("sqPortal").value;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+document.getElementById("sqState").value = (state.stateQuota && state.stateQuota.state) || "";
+document.getElementById("sqPortal").value = (state.stateQuota && state.stateQuota.portal) || "";
+document.getElementById("calcBtn").addEventListener("click", function() {
+  var aC = parseInt(document.getElementById("aC").value, 10) || 0;
+  var aW = parseInt(document.getElementById("aW").value, 10) || 0;
+  var bC = parseInt(document.getElementById("bC").value, 10) || 0;
+  var bW = parseInt(document.getElementById("bW").value, 10) || 0;
+  var score = (aC + bC) * 4 - (aW + bW);
+  var att = aC + bC + aW + bW;
+  var acc = att ? Math.round((aC + bC) / att * 1000) / 10 : 0;
+  state.mocks.push({ label: "Mock " + (state.mocks.length + 1), date: new Date().toISOString().slice(0,10), aC: aC, aW: aW, aS: Math.max(0, 100-aC-aW), bC: bC, bW: bW, bS: Math.max(0, 140-bC-bW), score: score, acc: acc, gap: 765 - score });
+  saveState();
+  document.getElementById("outScore").textContent = "Logged Mock Score: " + score + " / 960 (" + acc + "% accuracy)";
+});
+document.getElementById("exportBtn").addEventListener("click", function() {
+  saveState();
+  var payload = { exported: new Date().toISOString().slice(0,10), exam: "NEET-MDS 2027", targetBranch: "OMFS", mocks: state.mocks, errors: state.errors, shortlist: state.shortlist, counselling: state.counselling, stateQuota: state.stateQuota };
+  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "neet-mds-planner-backup.json";
+  a.click();
+});
+document.getElementById("importBtn").addEventListener("click", function() {
+  document.getElementById("importFile").click();
+});
+document.getElementById("importFile").addEventListener("change", function(e) {
+  var f = e.target.files && e.target.files[0];
+  if (!f) return;
+  var rd = new FileReader();
+  rd.onload = function() {
+    try {
+      var d = JSON.parse(rd.result);
+      if (Array.isArray(d.mocks)) state.mocks = d.mocks;
+      if (Array.isArray(d.errors)) state.errors = d.errors;
+      if (Array.isArray(d.shortlist)) state.shortlist = d.shortlist;
+      if (Array.isArray(d.counselling)) state.counselling = d.counselling;
+      if (d.stateQuota) state.stateQuota = d.stateQuota;
+      saveState();
+      document.getElementById("sqState").value = (state.stateQuota && state.stateQuota.state) || "";
+      document.getElementById("sqPortal").value = (state.stateQuota && state.stateQuota.portal) || "";
+      document.getElementById("outScore").textContent = "Backup restored (" + state.mocks.length + " mocks, " + state.shortlist.length + " shortlisted colleges).";
+    } catch(err) {}
+  };
+  rd.readAsText(f);
+});
+</script>
+</body>
+</html>
