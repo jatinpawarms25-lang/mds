@@ -1,5 +1,12 @@
 # Changelog (`CHANGELOG.md`)
 
+## [5.0.0-phase5-7] - 2026-11-15
+
+### Added
+- **Versioned Academic Content DB (`supabase/migrations/003_content_packs.sql`)**: Added `content_packs` and `question_bank` (Data Domain B) with `source`, `confidence IN ('official', 'secondary', 'estimate')`, and `verified_at` (Rule R6), isolated from user progress (Rule R9).
+- **Closed-Loop Analytics & Plan Adjuster (`src/analytics/engine.ts`, `TodayScreen.tsx`)**: Computes latest/best mock scores, weak-subject risk ranking (mistakes + leeches), and 1-click weekly focus adjustments.
+- **`.apkg` Round-Trip Packaging (`src/memory/apkg.ts`, `MemoryScreen.tsx`)**: Added pure TypeScript ZIP + `.apkg` export/import verified by `apkg.test.ts` (Rule R10 satisfied).
+
 ## [4.0.0-phase4] - 2026-11-15
 
 ### Added

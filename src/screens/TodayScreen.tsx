@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
+import { computeStudyAnalytics, type ErrorInput, type MockSummaryInput } from '../analytics/engine';
 import { useSyncCollection } from '../hooks/useSyncStore';
+import type { CardRecord } from '../memory/types';
 import { syncEngine } from '../sync/syncEngine';
 import type { SyncSnapshotInfo } from '../sync/types';
 
@@ -38,7 +40,9 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
   const todayKey = new Date().toISOString().slice(0, 10);
   const { items: settings } = useSyncCollection<{ value: unknown }>('settings');
   const { items: routines, putItem: putRoutine } = useSyncCollection<Record<string, boolean>>('daily_routines');
-  const { items: errors } = useSyncCollection('errors');
+  const { items: errors } = useSyncCollection<ErrorInput>('errors');
+  const { items: mocks } = useSyncCollection<MockSummaryInput>('mocks');
+  const { items: cards } = useSyncCollection<CardRecord>('cards');
 
   const settingsMap = useMemo(() => {
     const m: Record<string, unknown> = {};
@@ -64,6 +68,16 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
     if (Number.isNaN(t)) return null;
     return Math.max(0, Math.ceil((t - Date.now()) / 86400000));
   }, [examDate]);
+
+  const analytics = useMemo(
+    () =>
+      computeStudyAnalytics({
+        mocks: mocks.map((m) => m.data),
+        errors: errors.map((e) => e.data),
+        cards: cards.map((c) => c.data)
+      }),
+    [mocks, errors, cards]
+  );
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -166,20 +180,43 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
           </div>
         </div>
 
-        <div className="glass-card rounded-3xl p-5 space-y-3">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Quick Shortcuts</h3>
-          <button onClick={() => onNavigate('daily_quiz')} className="w-full py-3 px-4 rounded-2xl bg-sky-500 text-white font-bold text-xs apple-press text-left">
-            Start Daily Mixed Quiz (10 Qs)
-          </button>
-          <button onClick={() => onNavigate('cbt_mock')} className="w-full py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-xs apple-press text-left">
-            Open CBT Mock Simulator & Calculator
-          </button>
-          <button onClick={() => onNavigate('ibq_spotter')} className="w-full py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-xs apple-press text-left">
-            15-Image Diagnosis Drill
-          </button>
-          <button onClick={() => onNavigate('error_log')} className="w-full py-3 px-4 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold text-xs apple-press text-left">
-            Open Mistake Log
-          </button>
+        <div className="space-y-4">
+          <div className="glass-card rounded-3xl p-5 space-y-3">
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Quick Shortcuts</h3>
+            <button onClick={() => onNavigate('memory')} className="w-full py-3 px-4 rounded-2xl bg-sky-500 text-white font-bold text-xs apple-press text-left">
+              Open Memory Queue (FSRS)
+            </button>
+            <button onClick={() => onNavigate('daily_quiz')} className="w-full py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-xs apple-press text-left">
+              Start Daily Mixed Quiz (10 Qs)
+            </button>
+            <button onClick={() => onNavigate('cbt_mock')} className="w-full py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-xs apple-press text-left">
+              Open CBT Mock Simulator & Calculator
+            </button>
+            <button onClick={() => onNavigate('ibq_spotter')} className="w-full py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-xs apple-press text-left">
+              15-Image Diagnosis Drill
+            </button>
+            <button onClick={() => onNavigate('error_log')} className="w-full py-3 px-4 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold text-xs apple-press text-left">
+              Open Mistake Log
+            </button>
+          </div>
+
+          <div className="glass-card rounded-3xl p-5 space-y-2.5 text-xs">
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold text-white uppercase tracking-wider">Closed-Loop Analytics</h3>
+              <span className="text-[10px] text-emerald-400 font-bold num-tabular">
+                {analytics.latestMockScore !== null ? `Latest: ${analytics.latestMockScore}/960` : 'No mocks yet'}
+              </span>
+            </div>
+            <p className="text-slate-300 leading-relaxed">{analytics.nextAction}</p>
+            {analytics.weakestSubjects.length > 0 && (
+              <button
+                onClick={() => void syncEngine.putRecordLocal('settings', 'weeklyFocusSubject', { value: analytics.weakestSubjects[0].subject })}
+                className="w-full py-2 px-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-bold text-left apple-press"
+              >
+                Apply Focus to Plan: {analytics.weakestSubjects[0].subject}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

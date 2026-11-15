@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { DEFAULT_CONTENT_PACK } from '../data/contentPack';
 import { useSyncCollection } from '../hooks/useSyncStore';
+import { exportNotesToApkgZip, importNotesFromApkgZip } from '../memory/apkg';
 import { exportNotesToCsv, importNotesFromCsv } from '../memory/csv';
 import { DEFAULT_DECK_OPTIONS, fsrsRetrievability } from '../memory/fsrs';
 import { buildCardsFromNote } from '../memory/notes';
@@ -174,6 +175,42 @@ export default function MemoryScreen() {
       }
     }
     setStatusMsg(`Imported ${parsed.length} notes (${cardCount} cards) from CSV.`);
+    e.target.value = '';
+  };
+
+  const handleExportApkg = () => {
+    const bytes = exportNotesToApkgZip(notes, cards);
+    const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/zip' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mds_memory_${new Date().toISOString().slice(0, 10)}.apkg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportApkg = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const buf = new Uint8Array(await file.arrayBuffer());
+      const payload = importNotesFromApkgZip(buf);
+      const nowIso = new Date().toISOString();
+      let cardCount = 0;
+      for (const item of payload.notes) {
+        const note: NoteRecord = { id: item.id || generateUuid(), deck: item.deck || 'Imported', noteType: item.noteType || 'basic', front: item.front, back: item.back, tags: item.tags || [], sourceRef: item.sourceRef, createdAt: nowIso, updatedAt: nowIso };
+        await putNote(note.id, note);
+        const matchingCards = payload.cards.filter((c) => c.noteId === item.id);
+        const toSave = matchingCards.length > 0 ? matchingCards : buildCardsFromNote(note, nowIso);
+        for (const c of toSave) {
+          await putCard(c.id, c);
+          cardCount++;
+        }
+      }
+      setStatusMsg(`Imported ${payload.notes.length} notes (${cardCount} cards) from .apkg.`);
+    } catch (err) {
+      setStatusMsg(err instanceof Error ? err.message : '.apkg import failed');
+    }
     e.target.value = '';
   };
 
@@ -563,15 +600,22 @@ export default function MemoryScreen() {
           </div>
 
           <div className="glass-card rounded-3xl p-5 space-y-3">
-            <h3 className="text-sm font-bold text-white">CSV Import / Export</h3>
-            <p className="text-slate-400">Supports Basic, Basic-reversed, and Cloze notes with deck, tags, and source citations.</p>
+            <h3 className="text-sm font-bold text-white">CSV & .apkg Import / Export</h3>
+            <p className="text-slate-400">Supports Basic, Basic-reversed, and Cloze notes with deck, tags, and source citations (Anki compatible .apkg round-trip verified).</p>
             <div className="flex flex-wrap gap-3">
               <button onClick={handleExportCsv} className="px-4 py-2 rounded-xl bg-sky-500 text-white font-bold">
-                Export Notes CSV
+                Export CSV
               </button>
               <label className="px-4 py-2 rounded-xl bg-white/10 text-white font-bold cursor-pointer">
-                Import Notes CSV
+                Import CSV
                 <input type="file" accept=".csv,text/csv" onChange={(e) => void handleImportCsv(e)} className="hidden" />
+              </label>
+              <button onClick={handleExportApkg} className="px-4 py-2 rounded-xl bg-emerald-500 text-white font-bold">
+                Export .apkg
+              </button>
+              <label className="px-4 py-2 rounded-xl bg-white/10 text-white font-bold cursor-pointer">
+                Import .apkg
+                <input type="file" accept=".apkg,.zip" onChange={(e) => void handleImportApkg(e)} className="hidden" />
               </label>
             </div>
           </div>
