@@ -1,5 +1,12 @@
 # Changelog (`CHANGELOG.md`)
 
+## [4.0.0-phase4] - 2026-11-15
+
+### Added
+- **DB-Enforced Image Rules (`supabase/migrations/002_image_library.sql`)**: Created `image_library` (Data Domain C) with `CHECK (ai_generated = false)` and `published_requires_attribution` CHECK constraint requiring `licence`, `author`, `credit_line`, `source_page_url`, and `citation`.
+- **Non-Destructive Image-Occlusion & Candidate Queue (`src/data/imageOcclusion.ts`, `ImageAtlasScreen.tsx`, `MemoryScreen.tsx`)**: Added `(x, y, w, h)` coordinate occlusion editor, candidate approval workflow (Rule R3), and FSRS image-occlusion flashcard rendering.
+- **Phase 4 Unit Tests (`src/data/__tests__/imageLibrary.test.ts`)**: Verified all 22 baseline images, attribution rejection, SQL CHECK constraints, and occlusion coordinate normalization (25/25 total tests passing).
+
 ## [3.0.0-phase3] - 2026-11-15
 
 ### Added

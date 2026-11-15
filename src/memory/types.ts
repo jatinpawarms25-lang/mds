@@ -37,6 +37,10 @@ export interface CardRecord {
   suspended: boolean;
   buriedUntil: string | null; // YYYY-MM-DD local/UTC day
   isLeech: boolean;
+  imageUrl?: string;
+  imageCredit?: string;
+  occlusionMasks?: Array<{ id: string; label: string; x: number; y: number; w: number; h: number }>;
+  activeMaskId?: string;
   createdAt: string;
   updatedAt: string;
 }

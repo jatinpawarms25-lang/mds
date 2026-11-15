@@ -332,6 +332,26 @@ export default function MemoryScreen() {
               </div>
 
               <div className="min-h-[140px] flex flex-col justify-center space-y-4">
+                {activeCard.imageUrl && (
+                  <div className="relative inline-block mx-auto max-h-64 overflow-hidden rounded-2xl bg-black">
+                    <img src={activeCard.imageUrl} alt={activeCard.front} className="max-h-64 object-contain block" />
+                    {(activeCard.occlusionMasks || []).map((m) => {
+                      const isActive = m.id === activeCard.activeMaskId;
+                      if (showAnswer && isActive) return null;
+                      return (
+                        <div
+                          key={m.id}
+                          style={{ left: `${m.x}%`, top: `${m.y}%`, width: `${m.w}%`, height: `${m.h}%` }}
+                          className={`absolute border-2 rounded flex items-center justify-center text-[10px] font-bold text-white ${
+                            isActive ? 'bg-sky-500 border-white' : 'bg-slate-900/70 border-slate-400'
+                          }`}
+                        >
+                          {isActive ? '?' : ''}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className="text-base md:text-lg font-bold text-white whitespace-pre-wrap leading-relaxed">
                   {activeCard.front}
                 </div>
