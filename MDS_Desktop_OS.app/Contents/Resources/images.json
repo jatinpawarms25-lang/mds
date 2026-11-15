@@ -17,7 +17,9 @@
     "licence": "CC BY-SA 3.0",
     "author": "Dr. Michael A. Kahn",
     "creditLine": "Image: Dr. Michael A. Kahn / Wikimedia Commons (CC BY-SA 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Ameloblastoma_mandible_panoramic.jpg/640px-Ameloblastoma_mandible_panoramic.jpg",
+    "isPlaceholder": false
   },
   {
     "id": "rad_okc_opg",
@@ -37,7 +39,9 @@
     "licence": "CC BY 3.0",
     "author": "Kaur et al., Case Reports in Dentistry",
     "creditLine": "Image: Kaur et al. / Open-i PMC3760359 (CC BY 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://openi.nlm.nih.gov/imgs/512/285/3760359/PMC3760359_CRIM.DENT2013-431872.001.png",
+    "isPlaceholder": false
   },
   {
     "id": "rad_osteosarcoma_sunburst",
@@ -57,7 +61,8 @@
     "licence": "CC BY-NC-SA 3.0",
     "author": "Dr. Frank Gaillard / Radiopaedia.org",
     "creditLine": "Image: Radiopaedia.org case 18452 (CC BY-NC-SA 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "isPlaceholder": true
   },
   {
     "id": "rad_paget_cotton_wool",
@@ -77,7 +82,9 @@
     "licence": "Public Domain",
     "author": "CDC Public Health Image Library",
     "creditLine": "Courtesy of the U.S. National Library of Medicine / CDC (Public Domain)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Paget%27s_disease_of_the_skull.jpg/640px-Paget%27s_disease_of_the_skull.jpg",
+    "isPlaceholder": false
   },
   {
     "id": "rad_fibrous_dysplasia_ground_glass",
@@ -97,7 +104,9 @@
     "licence": "CC BY-SA 4.0",
     "author": "Gopinath et al., Imaging Science in Dentistry",
     "creditLine": "Image: Gopinath et al. / Wikimedia Commons (CC BY-SA 4.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Fibrous_dysplasia_maxilla.jpg/640px-Fibrous_dysplasia_maxilla.jpg",
+    "isPlaceholder": false
   },
   {
     "id": "rad_garre_onion_skin",
@@ -117,7 +126,9 @@
     "licence": "CC BY 3.0",
     "author": "Gundappa et al., Case Reports in Dentistry",
     "creditLine": "Image: Gundappa et al. / Open-i PMC3886113 (CC BY 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://openi.nlm.nih.gov/imgs/512/123/3886113/PMC3886113_CRID2013-685025.001.png",
+    "isPlaceholder": false
   },
   {
     "id": "rad_multiple_myeloma",
@@ -137,7 +148,9 @@
     "licence": "Public Domain",
     "author": "Dr. Laughlin / CDC PHIL",
     "creditLine": "Courtesy of the U.S. National Library of Medicine (Public Domain)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Multiple_myeloma_skull_lateral.jpg/640px-Multiple_myeloma_skull_lateral.jpg",
+    "isPlaceholder": false
   },
   {
     "id": "rad_dentigerous_cyst",
@@ -157,7 +170,9 @@
     "licence": "CC BY 3.0",
     "author": "Sethi et al., Case Reports in Dentistry",
     "creditLine": "Image: Sethi et al. / Open-i PMC3658514 (CC BY 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://openi.nlm.nih.gov/imgs/512/120/3658514/PMC3658514_CRIM.DENT2013-145620.001.png",
+    "isPlaceholder": false
   },
   {
     "id": "histo_ameloblastoma_follicular",
@@ -177,7 +192,9 @@
     "licence": "CC BY-SA 3.0",
     "author": "Nephron",
     "creditLine": "Image: Nephron / Wikimedia Commons (CC BY-SA 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Ameloblastoma_histopathology.jpg/640px-Ameloblastoma_histopathology.jpg",
+    "isPlaceholder": false
   },
   {
     "id": "histo_okc_lining",
@@ -197,7 +214,9 @@
     "licence": "CC BY-SA 3.0",
     "author": "Nephron",
     "creditLine": "Image: Nephron / Wikimedia Commons (CC BY-SA 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Odontogenic_keratocyst_histopathology.jpg/640px-Odontogenic_keratocyst_histopathology.jpg",
+    "isPlaceholder": false
   },
   {
     "id": "histo_pindborg_liesegang",
@@ -217,7 +236,9 @@
     "licence": "CC BY 3.0",
     "author": "Kumar et al., J Oral Maxillofac Pathol",
     "creditLine": "Image: Kumar et al. / Open-i PMC3658514 (CC BY 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://openi.nlm.nih.gov/imgs/512/120/3658514/PMC3658514_CRIM.DENT2013-145620.003.png",
+    "isPlaceholder": false
   },
   {
     "id": "histo_adenoid_cystic_cribriform",
@@ -237,7 +258,9 @@
     "licence": "CC BY-SA 3.0",
     "author": "Nephron",
     "creditLine": "Image: Nephron / Wikimedia Commons (CC BY-SA 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Adenoid_cystic_carcinoma_cribriform.jpg/640px-Adenoid_cystic_carcinoma_cribriform.jpg",
+    "isPlaceholder": false
   },
   {
     "id": "histo_lichen_planus_civatte",
@@ -257,7 +280,9 @@
     "licence": "CC BY-SA 3.0",
     "author": "Nephron",
     "creditLine": "Image: Nephron / Wikimedia Commons (CC BY-SA 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Lichen_planus_high_mag.jpg/640px-Lichen_planus_high_mag.jpg",
+    "isPlaceholder": false
   },
   {
     "id": "diag_lefort_fractures",
@@ -275,9 +300,11 @@
     "sourcePageUrl": "https://smart.servier.com/smart_image/facial-fractures-le-fort/",
     "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Le_Fort_fractures.svg/640px-Le_Fort_fractures.svg.png",
     "licence": "CC BY 4.0",
-    "author": "Servier Medical Art / Mikael H\u00e4ggstr\u00f6m",
+    "author": "Servier Medical Art / Mikael Haggstrom",
     "creditLine": "Diagram provided by Servier Medical Art (https://smart.servier.com), licensed under CC BY 4.0",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Le_Fort_fractures.svg/640px-Le_Fort_fractures.svg.png",
+    "isPlaceholder": false
   },
   {
     "id": "diag_mandible_fracture_sites",
@@ -286,7 +313,7 @@
     "subject": "Oral & Maxillofacial Surgery (OMFS)",
     "type": "diagram",
     "keyFeatures": [
-      "Condylar neck: Most common site overall (~29\u201335%)",
+      "Condylar neck: Most common site overall (~29-35%)",
       "Angle of mandible: High incidence when impacted third molar is present (~25%)",
       "Parasymphysis / Body: Frequently fractured in motor vehicle accidents (~20%)"
     ],
@@ -295,9 +322,11 @@
     "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Mandible_fracture_locations.svg",
     "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Mandible_fracture_locations.svg/640px-Mandible_fracture_locations.svg.png",
     "licence": "CC BY-SA 4.0",
-    "author": "Redrawn from Dingman & Natvig Classification / Mikael H\u00e4ggstr\u00f6m",
+    "author": "Redrawn from Dingman & Natvig Classification / Mikael Haggstrom",
     "creditLine": "Diagram: Redrawn from Dingman & Natvig, Wikimedia Commons (CC BY-SA 4.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Mandible_fracture_locations.svg/640px-Mandible_fracture_locations.svg.png",
+    "isPlaceholder": false
   },
   {
     "id": "diag_pederson_impaction",
@@ -318,7 +347,9 @@
     "licence": "CC BY-SA 3.0",
     "author": "Redrawn from Pederson GW, Dental Extraction (1988)",
     "creditLine": "Redrawn faithfully from Pederson Classification (1988) / Wikimedia Commons",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Pell_and_Gregory_Classification.png/640px-Pell_and_Gregory_Classification.png",
+    "isPlaceholder": false
   },
   {
     "id": "clin_ludwig_angina",
@@ -338,7 +369,9 @@
     "licence": "CC BY 3.0",
     "author": "Lin et al., Case Reports in Dentistry",
     "creditLine": "Image: Lin et al. / Open-i PMC3658514 (CC BY 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://openi.nlm.nih.gov/imgs/512/120/3658514/PMC3658514_CRIM.DENT2013-145620.002.png",
+    "isPlaceholder": false
   },
   {
     "id": "inst_who_cpi_probe",
@@ -358,30 +391,34 @@
     "licence": "Public Domain",
     "author": "U.S. Navy Bureau of Medicine",
     "creditLine": "Official U.S. Navy photo / Wikimedia Commons (Public Domain)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Periodontal_probe.jpg/640px-Periodontal_probe.jpg",
+    "isPlaceholder": false
   },
   {
     "id": "inst_gracey_curettes",
     "title": "Area-Specific Gracey Curette Set & Surface Designations",
-    "diagnosis": "Gracey Curette Working Blade Angulation (70\u00b0)",
+    "diagnosis": "Gracey Curette Working Blade Angulation (70 deg)",
     "subject": "Periodontology",
     "type": "diagram",
     "keyFeatures": [
-      "Blade offset at 70\u00b0 to lower shank; only one working cutting edge (lower edge)",
+      "Blade offset at 70 deg to lower shank; only one working cutting edge (lower edge)",
       "Gracey 1-2 & 3-4: Anterior teeth",
       "Gracey 5-6: Anterior & premolar teeth",
       "Gracey 7-8 & 9-10: Posterior teeth, facial and lingual surfaces",
       "Gracey 11-12 & 15-16: Posterior teeth, mesial surfaces",
       "Gracey 13-14 & 17-18: Posterior teeth, distal surfaces"
     ],
-    "lookAlikes": "Universal curette (blade at 90\u00b0 to lower shank with 2 cutting edges)",
+    "lookAlikes": "Universal curette (blade at 90 deg to lower shank with 2 cutting edges)",
     "sourceName": "Textbook Redrawn (Carranza Periodontology)",
     "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Gracey_curette_angulation.png",
     "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Gracey_curette_angulation.png/640px-Gracey_curette_angulation.png",
     "licence": "CC BY-SA 4.0",
     "author": "Redrawn from Carranza Clinical Periodontology 13th ed.",
     "creditLine": "Redrawn from Carranza Clinical Periodontology (13th ed) / Wikimedia Commons",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Gracey_curette_angulation.png/640px-Gracey_curette_angulation.png",
+    "isPlaceholder": false
   },
   {
     "id": "diag_steiner_cephalometrics",
@@ -390,11 +427,11 @@
     "subject": "Orthodontics & Dentofacial Orthopaedics",
     "type": "diagram",
     "keyFeatures": [
-      "SNA (82\u00b0 \u00b1 2\u00b0): Maxillary anteroposterior position relative to anterior cranial base",
-      "SNB (80\u00b0 \u00b1 2\u00b0): Mandibular position relative to anterior cranial base",
-      "ANB (2\u00b0 \u00b1 2\u00b0): Skeletal relationship (Class I: 2-4\u00b0, Class II: >4\u00b0, Class III: <2\u00b0)",
-      "Tweed FMA (25\u00b0): Frankfurt Mandibular Plane Angle",
-      "IMPA (90\u00b0): Incisor Mandibular Plane Angle"
+      "SNA (82 deg +/- 2 deg): Maxillary anteroposterior position relative to anterior cranial base",
+      "SNB (80 deg +/- 2 deg): Mandibular position relative to anterior cranial base",
+      "ANB (2 deg +/- 2 deg): Skeletal relationship (Class I: 2-4 deg, Class II: >4 deg, Class III: <2 deg)",
+      "Tweed FMA (25 deg): Frankfurt Mandibular Plane Angle",
+      "IMPA (90 deg): Incisor Mandibular Plane Angle"
     ],
     "lookAlikes": "Downs analysis, Wits appraisal (linear measurement in mm on occlusal plane)",
     "sourceName": "Wikimedia Commons",
@@ -403,7 +440,9 @@
     "licence": "CC BY-SA 3.0",
     "author": "Redrawn from Steiner CC (1953) / Wikimedia Commons",
     "creditLine": "Redrawn from Steiner Analysis (1953), Wikimedia Commons (CC BY-SA 3.0)",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Steiner_cephalometric_analysis.svg/640px-Steiner_cephalometric_analysis.svg.png",
+    "isPlaceholder": false
   },
   {
     "id": "diag_cranial_nerve_foramina",
@@ -427,9 +466,11 @@
     "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Cranial_foramina.svg",
     "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Cranial_foramina.svg/640px-Cranial_foramina.svg.png",
     "licence": "CC BY-SA 4.0",
-    "author": "Gray Anatomy / Mikael H\u00e4ggstr\u00f6m",
-    "creditLine": "Image: Gray Anatomy / Mikael H\u00e4ggstr\u00f6m, Wikimedia Commons (CC BY-SA 4.0)",
-    "dateVerified": "2026-11-15"
+    "author": "Gray Anatomy / Mikael Haggstrom",
+    "creditLine": "Image: Gray Anatomy / Mikael Haggstrom, Wikimedia Commons (CC BY-SA 4.0)",
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Cranial_foramina.svg/640px-Cranial_foramina.svg.png",
+    "isPlaceholder": false
   },
   {
     "id": "diag_vertucci_canals",
@@ -454,6 +495,8 @@
     "licence": "CC BY-SA 4.0",
     "author": "Redrawn from Vertucci FJ, Oral Surg Oral Med Oral Pathol 1984",
     "creditLine": "Redrawn from Vertucci Canal Morphologies (1984) / Wikimedia Commons",
-    "dateVerified": "2026-11-15"
+    "dateVerified": "2026-11-15",
+    "imageFile": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Vertucci_canal_classification.png/640px-Vertucci_canal_classification.png",
+    "isPlaceholder": false
   }
 ]

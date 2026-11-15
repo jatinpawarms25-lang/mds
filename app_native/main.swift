@@ -7,13 +7,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var serverProcess: Process?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Ensure regular application mode so window appears in Dock and UI
         NSApp.setActivationPolicy(.regular)
 
-        // Ensure background sync server is running on port 8765
         startSyncServerIfNeeded()
 
-        // Configure Window
         let rect = NSRect(x: 100, y: 100, width: 1400, height: 920)
         window = NSWindow(
             contentRect: rect,
@@ -21,7 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "MDS Desktop OS — AIR 1–10 Suite"
+        window.title = "MDS Desktop OS - AIR 1-10 Suite"
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         window.backgroundColor = NSColor(red: 0.04, green: 0.05, blue: 0.09, alpha: 1.0)
@@ -29,11 +26,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.minSize = NSSize(width: 1080, height: 720)
         window.delegate = self
 
-        // Configure WebKit
         let config = WKWebViewConfiguration()
         config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         config.preferences.setValue(true, forKey: "developerExtrasEnabled")
-        
+
         let webpagePrefs = WKWebpagePreferences()
         webpagePrefs.allowsContentJavaScript = true
         config.defaultWebpagePreferences = webpagePrefs
@@ -42,7 +38,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         webView.autoresizingMask = [.width, .height]
         window.contentView?.addSubview(webView)
 
-        // Load local bundle resource index.html with read access to the entire bundle directory
         let bundleDir = Bundle.main.resourceURL ?? URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
         let htmlUrl = bundleDir.appendingPathComponent("index.html")
 

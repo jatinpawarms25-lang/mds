@@ -8,21 +8,17 @@
 		<data>
 		ClCVEZjyG5KZn/In+AVo/tkQmKU=
 		</data>
-		<key>Resources/AppIcon.icns</key>
-		<data>
-		fs5GWkEzq2p1n+p1s8l/KW6CaJY=
-		</data>
 		<key>Resources/IMAGE-CREDITS.md</key>
 		<data>
 		kj3HKhuuboFzb1PcfUQAPZLY9EA=
 		</data>
 		<key>Resources/app.js</key>
 		<data>
-		uTEaaBQXARaPkeI/2idp9YGPZPI=
+		M9UyGYPFpcX1UhWDJCkRR8yDQ+Y=
 		</data>
 		<key>Resources/app.jsx</key>
 		<data>
-		dahU8HSUpJXvugek5YYhXmqtzbg=
+		2w8mHtjHUBsATy9UFtU6zA6VcaQ=
 		</data>
 		<key>Resources/apple-touch-icon.png</key>
 		<data>
@@ -30,7 +26,7 @@
 		</data>
 		<key>Resources/content_pack.json</key>
 		<data>
-		KnvntwcP+lwTo2VzfGUfmThJhMI=
+		ZrWA21n5qY3KAjA91cY1S6+OmfQ=
 		</data>
 		<key>Resources/icon-192.png</key>
 		<data>
@@ -42,39 +38,43 @@
 		</data>
 		<key>Resources/images.json</key>
 		<data>
-		jEDezqNK+2vQH8RMgksBXxIJS5Q=
+		xnKk2QZjobQUMfZY0Mffg246Tts=
 		</data>
 		<key>Resources/index.html</key>
 		<data>
-		6TEzIBRQpqWE60LrbFNl8zyVCrs=
+		gjciXQQtrG2qqRZMTybgE7JC/W4=
 		</data>
 		<key>Resources/js/content_pack.js</key>
 		<data>
-		bLnE1AHXuHkIjg3UyBzlwphGjpE=
+		DInedcmcVElzRWHM2m1nwsScGb8=
 		</data>
 		<key>Resources/js/image_library.js</key>
 		<data>
-		o/Ji7Y5Tt6wS7DasA++MIxcoKrw=
+		lMqXknHbYQvJIPUQrRTiowftGms=
 		</data>
 		<key>Resources/js/study_data.js</key>
 		<data>
-		gzqJ5+WBsjnlYYwJ+SVSlTOLk78=
+		7/USdLmo3eE+JyBd1WklEt6H9oQ=
 		</data>
 		<key>Resources/js/sync_engine.js</key>
 		<data>
-		SYZ+PYTdSbTpkrWrnFWvTO6jlNw=
+		a9ymQ2JqGJSI4xImJAtzmuGT5Q4=
 		</data>
 		<key>Resources/manifest.json</key>
 		<data>
-		bfjd2PuLv0iVWhyaXkoUyfxiJfA=
+		jQUjO5zcrCw3hUs+3S5WgPO9ixA=
 		</data>
 		<key>Resources/supabase/schema.sql</key>
 		<data>
-		nCfJ3MrZVI/g+K3hP+aDY4OjHbw=
+		e9Trr3u1Ogoe3ovF5u2mx3oruNY=
 		</data>
 		<key>Resources/sw.js</key>
 		<data>
 		hC5jC5W6gG/HKbzJApc/qACOkJw=
+		</data>
+		<key>Resources/vendor/babel.min.js</key>
+		<data>
+		ygEwZnTikR0eGBb2jq9GttZPmbc=
 		</data>
 		<key>Resources/vendor/react-dom.min.js</key>
 		<data>
@@ -102,13 +102,6 @@
 			AbmY0fPgJaKtUooh4EQI9FvJCWHuEg45jBQhgcahTLw=
 			</data>
 		</dict>
-		<key>Resources/AppIcon.icns</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			WdmgcH1+SYCL099inNMc+wEufadIq1SYZfyrFoPDkqw=
-			</data>
-		</dict>
 		<key>Resources/IMAGE-CREDITS.md</key>
 		<dict>
 			<key>hash2</key>
@@ -120,14 +113,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			O/crBtIKPTb/pyi7qxiE31FJxpx5TBqprrFYtQFVkY8=
+			/JTFA9qf2vlHnpjiVV33bUpvnOysjjRT2AbqhXNNKsk=
 			</data>
 		</dict>
 		<key>Resources/app.jsx</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			dTh/EmyAwhm3ZzQVObXMhGM6MSQq3ur7QO3QdlMnMuU=
+			CCy2jJLnSbh33TY/ViAfK69aLxQQH4GDsUQ4O+qL/Cw=
 			</data>
 		</dict>
 		<key>Resources/apple-touch-icon.png</key>
@@ -141,7 +134,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			5xOif3o0rAyJlPUOzvStNGq+vG94Q6rr/Bta9SpdR6I=
+			BMDcsJXOIdAdub8qwV93dfQgcrRLQ/gZGQZAwmN9OHs=
 			</data>
 		</dict>
 		<key>Resources/icon-192.png</key>
@@ -162,56 +155,56 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			DGpYllIigkViPLME5n7m5+BF78TY81Zkg0VmJRN3H8U=
+			Aoxz/J2IE5JaKaCByOsSPfEFMeYDnq3LdH8+/PKryUE=
 			</data>
 		</dict>
 		<key>Resources/index.html</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			qlr2hACHghe7J8V6Ac/VmNTkqxMZhKc6wbBWHqqAOus=
+			LtQFauOg5ybObti5QoqcJd7IfHcVGkIsODqPRzUSLFc=
 			</data>
 		</dict>
 		<key>Resources/js/content_pack.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			nTQKej8IyCnYOXemKHY4ihxsk+/zaGhRTjfaFTXbuOc=
+			irYp4uKWuorspa3vKJ9cx+wjztNtXyUAqCbTAW42hAY=
 			</data>
 		</dict>
 		<key>Resources/js/image_library.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			nNX0Coi7gh4+XwS9/PuhojbWI7+bCK1ZJ9Z4u15p7SY=
+			bMb5d0DvFfbxsJolPEFPcReErqeY1sftRxe7cwpumtc=
 			</data>
 		</dict>
 		<key>Resources/js/study_data.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			zX4YwWiFXLwFj+cOMAIOsK6msJHIup5dPJihpiYu+EY=
+			Zx4P51g98FDD/luL3nMfv+NMomIElHx2cs/Bi+S8pmk=
 			</data>
 		</dict>
 		<key>Resources/js/sync_engine.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			g2JK2Of/iu3iC0lZmlm55qMnj3x413kuFbBEl4bxPi0=
+			ZukVPgr4a6FSw9ZkM3QSWeue0XSKW5wLf/PIuWFq3/E=
 			</data>
 		</dict>
 		<key>Resources/manifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			9caslnOzsvt6LeTHYjqcDs+Ydp4w1jJBxu1BWf15Kpw=
+			di1jS0Ef7bxzs9pQzfL7vq/xlqym8ChVMEF4l7IClUk=
 			</data>
 		</dict>
 		<key>Resources/supabase/schema.sql</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			53v7YxUUksQoBP5t7lhuycgXA51CdcXvyYMwEyKCZyA=
+			/KXzkLXBvscfDgZImMLig0RDAjDgn1sxkGi46rUGyGI=
 			</data>
 		</dict>
 		<key>Resources/sw.js</key>
@@ -219,6 +212,13 @@
 			<key>hash2</key>
 			<data>
 			xLUlQn1YzAdbDhukYIh8xa6R0l7oIDv2BBdDPFITIz0=
+			</data>
+		</dict>
+		<key>Resources/vendor/babel.min.js</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			yKLWJUm2Ihsj8lVeIxbk/mTnFhSVRXhe4ygf3ipbkOE=
 			</data>
 		</dict>
 		<key>Resources/vendor/react-dom.min.js</key>

@@ -1,7 +1,7 @@
 // ==============================================================================
-// NEET-MDS Top-10 Planner (MDS OS) — Universal Apple Workstation
-// Target: AIR 1-10 • Target Branch: OMFS • Real Cloud Sync & CBT Engine
-// Strict ASCII Quotes Only • Zero AI Images • Realtime Supabase
+// NEET-MDS Top-10 Planner (MDS OS) - Universal Apple Workstation
+// Target: AIR 1-10 - Target Branch: OMFS - Real Cloud Sync & CBT Engine
+// Strict ASCII Quotes Only - Zero AI Images - Realtime Supabase
 // ==============================================================================
 
 const {
@@ -500,11 +500,28 @@ function App() {
   });
   const [scrollTop, setScrollTop] = useState(0);
 
-  // Filter States
+  // Filter & Interactive Module States
   const [searchQuery, setSearchQuery] = useState('');
   const [partFilter, setPartFilter] = useState('ALL');
   const [ibqFilter, setIbqFilter] = useState('All');
   const [revealedIbqs, setRevealedIbqs] = useState({});
+  const [pedAngulation, setPedAngulation] = useState(1);
+  const [pedDepth, setPedDepth] = useState(2);
+  const [pedRamus, setPedRamus] = useState(3);
+  const [collegeSearch, setCollegeSearch] = useState('');
+  const [collegeSortBy, setCollegeSortBy] = useState('rank');
+  const [targetRankInput, setTargetRankInput] = useState(10);
+  const [predScoreInput, setPredScoreInput] = useState(786);
+  const [errFilterReason, setErrFilterReason] = useState('ALL');
+  const [pendingPackDiff, setPendingPackDiff] = useState(null);
+  const [previousContentPack, setPreviousContentPack] = useState(null);
+  const isApplyingRemoteRef = useRef(false);
+  useEffect(() => {
+    window.__setMdsView = setCurrentView;
+    return () => {
+      delete window.__setMdsView;
+    };
+  }, []);
 
   // Theme Management (Light / Dark / System)
   useEffect(() => {
@@ -588,22 +605,23 @@ function App() {
     };
   });
 
-  // Extracted React states for immediate reactive binding
+  // Extracted React states for immediate reactive binding (Rule R4: no personal defaults in code)
   const [userSettings, setUserSettings] = useState(() => {
     const s = localProgressDoc.userSettings || {};
     return {
       examDate: s.examDate && s.examDate.value !== undefined ? s.examDate.value : '',
-      // Fix 5: Empty by default
-      dailyHours: s.dailyHours && s.dailyHours.value !== undefined ? s.dailyHours.value : 8,
+      internshipDate: s.internshipDate && s.internshipDate.value !== undefined ? s.internshipDate.value : '',
+      stateName: s.stateName && s.stateName.value !== undefined ? s.stateName.value : '',
+      statePortalUrl: s.statePortalUrl && s.statePortalUrl.value !== undefined ? s.statePortalUrl.value : '',
+      stateDomicileBasis: s.stateDomicileBasis && s.stateDomicileBasis.value !== undefined ? s.stateDomicileBasis.value : '',
+      reservationCategory: s.reservationCategory && s.reservationCategory.value !== undefined ? s.reservationCategory.value : '',
+      targetBranch: s.targetBranch && s.targetBranch.value !== undefined ? s.targetBranch.value : '',
+      dailyHours: s.dailyHours && s.dailyHours.value !== undefined ? s.dailyHours.value : '',
       targetScore: s.targetScore && s.targetScore.value !== undefined ? s.targetScore.value : 790,
       coachingName: s.coachingName && s.coachingName.value !== undefined ? s.coachingName.value : 'Dr. Anchal Agarwal Classes',
       studySpine: s.studySpine && s.studySpine.value !== undefined ? s.studySpine.value : 'Dental Pulse, 18th edition 2025',
-      stateName: s.stateName && s.stateName.value !== undefined ? s.stateName.value : '',
-      // Fix 5: Empty by default
-      statePortalUrl: s.statePortalUrl && s.statePortalUrl.value !== undefined ? s.statePortalUrl.value : '',
-      // Fix 5: Empty by default
       contentUpdateUrl: s.contentUpdateUrl && s.contentUpdateUrl.value !== undefined ? s.contentUpdateUrl.value : '',
-      soundEnabled: true,
+      soundEnabled: s.soundEnabled && s.soundEnabled.value !== undefined ? s.soundEnabled.value : true,
       dismissedWarning: s.dismissedWarning && s.dismissedWarning.value !== undefined ? s.dismissedWarning.value : false
     };
   });
@@ -697,7 +715,7 @@ function App() {
     id: 'c2',
     name: 'Institute of Medical Sciences (IMS), BHU, Varanasi',
     priority: 2,
-    notes: 'Central seat, zero bond, ₹1.1L stipend.'
+    notes: 'Central seat, zero bond, Rs 1.1L stipend.'
   }]);
   const [counsellingTracker, setCounsellingTracker] = useState(() => localProgressDoc.counsellingTracker || {});
   const [documentsChecklist, setDocumentsChecklist] = useState(() => localProgressDoc.documentsChecklist || {});
@@ -861,33 +879,59 @@ function App() {
       setSyncConflictsState(info.conflicts || []);
       const localDoc = window.SyncEngine.getLocalProgressDoc();
       if (localDoc && localDoc.userSettings) {
-        if (localDoc.mockScores && Array.isArray(localDoc.mockScores)) setMockScores(localDoc.mockScores);
-        if (localDoc.errorLog && Array.isArray(localDoc.errorLog)) setErrorLog(localDoc.errorLog);
+        isApplyingRemoteRef.current = true;
+        const s = localDoc.userSettings;
+        setUserSettings(prev => ({
+          ...prev,
+          examDate: s.examDate?.value ?? prev.examDate,
+          internshipDate: s.internshipDate?.value ?? prev.internshipDate,
+          stateName: s.stateName?.value ?? prev.stateName,
+          statePortalUrl: s.statePortalUrl?.value ?? prev.statePortalUrl,
+          stateDomicileBasis: s.stateDomicileBasis?.value ?? prev.stateDomicileBasis,
+          reservationCategory: s.reservationCategory?.value ?? prev.reservationCategory,
+          targetBranch: s.targetBranch?.value ?? prev.targetBranch,
+          dailyHours: s.dailyHours?.value ?? prev.dailyHours,
+          targetScore: s.targetScore?.value ?? prev.targetScore,
+          coachingName: s.coachingName?.value ?? prev.coachingName,
+          studySpine: s.studySpine?.value ?? prev.studySpine,
+          contentUpdateUrl: s.contentUpdateUrl?.value ?? prev.contentUpdateUrl,
+          dismissedWarning: s.dismissedWarning?.value ?? prev.dismissedWarning
+        }));
+        if (Array.isArray(localDoc.mockScores)) setMockScores(localDoc.mockScores);
+        if (Array.isArray(localDoc.errorLog)) setErrorLog(localDoc.errorLog);
         if (localDoc.subjectProgress) setSubjectProgress(localDoc.subjectProgress);
         if (localDoc.planChecklist) setPlanChecklist(localDoc.planChecklist);
-        if (localDoc.collegeShortlist) setCollegeShortlist(localDoc.collegeShortlist);
+        if (localDoc.shakyCards) setShakyCards(localDoc.shakyCards);
+        if (localDoc.omfsChecklist) setOmfsChecklist(localDoc.omfsChecklist);
+        if (localDoc.hiddenRulesChecked) setHiddenRulesChecked(localDoc.hiddenRulesChecked);
+        if (localDoc.masterChecklistsChecked) setMasterChecklistsChecked(localDoc.masterChecklistsChecked);
+        if (Array.isArray(localDoc.collegeShortlist)) setCollegeShortlist(localDoc.collegeShortlist);
         if (localDoc.counsellingTracker) setCounsellingTracker(localDoc.counsellingTracker);
         if (localDoc.documentsChecklist) setDocumentsChecklist(localDoc.documentsChecklist);
+        if (Array.isArray(localDoc.imageDrillHistory)) setImageDrillHistory(localDoc.imageDrillHistory);
+        if (Array.isArray(localDoc.dailyQuizHistory)) setDailyQuizHistory(localDoc.dailyQuizHistory);
+        setTimeout(() => {
+          isApplyingRemoteRef.current = false;
+        }, 0);
       }
     });
     return unsub;
   }, []);
 
-  // Save Progress on state change with Field-Level Timestamps (Fix 4)
+  // Save Progress on state change with Isolated Field-Level Timestamps (Section 13.2 Fix)
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.SyncEngine) return;
+    if (typeof window === 'undefined' || !window.SyncEngine || isApplyingRemoteRef.current) return;
     const nowIso = new Date().toISOString();
     const todayKey = nowIso.split('T')[0];
     const fullDoc = window.SyncEngine.getLocalProgressDoc();
-
-    // Field-level updates
+    if (!fullDoc.userSettings) fullDoc.userSettings = {};
     Object.keys(userSettings).forEach(k => {
-      fullDoc.userSettings[k] = window.SyncEngine.toScalarObj(userSettings[k], nowIso);
+      fullDoc.userSettings[k] = window.SyncEngine.updateScalarIfChanged(fullDoc.userSettings[k], userSettings[k], nowIso);
     });
     if (!fullDoc.dailyRoutines) fullDoc.dailyRoutines = {};
     if (!fullDoc.dailyRoutines[todayKey]) fullDoc.dailyRoutines[todayKey] = {};
     Object.keys(dailyRoutine).forEach(k => {
-      fullDoc.dailyRoutines[todayKey][k] = window.SyncEngine.toScalarObj(dailyRoutine[k], nowIso);
+      fullDoc.dailyRoutines[todayKey][k] = window.SyncEngine.updateScalarIfChanged(fullDoc.dailyRoutines[todayKey][k], dailyRoutine[k], nowIso);
     });
     fullDoc.planChecklist = planChecklist;
     fullDoc.subjectProgress = subjectProgress;
@@ -919,7 +963,7 @@ function App() {
               setCbtPart('B');
               setCbtCurrentIndex(0);
               playAppleChime();
-              alert('⏰ Part A 75-Minute Time Limit Reached! Part A is now locked. Proceeding to Part B (105 Mins).');
+              alert(' Part A 75-Minute Time Limit Reached! Part A is now locked. Proceeding to Part B (105 Mins).');
               return 0;
             }
             return prev - 1;
@@ -1417,23 +1461,101 @@ function App() {
   const handleAddCollegeToShortlist = college => {
     triggerHaptic(10);
     playAppleClick();
-    if (collegeShortlist.some(c => c.id === college.id)) {
+    const activeList = collegeShortlist.filter(c => !c.deletedAt);
+    if (activeList.some(c => c.id === college.id)) {
       alert('College is already in your shortlist!');
       return;
     }
+    const nowIso = new Date().toISOString();
     const newEntry = {
       id: college.id,
       name: college.name,
-      priority: collegeShortlist.length + 1,
-      notes: `AIQ Round 1 Closing Rank: ${college.closingRank}. Stipend: ₹${college.stipendMonthly.toLocaleString()}/mo.`
+      priority: activeList.length + 1,
+      notes: `AIQ Round 1 Closing Rank: ${college.closingRank}. Stipend: Rs ${college.stipendMonthly.toLocaleString()}/mo.`,
+      updatedAt: nowIso,
+      deletedAt: null
     };
-    setCollegeShortlist(prev => [...prev, newEntry]);
-    alert(`Added ${college.name} to your shortlist!`);
+    setCollegeShortlist(prev => [...prev.filter(c => c.id !== college.id), newEntry]);
   };
   const handleRemoveCollegeFromShortlist = id => {
     triggerHaptic(10);
     playAppleClick();
-    setCollegeShortlist(prev => prev.filter(c => c.id !== id));
+    const nowIso = new Date().toISOString();
+    setCollegeShortlist(prev => prev.map(c => c.id === id ? {
+      ...c,
+      deletedAt: nowIso,
+      updatedAt: nowIso,
+      _deleted: true
+    } : c));
+  };
+  const handleDeleteMockRecord = id => {
+    triggerHaptic(10);
+    playAppleClick();
+    const nowIso = new Date().toISOString();
+    setMockScores(prev => prev.map(m => m.id === id ? {
+      ...m,
+      deletedAt: nowIso,
+      updatedAt: nowIso,
+      _deleted: true
+    } : m));
+  };
+  const handleDeleteErrorRecord = id => {
+    triggerHaptic(10);
+    playAppleClick();
+    const nowIso = new Date().toISOString();
+    setErrorLog(prev => prev.map(e => e.id === id ? {
+      ...e,
+      deletedAt: nowIso,
+      updatedAt: nowIso,
+      _deleted: true
+    } : e));
+  };
+  const handleAdvanceErrorReview = id => {
+    triggerHaptic(10);
+    playAppleClick();
+    const nowIso = new Date().toISOString();
+    setErrorLog(prev => prev.map(e => {
+      if (e.id !== id) return e;
+      const curr = e.reviewDay || 2;
+      const nextDay = curr === 2 ? 7 : curr === 7 ? 21 : 21;
+      const isVolatile = curr >= 21 ? true : Boolean(e.isVolatile);
+      return {
+        ...e,
+        reviewDay: nextDay,
+        isVolatile,
+        updatedAt: nowIso
+      };
+    }));
+  };
+  const handleLogCalculatedMock = () => {
+    triggerHaptic(12);
+    playAppleClick();
+    const aC = Math.max(0, Math.min(100, Number(calcPartAC) || 0));
+    const aW = Math.max(0, Math.min(100 - aC, Number(calcPartAW) || 0));
+    const aU = Math.max(0, 100 - aC - aW);
+    const bC = Math.max(0, Math.min(140, Number(calcPartBC) || 0));
+    const bW = Math.max(0, Math.min(140 - bC, Number(calcPartBW) || 0));
+    const bU = Math.max(0, 140 - bC - bW);
+    const totalScore = (aC + bC) * 4 - (aW + bW);
+    const att = aC + bC + aW + bW;
+    const accuracy = att > 0 ? Math.round((aC + bC) / att * 1000) / 10 : 0;
+    const nowIso = new Date().toISOString();
+    const rec = {
+      id: 'm_calc_' + Date.now(),
+      date: calcDate || nowIso.slice(0, 10),
+      source: calcSource || 'Ecdentistry Free Weekly Mock',
+      partA_C: aC,
+      partA_W: aW,
+      partA_U: aU,
+      partB_C: bC,
+      partB_W: bW,
+      partB_U: bU,
+      totalScore,
+      accuracy,
+      updatedAt: nowIso,
+      deletedAt: null
+    };
+    setMockScores(prev => [rec, ...prev]);
   };
 
   // Add Error Log Entry
@@ -1495,13 +1617,17 @@ function App() {
     reader.onload = evt => {
       try {
         const imported = JSON.parse(evt.target.result);
-        if (!imported.userProgress) {
-          alert('Invalid backup file. Missing userProgress root.');
+        if (!imported.userProgress && !Array.isArray(imported.mocks) && !Array.isArray(imported.shortlist)) {
+          alert('Invalid backup file. Expected MDS OS userProgress or Build A backup format.');
           return;
         }
-        if (confirm('Importing will replace local study records on this device. Do you want to proceed?')) {
-          if (window.SyncEngine) {
-            window.SyncEngine.saveLocalProgressDoc(imported.userProgress);
+        if (confirm('Import and merge backup records (mocks, errors, shortlist, counselling & state quota) into this device?')) {
+          if (window.SyncEngine && window.SyncEngine.importBackupPayload) {
+            const merged = window.SyncEngine.importBackupPayload(imported);
+            setMockScores(merged.mockScores || []);
+            setErrorLog(merged.errorLog || []);
+            setCollegeShortlist(merged.collegeShortlist || []);
+            setCounsellingTracker(merged.counsellingTracker || {});
             window.location.reload();
           }
         }
@@ -1546,11 +1672,11 @@ function App() {
   }, "Daily Rhythm"), [{
     id: 'dashboard',
     label: 'Today',
-    icon: '⚡'
+    icon: ''
   }, {
     id: 'daily_quiz',
     label: 'Daily Quiz',
-    icon: '🎯'
+    icon: ''
   }].map(item => /*#__PURE__*/React.createElement("button", {
     key: item.id,
     onClick: () => {
@@ -1568,19 +1694,19 @@ function App() {
   }, "Core Prep"), [{
     id: 'plan',
     label: '23-Week Plan',
-    icon: '📅'
+    icon: ''
   }, {
     id: 'curriculum',
     label: '17 Subjects',
-    icon: '📚'
+    icon: ''
   }, {
     id: 'cbt_mock',
     label: 'CBT Simulator',
-    icon: '⏱️'
+    icon: ''
   }, {
     id: 'error_log',
     label: 'Mistake Log',
-    icon: '🔁'
+    icon: ''
   }].map(item => /*#__PURE__*/React.createElement("button", {
     key: item.id,
     onClick: () => {
@@ -1598,19 +1724,19 @@ function App() {
   }, "High-Yield Vault"), [{
     id: 'volatile_vault',
     label: 'Volatile Formulas',
-    icon: '💎'
+    icon: ''
   }, {
     id: 'ibq_spotter',
     label: 'Real Image Atlas',
-    icon: '🩻'
+    icon: ''
   }, {
     id: 'omfs_deep_dive',
     label: 'OMFS Deep Dive',
-    icon: '🔪'
+    icon: ''
   }, {
     id: 'colleges',
     label: 'Colleges & Shortlist',
-    icon: '🏛️'
+    icon: ''
   }].map(item => /*#__PURE__*/React.createElement("button", {
     key: item.id,
     onClick: () => {
@@ -1628,15 +1754,15 @@ function App() {
   }, "Strategy & Result"), [{
     id: 'after_result',
     label: 'After the Result',
-    icon: '🏆'
+    icon: ''
   }, {
     id: 'hidden_neglected',
     label: '16 Hidden Rules',
-    icon: '⚠️'
+    icon: ''
   }, {
     id: 'watchlists',
     label: 'Master Checklists',
-    icon: '📋'
+    icon: ''
   }].map(item => /*#__PURE__*/React.createElement("button", {
     key: item.id,
     onClick: () => {
@@ -1654,11 +1780,11 @@ function App() {
   }, "System"), [{
     id: 'update_centre',
     label: 'Update Centre',
-    icon: '📡'
+    icon: ''
   }, {
     id: 'settings',
     label: 'Settings & Sync',
-    icon: '⚙️'
+    icon: ''
   }].map(item => /*#__PURE__*/React.createElement("button", {
     key: item.id,
     onClick: () => {
@@ -1679,7 +1805,7 @@ function App() {
     className: "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left apple-press transition-all bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/25 text-xs"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-base"
-  }, "📥"), /*#__PURE__*/React.createElement("span", null, "Download PDF"))))), /*#__PURE__*/React.createElement("main", {
+  }), /*#__PURE__*/React.createElement("span", null, "Download PDF"))))), /*#__PURE__*/React.createElement("main", {
     className: "flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative"
   }, /*#__PURE__*/React.createElement("header", {
     className: "glass-nav-bar px-4 md:px-6 py-2.5 flex items-center justify-between z-20 shrink-0"
@@ -1709,7 +1835,7 @@ function App() {
     className: `w-2 h-2 rounded-full ${syncState.status === 'synced' ? 'bg-emerald-400' : syncState.status === 'syncing' ? 'bg-sky-400 animate-spin' : syncState.status === 'offline' ? 'bg-amber-400' : syncState.status === 'error' ? 'bg-rose-500' : 'bg-slate-400'}`
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-[11px] font-semibold text-slate-200 hidden sm:inline"
-  }, syncState.status === 'synced' ? `Synced ✓ (${syncState.deviceName})` : syncState.status === 'syncing' ? 'Syncing...' : syncState.status === 'offline' ? 'Offline' : syncState.status === 'error' ? 'Sync Error' : 'Local Only')), /*#__PURE__*/React.createElement("button", {
+  }, syncState.status === 'synced' ? `Synced v (${syncState.deviceName})` : syncState.status === 'syncing' ? 'Syncing...' : syncState.status === 'offline' ? 'Offline' : syncState.status === 'error' ? 'Sync Error' : 'Local Only')), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       triggerHaptic(8);
       playAppleClick();
@@ -1717,7 +1843,7 @@ function App() {
     },
     className: "p-1.5 px-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs apple-press",
     title: `Current Theme: ${themeMode}`
-  }, themeMode === 'light' ? '☀️ Light' : themeMode === 'dark' ? '🌙 Dark' : '⚙️ Auto'), /*#__PURE__*/React.createElement("a", {
+  }, themeMode === 'light' ? ' Light' : themeMode === 'dark' ? ' Dark' : ' Auto'), /*#__PURE__*/React.createElement("a", {
     href: "/download-report",
     download: "MDS_OS_AI_Handover_Master_Report.pdf",
     onClick: () => {
@@ -1726,7 +1852,7 @@ function App() {
     },
     className: "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold apple-press",
     title: "Download Master AI Handover Report (PDF)"
-  }, /*#__PURE__*/React.createElement("span", null, "📥"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", {
     className: "hidden sm:inline"
   }, "Download PDF")), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
@@ -1738,7 +1864,7 @@ function App() {
     },
     className: "p-1.5 px-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs apple-press",
     title: userSettings.soundEnabled ? 'Apple Sounds Active' : 'Muted'
-  }, userSettings.soundEnabled ? '🔊' : '🔇'), /*#__PURE__*/React.createElement("button", {
+  }, userSettings.soundEnabled ? '' : ''), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       triggerHaptic(10);
       playAppleClick();
@@ -1746,7 +1872,7 @@ function App() {
     },
     className: "p-1.5 px-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300 apple-press",
     title: "Spotlight Search (Cmd+K)"
-  }, /*#__PURE__*/React.createElement("span", null, "🔍 ⌘K")))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, " Cmd+K")))), /*#__PURE__*/React.createElement("div", {
     onScroll: e => setScrollTop(e.currentTarget.scrollTop),
     className: "flex-1 overflow-y-auto p-4 md:p-6 pb-28 md:pb-8 space-y-6"
   }, currentView === 'dashboard' && /*#__PURE__*/React.createElement("div", {
@@ -1763,7 +1889,7 @@ function App() {
     className: "flex items-center gap-2.5 text-xs"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400 text-base"
-  }, "☁️"), /*#__PURE__*/React.createElement("span", null, "Not signed in - progress is only on this device. Sign in in Settings to sync.")), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("span", null, "Not signed in - progress is only on this device. Sign in in Settings to sync.")), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       triggerHaptic(10);
       playAppleClick();
@@ -1776,7 +1902,7 @@ function App() {
     className: "flex items-start gap-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-2xl"
-  }, "⚠️"), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "text-xs space-y-1"
   }, /*#__PURE__*/React.createElement("div", {
     className: "font-bold text-amber-300"
@@ -1804,7 +1930,7 @@ function App() {
     className: "text-xs font-normal text-slate-400"
   }, "/ 960")), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] text-emerald-400 mt-1 font-semibold"
-  }, "202+ Correct • ≤22 Wrong")), /*#__PURE__*/React.createElement("div", {
+  }, "202+ Correct - at most 22 Wrong")), /*#__PURE__*/React.createElement("div", {
     className: "glass-card rounded-2xl p-4"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-[11px] font-bold text-indigo-400 uppercase tracking-wider"
@@ -1888,7 +2014,7 @@ function App() {
     className: "flex items-center gap-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: `w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs ${dailyRoutine[block.key] ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-400'}`
-  }, dailyRoutine[block.key] ? '✓' : ''), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, dailyRoutine[block.key] ? 'v' : ''), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "text-xs font-bold text-white flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", null, block.title), /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-slate-300 font-mono"
@@ -1907,40 +2033,40 @@ function App() {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-lg"
-  }, "🎯"), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "text-left"
   }, /*#__PURE__*/React.createElement("div", null, "Start Daily Mixed Quiz"), /*#__PURE__*/React.createElement("div", {
     className: "text-[10px] text-sky-100 font-normal"
-  }, "10 Questions (Weak subjects weighted)"))), /*#__PURE__*/React.createElement("span", null, "→")), /*#__PURE__*/React.createElement("button", {
+  }, "10 Questions (Weak subjects weighted)"))), /*#__PURE__*/React.createElement("span", null, "")), /*#__PURE__*/React.createElement("button", {
     onClick: handleStartCbtMock,
     className: "w-full py-3 px-4 rounded-2xl bg-white/[0.05] hover:bg-white/10 border border-white/10 text-white font-bold text-xs apple-press flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-lg"
-  }, "⏱️"), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "text-left"
   }, /*#__PURE__*/React.createElement("div", null, "National CBT Mock Simulator"), /*#__PURE__*/React.createElement("div", {
     className: "text-[10px] text-slate-400 font-normal"
-  }, "Strict Part A 75-Min Lock"))), /*#__PURE__*/React.createElement("span", null, "→")), /*#__PURE__*/React.createElement("button", {
+  }, "Strict Part A 75-Min Lock"))), /*#__PURE__*/React.createElement("span", null, "")), /*#__PURE__*/React.createElement("button", {
     onClick: handleStart15ImageDrill,
     className: "w-full py-3 px-4 rounded-2xl bg-white/[0.05] hover:bg-white/10 border border-white/10 text-white font-bold text-xs apple-press flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-lg"
-  }, "🩻"), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "text-left"
   }, /*#__PURE__*/React.createElement("div", null, "15-Image Diagnosis Drill"), /*#__PURE__*/React.createElement("div", {
     className: "text-[10px] text-slate-400 font-normal"
-  }, "45s / Real Medical Radiograph"))), /*#__PURE__*/React.createElement("span", null, "→")), /*#__PURE__*/React.createElement("button", {
+  }, "45s / Real Medical Radiograph"))), /*#__PURE__*/React.createElement("span", null, "")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowAddErrorModal(true),
     className: "w-full py-3 px-4 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-bold text-xs apple-press flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-lg"
-  }, "🔁"), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "text-left"
   }, /*#__PURE__*/React.createElement("div", null, "Log Mistake in Notebook"), /*#__PURE__*/React.createElement("div", {
     className: "text-[10px] text-amber-400/80 font-normal"
@@ -1952,7 +2078,7 @@ function App() {
     className: "text-3xl font-extrabold text-white tracking-tight"
   }, "23-Week Study Plan"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-400 mt-1"
-  }, "160 Days • 8 Hours/Day = 1,280 Focused Hours (Compress Phase 3, never Phase 1)")), /*#__PURE__*/React.createElement("div", {
+  }, "160 Days - 8 Hours/Day = 1,280 Focused Hours (Compress Phase 3, never Phase 1)")), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4 stagger-2"
   }, STUDY_WEEKS.map(week => /*#__PURE__*/React.createElement("div", {
     key: week.week,
@@ -1989,9 +2115,9 @@ function App() {
     className: "text-white"
   }, "Subjects:"), " ", week.subjects), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", {
     className: "text-white"
-  }, "Work:"), " ", week.work), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", {
+  }, "Goal & Work:"), " ", week.goal), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", {
     className: "text-white"
-  }, "Mocks / Tests:"), " ", week.mocks)))))), currentView === 'curriculum' && /*#__PURE__*/React.createElement("div", {
+  }, "Phase:"), " ", week.phaseName, " (", week.title, ")")))))), currentView === 'curriculum' && /*#__PURE__*/React.createElement("div", {
     className: "space-y-6 max-w-6xl mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3 stagger-1"
@@ -1999,7 +2125,7 @@ function App() {
     className: "text-3xl font-extrabold text-white tracking-tight"
   }, "17 BDS Subjects"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-400 mt-1"
-  }, "Every subject ≈ 56 marks (14 Qs). No subject can be safely skipped.")), /*#__PURE__*/React.createElement("div", {
+  }, "Every subject ~ 56 marks (14 Qs). No subject can be safely skipped.")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
   }, ['ALL', 'A', 'B'].map(part => /*#__PURE__*/React.createElement("button", {
     key: part,
@@ -2007,7 +2133,7 @@ function App() {
     className: `text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${partFilter === part ? 'bg-sky-500 text-white border-sky-400' : 'bg-white/5 border-white/10 text-slate-300'}`
   }, part === 'ALL' ? 'All Subjects' : `Part ${part}`)))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4 stagger-2"
-  }, (contentPack.subjectDistribution || []).filter(s => partFilter === 'ALL' || s.part === partFilter).map(subj => {
+  }, (contentPack.examPattern && contentPack.examPattern.subjectDistribution || contentPack.subjectDistribution || []).filter(s => partFilter === 'ALL' || s.part === partFilter).map(subj => {
     const prog = subjectProgress[subj.subject] || {};
     const conf = prog.confidence && prog.confidence.value !== undefined ? prog.confidence.value : subj.isWeak ? 45 : 75;
     const mcqs = prog.mcqsDone && prog.mcqsDone.value !== undefined ? prog.mcqsDone.value : 0;
@@ -2024,7 +2150,7 @@ function App() {
       className: "text-xs font-bold text-white"
     }, subj.subject)), /*#__PURE__*/React.createElement("span", {
       className: "text-[10px] text-slate-400 font-mono mt-0.5 block"
-    }, subj.questions, " Questions • ", subj.marks, " Marks")), subj.isWeak && /*#__PURE__*/React.createElement("span", {
+    }, subj.questions, " Questions - ", subj.marks, " Marks")), subj.isWeak && /*#__PURE__*/React.createElement("span", {
       className: "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0"
     }, "Priority Focus")), /*#__PURE__*/React.createElement("div", {
       className: "space-y-1"
@@ -2110,7 +2236,7 @@ function App() {
     className: "flex items-center gap-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-2xl"
-  }, "🖥️"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "text-xs font-bold uppercase tracking-wider text-sky-400"
   }, cbtPart === 'A' ? 'Section 1: Part A (General Sciences)' : 'Section 2: Part B (Clinical Dental Sciences)'), /*#__PURE__*/React.createElement("div", {
     className: "text-sm font-extrabold text-white"
@@ -2118,10 +2244,10 @@ function App() {
     className: "flex items-center gap-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "p-2 px-3 rounded-xl bg-black/40 border border-white/10 font-mono text-base font-bold text-amber-300"
-  }, "⏱️ ", cbtPart === 'A' ? formatTime(cbtTimerA) : formatTime(cbtTimerB)), cbtPart === 'A' ? /*#__PURE__*/React.createElement("button", {
+  }, cbtPart === 'A' ? formatTime(cbtTimerA) : formatTime(cbtTimerB)), cbtPart === 'A' ? /*#__PURE__*/React.createElement("button", {
     onClick: handleLockPartA,
     className: "px-3.5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs apple-press shadow-md shadow-rose-500/20"
-  }, "🔒 Lock Part A & Proceed") : /*#__PURE__*/React.createElement("button", {
+  }, "Lock Part A & Proceed") : /*#__PURE__*/React.createElement("button", {
     onClick: handleFinishCbtTest,
     className: "px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs apple-press shadow-md shadow-emerald-500/20"
   }, "Finish & Submit CBT"))), (() => {
@@ -2138,7 +2264,7 @@ function App() {
     }, q.subject)), /*#__PURE__*/React.createElement("button", {
       onClick: () => handleToggleCbtFlag(q.id),
       className: `px-2.5 py-1 rounded-lg border font-bold text-[11px] ${flagged ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-white/5 border-white/10 text-slate-400'}`
-    }, flagged ? '🚩 Flagged' : '🏳️ Flag for Review')), /*#__PURE__*/React.createElement("div", {
+    }, flagged ? ' Flagged' : ' Flag for Review')), /*#__PURE__*/React.createElement("div", {
       className: "p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-sm font-semibold text-white leading-relaxed"
     }, q.num, ". ", q.q), /*#__PURE__*/React.createElement("div", {
       className: "grid grid-cols-1 md:grid-cols-2 gap-3 text-xs"
@@ -2154,11 +2280,11 @@ function App() {
       onClick: () => setCbtCurrentIndex(prev => Math.max(0, prev - 1)),
       disabled: cbtCurrentIndex === 0,
       className: "px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-40 text-white font-bold text-xs"
-    }, "← Previous Q"), /*#__PURE__*/React.createElement("button", {
+    }, " Previous Q"), /*#__PURE__*/React.createElement("button", {
       onClick: () => setCbtCurrentIndex(prev => Math.min(qList.length - 1, prev + 1)),
       disabled: cbtCurrentIndex === qList.length - 1,
       className: "px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-40 text-white font-bold text-xs"
-    }, "Next Q →")));
+    }, "Next Q ")));
   })()) : null, cbtCompleted && cbtResultSummary && /*#__PURE__*/React.createElement("div", {
     className: "p-6 rounded-3xl bg-emerald-500/15 border border-emerald-500/30 text-white space-y-3 stagger-2"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2203,7 +2329,7 @@ function App() {
     className: "glass-card rounded-3xl p-6 text-center space-y-3 stagger-2"
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 text-2xl flex items-center justify-center mx-auto"
-  }, "⏱️"), /*#__PURE__*/React.createElement("h3", {
+  }), /*#__PURE__*/React.createElement("h3", {
     className: "text-base font-bold text-white"
   }, "Launch National Timed CBT Simulator"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-300 max-w-md mx-auto"
@@ -2212,11 +2338,79 @@ function App() {
     className: "py-3 px-6 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs apple-press shadow-lg shadow-sky-500/25"
   }, "Start 240-Q CBT Test Now")), /*#__PURE__*/React.createElement("div", {
     className: "glass-card rounded-3xl p-6 space-y-4 stagger-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm font-bold text-white"
+  }, "NBEMS Mock Score Calculator (+4 / -1 / 0)"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400"
+  }, "Benchmark check: 202 Correct & 22 Wrong (16 Unattempted) = 786 / 960. Guessing EV = 5p - 1.")), /*#__PURE__*/React.createElement("div", {
+    className: "text-right"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-slate-400"
+  }, "Calculated Score: "), /*#__PURE__*/React.createElement("strong", {
+    className: "text-lg font-extrabold text-emerald-400"
+  }, ((Number(calcPartAC) || 0) + (Number(calcPartBC) || 0)) * 4 - ((Number(calcPartAW) || 0) + (Number(calcPartBW) || 0)), " / 960"))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-slate-400 block mb-1"
+  }, "Source / Mock Name"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: calcSource,
+    onChange: e => setCalcSource(e.target.value),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-slate-400 block mb-1"
+  }, "Part A Correct (100)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "0",
+    max: "100",
+    value: calcPartAC,
+    onChange: e => setCalcPartAC(parseInt(e.target.value || '0', 10)),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-slate-400 block mb-1"
+  }, "Part A Wrong"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "0",
+    max: "100",
+    value: calcPartAW,
+    onChange: e => setCalcPartAW(parseInt(e.target.value || '0', 10)),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-slate-400 block mb-1"
+  }, "Part B Correct (140)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "0",
+    max: "140",
+    value: calcPartBC,
+    onChange: e => setCalcPartBC(parseInt(e.target.value || '0', 10)),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-slate-400 block mb-1"
+  }, "Part B Wrong"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "0",
+    max: "140",
+    value: calcPartBW,
+    onChange: e => setCalcPartBW(parseInt(e.target.value || '0', 10)),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-end"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: handleLogCalculatedMock,
+    className: "w-full py-2 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs apple-press"
+  }, "+ Log Mock")))), /*#__PURE__*/React.createElement("div", {
+    className: "glass-card rounded-3xl p-6 space-y-4 stagger-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-sm font-bold text-white"
-  }, "Mock Test History & Analytics"), /*#__PURE__*/React.createElement("div", {
+  }, "Mock Test History & Analytics (Target Lines: 765 AIR-10 & 790 Goal)"), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-slate-400"
+  }, mockScores.filter(m => !m.deletedAt).length, " Active Mocks")), /*#__PURE__*/React.createElement("div", {
     className: "space-y-2"
-  }, mockScores.map(m => /*#__PURE__*/React.createElement("div", {
+  }, mockScores.filter(m => !m.deletedAt).map(m => /*#__PURE__*/React.createElement("div", {
     key: m.id,
     className: "p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -2225,15 +2419,18 @@ function App() {
     className: "text-[10px] text-slate-400 font-mono"
   }, m.date)), /*#__PURE__*/React.createElement("div", {
     className: "text-[11px] text-slate-400 mt-0.5"
-  }, "Part A: ", m.partA_C, "C / ", m.partA_W, "W • Part B: ", m.partB_C, "C / ", m.partB_W, "W • Accuracy: ", m.accuracy, "%")), /*#__PURE__*/React.createElement("div", {
+  }, "Part A: ", m.partA_C, "C / ", m.partA_W, "W - Part B: ", m.partB_C, "C / ", m.partB_W, "W - Accuracy: ", m.accuracy, "%")), /*#__PURE__*/React.createElement("div", {
     className: "text-right"
   }, /*#__PURE__*/React.createElement("div", {
     className: `text-xl font-extrabold ${m.totalScore >= 765 ? 'text-emerald-400' : 'text-sky-400'}`
   }, m.totalScore, " ", /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-slate-400"
   }, "/ 960")), /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] text-slate-400"
-  }, m.totalScore >= 765 ? 'AIR 10 Range' : `${765 - m.totalScore} pts to AIR 10`))))))), currentView === 'daily_quiz' && /*#__PURE__*/React.createElement("div", {
+    className: "text-[10px] text-slate-400 block"
+  }, m.totalScore >= 765 ? 'AIR 10 Range' : `${765 - m.totalScore} pts to AIR 10`), /*#__PURE__*/React.createElement("button", {
+    onClick: () => handleDeleteMockRecord(m.id),
+    className: "text-[10px] text-rose-400 hover:underline mt-1"
+  }, "Delete"))))))), currentView === 'daily_quiz' && /*#__PURE__*/React.createElement("div", {
     className: "space-y-6 max-w-6xl mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
     className: "stagger-1"
@@ -2241,7 +2438,7 @@ function App() {
     className: "text-3xl font-extrabold text-white tracking-tight"
   }, "Daily Mixed Diagnostic Quiz"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-400 mt-1"
-  }, "10 High-Yield Questions • Weak subjects (PHD, Physiology, Dental Materials) weighted heavier.")), !quizFinished ? /*#__PURE__*/React.createElement("div", {
+  }, "10 High-Yield Questions - Weak subjects (PHD, Physiology, Dental Materials) weighted heavier.")), !quizFinished ? /*#__PURE__*/React.createElement("div", {
     className: "glass-card rounded-3xl p-6 space-y-5 stagger-2"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between border-b border-white/10 pb-3"
@@ -2287,7 +2484,7 @@ function App() {
     className: "glass-card rounded-3xl p-8 text-center space-y-4 stagger-2"
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 text-3xl flex items-center justify-center mx-auto"
-  }, "🎯"), /*#__PURE__*/React.createElement("h3", {
+  }), /*#__PURE__*/React.createElement("h3", {
     className: "text-lg font-extrabold text-white"
   }, "Daily Quiz Completed!"), /*#__PURE__*/React.createElement("div", {
     className: "text-3xl font-extrabold text-sky-400"
@@ -2311,7 +2508,7 @@ function App() {
     className: "px-4 py-2.5 rounded-2xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs apple-press shadow-md shadow-sky-500/20"
   }, "+ Add Mistake Entry")), /*#__PURE__*/React.createElement("div", {
     className: "space-y-3 stagger-2"
-  }, errorLog.map(err => /*#__PURE__*/React.createElement("div", {
+  }, errorLog.filter(err => !err.deletedAt).map(err => /*#__PURE__*/React.createElement("div", {
     key: err.id,
     className: "glass-card rounded-3xl p-5 space-y-2.5"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2332,7 +2529,15 @@ function App() {
     className: "text-[11px] text-slate-400"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "text-slate-300"
-  }, "Reference:"), " ", err.reference)))))), currentView === 'volatile_vault' && /*#__PURE__*/React.createElement("div", {
+  }, "Reference:"), " ", err.reference, " | Review Stage: +", err.reviewDay || 2, "d ", err.isVolatile ? '(Volatile Sheet)' : ''), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 pt-1"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => handleAdvanceErrorReview(err.id),
+    className: "px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold text-[11px]"
+  }, "Advance Review (+2/+7/+21d)"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => handleDeleteErrorRecord(err.id),
+    className: "px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 font-bold text-[11px]"
+  }, "Delete"))))))), currentView === 'volatile_vault' && /*#__PURE__*/React.createElement("div", {
     className: "space-y-6 max-w-6xl mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
     className: "stagger-1"
@@ -2353,7 +2558,7 @@ function App() {
     category: 'Pharmacology',
     title: 'Adrenaline Ceilings',
     front: 'Healthy vs Cardiac patient adrenaline ceilings?',
-    back: 'Healthy: 200 µg (0.2 mg) per appointment. Cardiac: 40 µg (0.04 mg) = approx 2 cartridges of 1:100,000.'
+    back: 'Healthy: 200 ug (0.2 mg) per appointment. Cardiac: 40 ug (0.04 mg) = approx 2 cartridges of 1:100,000.'
   }, {
     id: 'v_gypsum',
     category: 'Dental Materials',
@@ -2371,7 +2576,7 @@ function App() {
     category: 'Orthodontics',
     title: 'Steiner Cephalometrics Norms',
     front: 'Steiner norms for SNA, SNB, ANB, U1-NA, L1-NB?',
-    back: 'SNA: 82° ± 2°; SNB: 80° ± 2°; ANB: 2° ± 2° (Class I 2-4°, Class II >4°, Class III <2°); U1-NA: 22° / 4mm; L1-NB: 25° / 4mm; Interincisal: 130-135°.'
+    back: 'SNA: 82 deg +/- 2 deg; SNB: 80 deg +/- 2 deg; ANB: 2 deg +/- 2 deg (Class I 2-4 deg, Class II >4 deg, Class III <2 deg); U1-NA: 22 deg / 4mm; L1-NB: 25 deg / 4mm; Interincisal: 130-135 deg.'
   }, {
     id: 'v_pederson',
     category: 'OMFS',
@@ -2401,7 +2606,7 @@ function App() {
         }));
       },
       className: `text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${isShaky ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-white/5 border-white/10 text-slate-400'}`
-    }, isShaky ? '⚠️ Still Shaky' : '✓ Mastered')), /*#__PURE__*/React.createElement("h3", {
+    }, isShaky ? ' Still Shaky' : 'v Mastered')), /*#__PURE__*/React.createElement("h3", {
       className: "text-xs font-bold text-white"
     }, card.title), /*#__PURE__*/React.createElement("div", {
       onClick: () => {
@@ -2417,7 +2622,7 @@ function App() {
       className: "text-slate-300 flex items-center justify-between"
     }, /*#__PURE__*/React.createElement("span", null, card.front), /*#__PURE__*/React.createElement("span", {
       className: "text-[10px] text-sky-400 font-bold"
-    }, "Tap to Reveal →")) : /*#__PURE__*/React.createElement("div", {
+    }, "Tap to Reveal ")) : /*#__PURE__*/React.createElement("div", {
       className: "text-emerald-300 font-semibold leading-relaxed"
     }, card.back)));
   }))), currentView === 'ibq_spotter' && /*#__PURE__*/React.createElement("div", {
@@ -2431,7 +2636,7 @@ function App() {
   }, "Strict Zero-AI Image Policy. Real radiographs, histology, and anatomical diagrams with verified citations.")), /*#__PURE__*/React.createElement("button", {
     onClick: handleStart15ImageDrill,
     className: "px-4 py-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs apple-press shadow-md shadow-sky-500/20"
-  }, "⚡ Start 15-Image Diagnosis Drill")), drillActive && !drillCompleted && /*#__PURE__*/React.createElement("div", {
+  }, "Start 15-Image Diagnosis Drill")), drillActive && !drillCompleted && /*#__PURE__*/React.createElement("div", {
     className: "glass-card rounded-3xl p-6 space-y-4 border border-sky-500/40 shadow-2xl stagger-2"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between border-b border-white/10 pb-3"
@@ -2439,7 +2644,7 @@ function App() {
     className: "text-xs font-bold text-sky-400 px-2.5 py-1 rounded-full bg-sky-500/20 border border-sky-500/30"
   }, "Image ", drillIndex + 1, " of 15"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-mono font-bold text-amber-300"
-  }, "⏱️ ", drillTimer, "s")), (() => {
+  }, " ", drillTimer, "s")), (() => {
     const q = drillQuestions[drillIndex];
     if (!q) return null;
     return /*#__PURE__*/React.createElement("div", {
@@ -2447,7 +2652,7 @@ function App() {
     }, /*#__PURE__*/React.createElement("div", {
       className: "w-full max-h-72 bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-white/10"
     }, /*#__PURE__*/React.createElement("img", {
-      src: q.image.imageFile || q.image.placeholderSourceUrl,
+      src: q.image.imageUrl || q.image.imageFile || q.image.placeholderSourceUrl,
       alt: q.image.diagnosis,
       className: "max-h-72 object-contain"
     })), /*#__PURE__*/React.createElement("div", {
@@ -2473,20 +2678,31 @@ function App() {
   }, imageLibrary.map(img => /*#__PURE__*/React.createElement("div", {
     key: img.id,
     className: "glass-card rounded-3xl p-4 space-y-3 overflow-hidden"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, img.isPlaceholder || !img.imageUrl && !img.imageFile ? /*#__PURE__*/React.createElement("div", {
+    className: "w-full h-48 bg-white/[0.04] rounded-2xl p-4 flex flex-col items-center justify-center text-center border border-white/10 space-y-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-bold text-amber-300"
+  }, "Linked External Case (Licence Requires Direct Link)"), /*#__PURE__*/React.createElement("p", {
+    className: "text-[11px] text-slate-300"
+  }, img.diagnosis), /*#__PURE__*/React.createElement("a", {
+    href: img.placeholderSourceUrl || img.sourcePageUrl,
+    target: "_blank",
+    rel: "noreferrer",
+    className: "px-3 py-1.5 rounded-xl bg-sky-500/20 border border-sky-400/30 text-sky-300 text-xs font-bold hover:bg-sky-500/30"
+  }, "View Original at Source")) : /*#__PURE__*/React.createElement("div", {
     onClick: () => {
       setActiveZoomImage(img);
       setZoomLevel(1);
     },
     className: "w-full h-48 bg-black/60 rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 cursor-pointer relative group"
   }, /*#__PURE__*/React.createElement("img", {
-    src: img.imageFile || img.placeholderSourceUrl,
+    src: img.imageUrl || img.imageFile,
     alt: img.diagnosis,
     loading: "lazy",
     className: "max-h-48 object-contain transition-transform duration-300 group-hover:scale-105"
   }), /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold"
-  }, "🔍 Tap to Zoom")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+  }, "Tap to Zoom")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] font-bold text-sky-400 uppercase tracking-wider"
   }, img.subject), /*#__PURE__*/React.createElement("h3", {
     className: "text-xs font-bold text-white mt-0.5"
@@ -2503,7 +2719,7 @@ function App() {
     target: "_blank",
     rel: "noreferrer",
     className: "text-sky-400 hover:text-sky-300 underline block"
-  }, "View Original Publication →")))))), currentView === 'omfs_deep_dive' && /*#__PURE__*/React.createElement("div", {
+  }, "View Original Publication ")))))), currentView === 'omfs_deep_dive' && /*#__PURE__*/React.createElement("div", {
     className: "space-y-6 max-w-6xl mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
     className: "stagger-1"
@@ -2515,11 +2731,65 @@ function App() {
     className: "glass-card rounded-3xl p-6 space-y-3 border border-sky-500/30 stagger-2"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-base font-extrabold text-white flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "🏆"), " Why Top-10 Matters for OMFS Aspirants"), /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("span", null), " Why Top-10 Matters for OMFS Aspirants"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-300 leading-relaxed"
   }, contentPack.omfsDeepDive?.whyTop10Matters || 'KGMU Lucknow and BHU Varanasi OMFS seats close in the Top 10 (Ranks 4 and 9 in 2025 Round 1). MAIDS New Delhi closed at Rank 1 in 2026 Round 1. Any government OMFS seat in AIQ Round 1 closes by Rank ~156.'), /*#__PURE__*/React.createElement("div", {
     className: "p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200"
   }, /*#__PURE__*/React.createElement("strong", null, "Important Notice:"), " AIIMS New Delhi, JIPMER, and PGIMER dental seats are NOT through NEET-MDS - they are admitted through INI-CET, a completely separate exam with negative marking of -1/3.")), /*#__PURE__*/React.createElement("div", {
+    className: "glass-card rounded-3xl p-6 space-y-4 border border-sky-500/30 stagger-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm font-bold text-white"
+  }, "Interactive Pederson Difficulty Index Calculator (Mandibular 3rd Molar)"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400"
+  }, "Total Score = Angulation (1-4) + Depth (1-3) + Ramus Relationship (1-3). 3-4 Easy, 5-6 Moderate, 7-10 Very Difficult.")), /*#__PURE__*/React.createElement("div", {
+    className: "text-right"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-slate-400"
+  }, "Difficulty Score: "), /*#__PURE__*/React.createElement("strong", {
+    className: "text-lg font-extrabold text-sky-400"
+  }, pedAngulation + pedDepth + pedRamus, " / 10 (", pedAngulation + pedDepth + pedRamus <= 4 ? 'Easy' : pedAngulation + pedDepth + pedRamus <= 6 ? 'Moderate' : 'Very Difficult', ")"))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-slate-300 font-semibold block mb-1"
+  }, "Winter Angulation"), /*#__PURE__*/React.createElement("select", {
+    value: pedAngulation,
+    onChange: e => setPedAngulation(Number(e.target.value)),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: 1
+  }, "Mesioangular (1) - Most Common"), /*#__PURE__*/React.createElement("option", {
+    value: 2
+  }, "Horizontal (2)"), /*#__PURE__*/React.createElement("option", {
+    value: 3
+  }, "Vertical (3)"), /*#__PURE__*/React.createElement("option", {
+    value: 4
+  }, "Distoangular (4) - Most Difficult"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-slate-300 font-semibold block mb-1"
+  }, "Pell & Gregory Depth"), /*#__PURE__*/React.createElement("select", {
+    value: pedDepth,
+    onChange: e => setPedDepth(Number(e.target.value)),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: 1
+  }, "Level A (1) - Occlusal plane at/above 2nd molar"), /*#__PURE__*/React.createElement("option", {
+    value: 2
+  }, "Level B (2) - Between occlusal & cervical line"), /*#__PURE__*/React.createElement("option", {
+    value: 3
+  }, "Level C (3) - Below cervical line"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-slate-300 font-semibold block mb-1"
+  }, "Ramus Relationship"), /*#__PURE__*/React.createElement("select", {
+    value: pedRamus,
+    onChange: e => setPedRamus(Number(e.target.value)),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: 1
+  }, "Class I (1) - Sufficient space"), /*#__PURE__*/React.createElement("option", {
+    value: 2
+  }, "Class II (2) - Less than crown width"), /*#__PURE__*/React.createElement("option", {
+    value: 3
+  }, "Class III (3) - Completely within ramus"))))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4 stagger-3"
   }, [{
     title: 'Impactions Classification',
@@ -2540,7 +2810,7 @@ function App() {
     className: "text-xs font-bold text-white flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sky-400"
-  }, "❖"), " ", item.title), /*#__PURE__*/React.createElement("p", {
+  }), " ", item.title), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-300 leading-relaxed"
   }, item.desc))))), currentView === 'colleges' && /*#__PURE__*/React.createElement("div", {
     className: "space-y-6 max-w-6xl mx-auto"
@@ -2556,11 +2826,11 @@ function App() {
     className: "flex items-center justify-between border-b border-white/10 pb-3"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
     className: "text-base font-extrabold text-white flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "🏛️"), " My College Priority Shortlist (", collegeShortlist.length, ")"), /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("span", null), " My College Priority Shortlist (", collegeShortlist.filter(c => !c.deletedAt).length, ")"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-400"
-  }, "Use ▲ / ▼ buttons to adjust priority order. Persists and syncs across devices."))), /*#__PURE__*/React.createElement("div", {
+  }, "Use Up / Down buttons to adjust priority order. Persists and syncs across devices."))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-2"
-  }, collegeShortlist.map((col, idx) => /*#__PURE__*/React.createElement("div", {
+  }, collegeShortlist.filter(c => !c.deletedAt).map((col, idx, arr) => /*#__PURE__*/React.createElement("div", {
     key: col.id,
     className: "p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-3 text-xs"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2578,16 +2848,16 @@ function App() {
     disabled: idx === 0,
     className: "px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-bold",
     title: "Move Up"
-  }, "▲"), /*#__PURE__*/React.createElement("button", {
+  }, "Up"), /*#__PURE__*/React.createElement("button", {
     onClick: () => handleMoveCollegeShortlist(idx, 1),
-    disabled: idx === collegeShortlist.length - 1,
+    disabled: idx === arr.length - 1,
     className: "px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-bold",
     title: "Move Down"
-  }, "▼"), /*#__PURE__*/React.createElement("button", {
+  }, "Down"), /*#__PURE__*/React.createElement("button", {
     onClick: () => handleRemoveCollegeFromShortlist(col.id),
     className: "px-2 py-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 font-bold ml-1",
     title: "Remove from shortlist"
-  }, "✕")))))), /*#__PURE__*/React.createElement("div", {
+  }, "x")))))), /*#__PURE__*/React.createElement("div", {
     className: "glass-card rounded-3xl p-6 space-y-4 stagger-3"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-sm font-bold text-white"
@@ -2624,9 +2894,9 @@ function App() {
     className: "py-3 px-3 font-mono font-bold text-sky-400"
   }, c.closingRank), /*#__PURE__*/React.createElement("td", {
     className: "py-3 px-3 font-mono text-emerald-400"
-  }, "₹", c.stipendMonthly.toLocaleString()), /*#__PURE__*/React.createElement("td", {
+  }, "Rs ", c.stipendMonthly.toLocaleString()), /*#__PURE__*/React.createElement("td", {
     className: "py-3 px-3 font-mono"
-  }, "₹", c.feeAnnual.toLocaleString()), /*#__PURE__*/React.createElement("td", {
+  }, "Rs ", c.feeAnnual.toLocaleString()), /*#__PURE__*/React.createElement("td", {
     className: "py-3 px-3"
   }, c.bondYears > 0 ? `${c.bondYears} Year` : 'No Bond'), /*#__PURE__*/React.createElement("td", {
     className: "py-3 px-3 text-right"
@@ -2647,7 +2917,7 @@ function App() {
     className: "flex items-center justify-between border-b border-white/10 pb-2"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-sm font-bold text-white flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "🔮"), " NEET-MDS Rank Estimator (Historical 2024-2026 Anchors)"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null), " NEET-MDS Rank Estimator (Historical 2024-2026 Anchors)"), /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] text-amber-400 font-bold"
   }, "Estimate only, not a promise")), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs"
@@ -2687,7 +2957,7 @@ function App() {
     className: "glass-card rounded-3xl p-6 space-y-4 stagger-3"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-sm font-bold text-white flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "💰"), " 3-Year Cost vs Stipend Comparison Calculator"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null), " 3-Year Cost vs Stipend Comparison Calculator"), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-3 gap-4 text-xs"
   }, /*#__PURE__*/React.createElement("div", {
     className: "p-4 rounded-2xl bg-black/30 border border-white/10 space-y-2"
@@ -2697,11 +2967,11 @@ function App() {
     className: "text-[11px] text-slate-400"
   }, "e.g. MAIDS, Lady Hardinge, BHU, AMU"), /*#__PURE__*/React.createElement("div", {
     className: "pt-1 text-emerald-400 font-mono text-sm font-bold"
-  }, "Stipend: ₹1.1L - 1.25L / mo"), /*#__PURE__*/React.createElement("div", {
+  }, "Stipend: Rs 1.1L - 1.25L / mo"), /*#__PURE__*/React.createElement("div", {
     className: "text-slate-300"
-  }, "Annual Fee: ~₹18,000 - 25,000"), /*#__PURE__*/React.createElement("div", {
+  }, "Annual Fee: ~Rs 18,000 - 25,000"), /*#__PURE__*/React.createElement("div", {
     className: "p-2 rounded-xl bg-emerald-500/10 text-emerald-300 text-[11px] font-bold"
-  }, "Net 3-Year Surplus: +₹39 Lakhs")), /*#__PURE__*/React.createElement("div", {
+  }, "Net 3-Year Surplus: +Rs 39 Lakhs")), /*#__PURE__*/React.createElement("div", {
     className: "p-4 rounded-2xl bg-black/30 border border-white/10 space-y-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "font-bold text-white"
@@ -2709,11 +2979,11 @@ function App() {
     className: "text-[11px] text-slate-400"
   }, "e.g. Mumbai, Jaipur, Raipur, Hyderabad"), /*#__PURE__*/React.createElement("div", {
     className: "pt-1 text-sky-400 font-mono text-sm font-bold"
-  }, "Stipend: ₹70k - 85k / mo"), /*#__PURE__*/React.createElement("div", {
+  }, "Stipend: Rs 70k - 85k / mo"), /*#__PURE__*/React.createElement("div", {
     className: "text-slate-300"
-  }, "Annual Fee: ~₹35,000 - 60,000"), /*#__PURE__*/React.createElement("div", {
+  }, "Annual Fee: ~Rs 35,000 - 60,000"), /*#__PURE__*/React.createElement("div", {
     className: "p-2 rounded-xl bg-sky-500/10 text-sky-300 text-[11px] font-bold"
-  }, "Net 3-Year Surplus: +₹25 Lakhs")), /*#__PURE__*/React.createElement("div", {
+  }, "Net 3-Year Surplus: +Rs 25 Lakhs")), /*#__PURE__*/React.createElement("div", {
     className: "p-4 rounded-2xl bg-black/30 border border-white/10 space-y-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "font-bold text-white"
@@ -2721,15 +2991,15 @@ function App() {
     className: "text-[11px] text-slate-400"
   }, "e.g. Manipal, A.B. Shetty, DY Patil"), /*#__PURE__*/React.createElement("div", {
     className: "pt-1 text-amber-400 font-mono text-sm font-bold"
-  }, "Stipend: ₹15k - 30k / mo"), /*#__PURE__*/React.createElement("div", {
+  }, "Stipend: Rs 15k - 30k / mo"), /*#__PURE__*/React.createElement("div", {
     className: "text-slate-300"
-  }, "Annual Fee: ~₹12L - 18L / yr"), /*#__PURE__*/React.createElement("div", {
+  }, "Annual Fee: ~Rs 12L - 18L / yr"), /*#__PURE__*/React.createElement("div", {
     className: "p-2 rounded-xl bg-rose-500/10 text-rose-300 text-[11px] font-bold"
-  }, "Net 3-Year Cost: -₹35 to 45 Lakhs")))), /*#__PURE__*/React.createElement("div", {
+  }, "Net 3-Year Cost: -Rs 35 to 45 Lakhs")))), /*#__PURE__*/React.createElement("div", {
     className: "glass-card rounded-3xl p-6 space-y-3 stagger-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-sm font-bold text-white flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "🧊"), " Freeze vs Float Visual Rules (MCC 2026 Protocol)"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null), " Freeze vs Float Visual Rules (MCC 2026 Protocol)"), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4 text-xs leading-relaxed text-slate-300"
   }, /*#__PURE__*/React.createElement("div", {
     className: "p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1.5"
@@ -2747,7 +3017,7 @@ function App() {
     className: "glass-card rounded-3xl p-6 space-y-4 stagger-5"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-sm font-bold text-white flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "🗺️"), " Round-by-Round Counselling Tracker (Saved & Synced)"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null), " Round-by-Round Counselling Tracker (Saved & Synced)"), /*#__PURE__*/React.createElement("div", {
     className: "space-y-3 text-xs"
   }, [{
     key: 'r1',
@@ -2756,7 +3026,7 @@ function App() {
   }, {
     key: 'r2',
     name: 'Round 2 (Fresh Choices)',
-    rules: 'Fresh choices required. Seat allotted and not joined = forfeiture of ₹25,000 deposit.'
+    rules: 'Fresh choices required. Seat allotted and not joined = forfeiture of Rs 25,000 deposit.'
   }, {
     key: 'r3',
     name: 'Round 3 (Mop-Up)',
@@ -2785,7 +3055,7 @@ function App() {
       className: "flex items-center gap-3"
     }, /*#__PURE__*/React.createElement("div", {
       className: `w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs ${isDone ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-400'}`
-    }, isDone ? '✓' : ''), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    }, isDone ? 'v' : ''), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
       className: "font-bold text-white"
     }, r.name), /*#__PURE__*/React.createElement("div", {
       className: "text-[11px] text-slate-400"
@@ -2820,13 +3090,13 @@ function App() {
       className: "flex items-center justify-between border-b border-white/10 pb-2"
     }, /*#__PURE__*/React.createElement("span", {
       className: "text-[10px] font-bold text-sky-400 uppercase tracking-wider"
-    }, rule.category), /*#__PURE__*/React.createElement("div", {
+    }, rule.group || rule.category, " (", rule.year || '2026', ")"), /*#__PURE__*/React.createElement("div", {
       className: `w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs ${isChecked ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-400'}`
-    }, isChecked ? '✓' : '')), /*#__PURE__*/React.createElement("h3", {
+    }, isChecked ? 'v' : '')), /*#__PURE__*/React.createElement("h3", {
       className: "text-xs font-bold text-white"
     }, rule.title), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-slate-300 leading-relaxed"
-    }, rule.content));
+    }, rule.detail || rule.content));
   }))), currentView === 'watchlists' && /*#__PURE__*/React.createElement("div", {
     className: "space-y-6 max-w-6xl mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2849,10 +3119,12 @@ function App() {
   }, cl.description)), /*#__PURE__*/React.createElement("div", {
     className: "space-y-2 text-xs"
   }, cl.items.map((item, iIdx) => {
-    const itemKey = `${cl.id}_${iIdx}`;
+    const itemId = item && typeof item === 'object' && item.id ? item.id : iIdx;
+    const itemText = item && typeof item === 'object' && item.text ? item.text : String(item);
+    const itemKey = `${cl.id}_${itemId}`;
     const isDone = !!(masterChecklistsChecked[itemKey] && masterChecklistsChecked[itemKey].value);
     return /*#__PURE__*/React.createElement("div", {
-      key: iIdx,
+      key: itemKey,
       onClick: () => {
         triggerHaptic(8);
         playAppleClick();
@@ -2867,9 +3139,9 @@ function App() {
       className: `p-3 rounded-2xl border flex items-center gap-3 cursor-pointer transition-all ${isDone ? 'bg-emerald-500/10 border-emerald-500/30 text-white' : 'bg-white/[0.02] border-white/10 text-slate-300'}`
     }, /*#__PURE__*/React.createElement("div", {
       className: `w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs shrink-0 ${isDone ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-400'}`
-    }, isDone ? '✓' : ''), /*#__PURE__*/React.createElement("span", {
+    }, isDone ? 'v' : ''), /*#__PURE__*/React.createElement("span", {
       className: "leading-relaxed"
-    }, item));
+    }, itemText));
   })))))), currentView === 'update_centre' && /*#__PURE__*/React.createElement("div", {
     className: "space-y-6 max-w-6xl mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2882,7 +3154,7 @@ function App() {
     onClick: handleCheckOfficialUpdates,
     disabled: proxyCheckState.checking,
     className: "px-4 py-2.5 rounded-2xl bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-white font-bold text-xs apple-press shadow-md shadow-sky-500/20"
-  }, proxyCheckState.checking ? 'Checking Portals...' : '⚡ Check Portals Now')), proxyCheckState.lastChecked && /*#__PURE__*/React.createElement("div", {
+  }, proxyCheckState.checking ? 'Checking Portals...' : ' Check Portals Now')), proxyCheckState.lastChecked && /*#__PURE__*/React.createElement("div", {
     className: "p-3 px-4 rounded-2xl bg-white/[0.03] border border-white/10 text-xs text-slate-300 flex items-center justify-between stagger-2"
   }, /*#__PURE__*/React.createElement("span", null, "Last Checked: ", /*#__PURE__*/React.createElement("strong", {
     className: "text-white"
@@ -2910,7 +3182,7 @@ function App() {
       target: "_blank",
       rel: "noreferrer",
       className: "text-amber-300 hover:text-white underline font-bold block"
-    }, "Open Official Portal Manually →")), src.notices && src.notices.length > 0 && /*#__PURE__*/React.createElement("div", {
+    }, "Open Official Portal Manually ")), src.notices && src.notices.length > 0 && /*#__PURE__*/React.createElement("div", {
       className: "space-y-1.5 pt-1"
     }, src.notices.map((n, idx) => /*#__PURE__*/React.createElement("a", {
       key: idx,
@@ -2933,7 +3205,7 @@ function App() {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xl"
-  }, "☁️"), /*#__PURE__*/React.createElement("h2", {
+  }), /*#__PURE__*/React.createElement("h2", {
     className: "text-base font-extrabold text-white"
   }, "Cross-Device Real Cloud Sync"), /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-400 font-bold border border-sky-500/30"
@@ -2945,17 +3217,17 @@ function App() {
     className: `w-2.5 h-2.5 rounded-full ${syncState.status === 'synced' ? 'bg-emerald-400 shadow-lg shadow-emerald-400/50' : syncState.status === 'syncing' ? 'bg-sky-400 animate-spin' : syncState.status === 'offline' ? 'bg-amber-400' : syncState.status === 'error' ? 'bg-rose-500' : 'bg-slate-400'}`
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold text-white"
-  }, syncState.status === 'synced' ? 'Synced ✓' : syncState.status === 'syncing' ? 'Syncing...' : syncState.status === 'offline' ? 'Offline (Saved Locally)' : syncState.status === 'error' ? 'Sync Error' : 'Local Only'))), /*#__PURE__*/React.createElement("div", {
+  }, syncState.status === 'synced' ? 'Synced v' : syncState.status === 'syncing' ? 'Syncing...' : syncState.status === 'offline' ? 'Offline (Saved Locally)' : syncState.status === 'error' ? 'Sync Error' : 'Local Only'))), /*#__PURE__*/React.createElement("div", {
     className: "p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-xs font-bold text-white flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "⚡"), " Supabase Backend Connection"), syncState.isConfigured ? /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null), " Supabase Backend Connection"), syncState.isConfigured ? /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] text-emerald-400 font-bold"
-  }, "● Connected") : /*#__PURE__*/React.createElement("span", {
+  }, " Connected") : /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] text-amber-400 font-bold"
-  }, "○ Setup Required")), !syncState.isConfigured ? /*#__PURE__*/React.createElement("div", {
+  }, " Setup Required")), !syncState.isConfigured ? /*#__PURE__*/React.createElement("div", {
     className: "space-y-3 text-xs"
   }, /*#__PURE__*/React.createElement("div", {
     className: "p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-[11px] text-sky-300 space-y-1.5"
@@ -2971,9 +3243,9 @@ function App() {
     className: "bg-black/40 px-1 py-0.5 rounded text-sky-300"
   }, "supabase/schema.sql"), "."), /*#__PURE__*/React.createElement("li", null, "In ", /*#__PURE__*/React.createElement("strong", {
     className: "text-white"
-  }, "Authentication → Providers"), ", ensure Email is enabled."), /*#__PURE__*/React.createElement("li", null, "In ", /*#__PURE__*/React.createElement("strong", {
+  }, "Authentication  Providers"), ", ensure Email is enabled."), /*#__PURE__*/React.createElement("li", null, "In ", /*#__PURE__*/React.createElement("strong", {
     className: "text-white"
-  }, "Project Settings → API"), ", copy your Project URL & Anon Public Key below:"))), /*#__PURE__*/React.createElement("div", {
+  }, "Project Settings  API"), ", copy your Project URL & Anon Public Key below:"))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "space-y-1"
@@ -3009,17 +3281,17 @@ function App() {
     className: "p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-xs font-bold text-white flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "👤"), " Sync Account & Authentication"), !syncState.user ? /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null), " Sync Account & Authentication"), !syncState.user ? /*#__PURE__*/React.createElement("div", {
     className: "space-y-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 border-b border-white/10 pb-2"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setAuthMode('magic'),
     className: `text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${authMode === 'magic' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'text-slate-400'}`
-  }, "✉️ Magic Link"), /*#__PURE__*/React.createElement("button", {
+  }, "Magic Link"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setAuthMode('password'),
     className: `text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${authMode === 'password' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'text-slate-400'}`
-  }, "🔑 Email & Password")), /*#__PURE__*/React.createElement("div", {
+  }, "Email & Password")), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-3 text-xs"
   }, /*#__PURE__*/React.createElement("div", {
     className: "space-y-1"
@@ -3039,7 +3311,7 @@ function App() {
     type: "password",
     value: authPassword,
     onChange: e => setAuthPassword(e.target.value),
-    placeholder: "••••••••••••",
+    placeholder: "------------",
     className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-2 pt-1"
@@ -3070,7 +3342,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("button", {
     onClick: handleManualSyncNow,
     className: "px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs apple-press flex items-center gap-1.5"
-  }, /*#__PURE__*/React.createElement("span", null, "🔄"), " Sync Now"), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("span", null), " Sync Now"), /*#__PURE__*/React.createElement("button", {
     onClick: handleSignOutUser,
     className: "px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 font-bold text-xs apple-press"
   }, "Sign Out"))), /*#__PURE__*/React.createElement("div", {
@@ -3093,7 +3365,7 @@ function App() {
     className: "text-[11px] text-slate-400 flex items-center gap-2 pt-1"
   }, /*#__PURE__*/React.createElement("span", null, "Status: ", /*#__PURE__*/React.createElement("strong", {
     className: "text-slate-200"
-  }, syncState.statusMessage)), syncState.lastSyncedAt && /*#__PURE__*/React.createElement("span", null, "• Last Synced: ", /*#__PURE__*/React.createElement("strong", {
+  }, syncState.statusMessage)), syncState.lastSyncedAt && /*#__PURE__*/React.createElement("span", null, "- Last Synced: ", /*#__PURE__*/React.createElement("strong", {
     className: "text-slate-200"
   }, new Date(syncState.lastSyncedAt).toLocaleTimeString()))))), syncConflictsState.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3"
@@ -3101,7 +3373,7 @@ function App() {
     className: "flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-xs font-bold text-amber-300 flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "⚠️"), " Unresolved Sync Conflicts (", syncConflictsState.length, ")"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null), " Unresolved Sync Conflicts (", syncConflictsState.length, ")"), /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] text-amber-400"
   }, "Losing versions preserved safely")), /*#__PURE__*/React.createElement("div", {
     className: "space-y-2 max-h-48 overflow-y-auto text-xs"
@@ -3112,14 +3384,14 @@ function App() {
     className: "font-bold text-white"
   }, conf.title), /*#__PURE__*/React.createElement("div", {
     className: "text-[10px] text-slate-400"
-  }, conf.collection, " • ", new Date(conf.timestamp).toLocaleTimeString())), /*#__PURE__*/React.createElement("button", {
+  }, conf.collection, " - ", new Date(conf.timestamp).toLocaleTimeString())), /*#__PURE__*/React.createElement("button", {
     onClick: () => handleRestoreConflict(conf.id),
     className: "px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[11px] shrink-0"
   }, "Restore This Version"))))), syncState.snapshots && syncState.snapshots.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 text-xs"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-xs font-bold text-white flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "⏪"), " Rolling Cloud Snapshots (Last 3 Auto-Saved)"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null), " Rolling Cloud Snapshots (Last 3 Auto-Saved)"), /*#__PURE__*/React.createElement("div", {
     className: "space-y-2"
   }, syncState.snapshots.map((snap, idx) => /*#__PURE__*/React.createElement("div", {
     key: snap.id,
@@ -3135,7 +3407,7 @@ function App() {
     className: "p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 space-y-3 text-xs"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-xs font-bold text-rose-300 flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "⛔"), " Danger Zone - Delete Cloud Data"), /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("span", null), " Danger Zone - Delete Cloud Data"), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] text-slate-300"
   }, "Permanently wipe all cloud database records and snapshots in Supabase. Your local device progress will remain completely untouched."), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col sm:flex-row gap-2 items-center"
@@ -3153,7 +3425,7 @@ function App() {
     className: "p-3.5 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 flex items-start gap-2.5"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-base"
-  }, "🔒"), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("strong", {
+  }), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("strong", {
     className: "text-slate-300"
   }, "Privacy Notice:"), " Your study progress is stored in your own private Supabase project, protected by your login. Only you can read it. Export a JSON backup any time."))), /*#__PURE__*/React.createElement("div", {
     className: "glass-card rounded-3xl p-6 space-y-4 stagger-2"
@@ -3165,7 +3437,7 @@ function App() {
     className: "space-y-1"
   }, /*#__PURE__*/React.createElement("label", {
     className: "font-semibold text-slate-300"
-  }, "Exam Date"), /*#__PURE__*/React.createElement("input", {
+  }, "Exam Date (No Default)"), /*#__PURE__*/React.createElement("input", {
     type: "date",
     value: userSettings.examDate,
     onChange: e => setUserSettings(prev => ({
@@ -3175,7 +3447,74 @@ function App() {
     className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] text-slate-400"
-  }, "Leave blank if 2027 date not announced yet")), /*#__PURE__*/React.createElement("div", {
+  }, "Leave blank until official 2027 bulletin announces date")), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-1"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "font-semibold text-slate-300"
+  }, "Internship Completion Date (No Default)"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: userSettings.internshipDate || '',
+    onChange: e => setUserSettings(prev => ({
+      ...prev,
+      internshipDate: e.target.value
+    })),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-1"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "font-semibold text-slate-300"
+  }, "Reservation Category (No Default)"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: userSettings.reservationCategory || '',
+    placeholder: "e.g. UR, EWS, OBC-NCL, SC, ST, PwBD",
+    onChange: e => setUserSettings(prev => ({
+      ...prev,
+      reservationCategory: e.target.value
+    })),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-1"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "font-semibold text-slate-300"
+  }, "Target Branch (No Default)"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: userSettings.targetBranch || '',
+    placeholder: "e.g. Oral and Maxillofacial Surgery (OMFS)",
+    onChange: e => setUserSettings(prev => ({
+      ...prev,
+      targetBranch: e.target.value
+    })),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-1"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "font-semibold text-slate-300"
+  }, "Daily Study Hours (No Default)"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "1",
+    max: "16",
+    value: userSettings.dailyHours === '' ? '' : userSettings.dailyHours,
+    placeholder: "e.g. 8",
+    onChange: e => setUserSettings(prev => ({
+      ...prev,
+      dailyHours: e.target.value === '' ? '' : parseInt(e.target.value, 10)
+    })),
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-1"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "font-semibold text-slate-300"
+  }, "Realtime Cloud Sync"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => {
+      triggerHaptic(8);
+      playAppleClick();
+      if (window.SyncEngine && window.SyncEngine.setRealtimeEnabled) {
+        window.SyncEngine.setRealtimeEnabled(!syncState.realtimeEnabled);
+      }
+    },
+    className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-left text-white font-bold"
+  }, syncState.realtimeEnabled !== false ? 'Realtime Subscription: ON' : 'Realtime Subscription: OFF')), /*#__PURE__*/React.createElement("div", {
     className: "space-y-1"
   }, /*#__PURE__*/React.createElement("label", {
     className: "font-semibold text-slate-300"
@@ -3252,9 +3591,9 @@ function App() {
   }, /*#__PURE__*/React.createElement("button", {
     onClick: handleExportJSON,
     className: "py-3 px-4 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold apple-press flex items-center justify-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "💾"), " Export JSON"), /*#__PURE__*/React.createElement("label", {
+  }, /*#__PURE__*/React.createElement("span", null), " Export JSON"), /*#__PURE__*/React.createElement("label", {
     className: "py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold apple-press flex items-center justify-center gap-2 cursor-pointer"
-  }, /*#__PURE__*/React.createElement("span", null, "📂"), " Import JSON", /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("span", null), " Import JSON", /*#__PURE__*/React.createElement("input", {
     type: "file",
     accept: ".json",
     onChange: handleImportJSON,
@@ -3262,7 +3601,7 @@ function App() {
   })), /*#__PURE__*/React.createElement("button", {
     onClick: handleCopyBackupCode,
     className: "py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold apple-press flex items-center justify-center gap-2"
-  }, /*#__PURE__*/React.createElement("span", null, "📋"), " Copy Code"))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null), " Copy Code"))), /*#__PURE__*/React.createElement("div", {
     className: "glass-card rounded-3xl p-6 space-y-4 stagger-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3"
@@ -3273,7 +3612,7 @@ function App() {
   }, "Run Section 3A sync self-tests & verify pack integrity")), /*#__PURE__*/React.createElement("button", {
     onClick: handleRunSyncDiagnostics,
     className: "px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs apple-press"
-  }, "🧪 Run Section 3A Sync Diagnostics")), /*#__PURE__*/React.createElement("div", {
+  }, "Run Section 3A Sync Diagnostics")), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs"
   }, /*#__PURE__*/React.createElement("div", {
     className: "p-3 rounded-xl bg-black/30 border border-white/10"
@@ -3292,23 +3631,23 @@ function App() {
   }, [{
     id: 'dashboard',
     label: 'Today',
-    icon: '⚡'
+    icon: ''
   }, {
     id: 'plan',
     label: 'Plan',
-    icon: '📅'
+    icon: ''
   }, {
     id: 'curriculum',
     label: 'Subjects',
-    icon: '📚'
+    icon: ''
   }, {
     id: 'cbt_mock',
     label: 'Mocks',
-    icon: '⏱️'
+    icon: ''
   }, {
     id: 'more_menu',
     label: 'More',
-    icon: '⋯'
+    icon: '...'
   }].map(tab => /*#__PURE__*/React.createElement("button", {
     key: tab.id,
     onClick: () => {
@@ -3345,47 +3684,47 @@ function App() {
   }, [{
     id: 'daily_quiz',
     label: 'Daily Quiz',
-    icon: '🎯'
+    icon: ''
   }, {
     id: 'colleges',
     label: 'Colleges & Shortlist',
-    icon: '🏛️'
+    icon: ''
   }, {
     id: 'after_result',
     label: 'After the Result',
-    icon: '🏆'
+    icon: ''
   }, {
     id: 'error_log',
     label: 'Mistake Log',
-    icon: '🔁'
+    icon: ''
   }, {
     id: 'volatile_vault',
     label: 'Volatile Sheet',
-    icon: '💎'
+    icon: ''
   }, {
     id: 'ibq_spotter',
     label: 'Real Image Atlas',
-    icon: '🩻'
+    icon: ''
   }, {
     id: 'omfs_deep_dive',
     label: 'OMFS Deep Dive',
-    icon: '🔪'
+    icon: ''
   }, {
     id: 'hidden_neglected',
     label: '16 Hidden Rules',
-    icon: '⚠️'
+    icon: ''
   }, {
     id: 'watchlists',
     label: 'Master Checklists',
-    icon: '📋'
+    icon: ''
   }, {
     id: 'update_centre',
     label: 'Update Centre',
-    icon: '📡'
+    icon: ''
   }, {
     id: 'settings',
     label: 'Settings & Sync',
-    icon: '⚙️'
+    icon: ''
   }].map(item => /*#__PURE__*/React.createElement("button", {
     key: item.id,
     onClick: () => {
@@ -3409,7 +3748,7 @@ function App() {
     className: "p-3 border-b border-white/10 flex items-center gap-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "🔍"), /*#__PURE__*/React.createElement("input", {
+  }), /*#__PURE__*/React.createElement("input", {
     type: "text",
     autoFocus: true,
     value: cmdQuery,
@@ -3423,51 +3762,51 @@ function App() {
   }, [{
     title: 'Today Command Center',
     id: 'dashboard',
-    icon: '⚡'
+    icon: ''
   }, {
     title: 'Daily Mixed Quiz (10 Qs)',
     id: 'daily_quiz',
-    icon: '🎯'
+    icon: ''
   }, {
     title: '23-Week Study Plan',
     id: 'plan',
-    icon: '📅'
+    icon: ''
   }, {
     title: '17 Subjects Tracker',
     id: 'curriculum',
-    icon: '📚'
+    icon: ''
   }, {
     title: 'CBT National Mock Simulator (Part A Lock)',
     id: 'cbt_mock',
-    icon: '⏱️'
+    icon: ''
   }, {
     title: 'Colleges & Priority Shortlist',
     id: 'colleges',
-    icon: '🏛️'
+    icon: ''
   }, {
     title: 'After the Result Hub',
     id: 'after_result',
-    icon: '🏆'
+    icon: ''
   }, {
     title: 'Mistake Notebook (+2, +7, +21 Days)',
     id: 'error_log',
-    icon: '🔁'
+    icon: ''
   }, {
     title: 'Volatile Formulas Sheet',
     id: 'volatile_vault',
-    icon: '💎'
+    icon: ''
   }, {
     title: 'Real Medical Image Atlas',
     id: 'ibq_spotter',
-    icon: '🩻'
+    icon: ''
   }, {
     title: 'OMFS Deep Dive & Ranks',
     id: 'omfs_deep_dive',
-    icon: '🔪'
+    icon: ''
   }, {
     title: 'Settings & Supabase Real Cloud Sync',
     id: 'settings',
-    icon: '⚙️'
+    icon: ''
   }].filter(i => !cmdQuery || i.title.toLowerCase().includes(cmdQuery.toLowerCase())).map((item, idx) => /*#__PURE__*/React.createElement("button", {
     key: idx,
     onClick: () => {
@@ -3506,7 +3845,7 @@ function App() {
     value: errSubject,
     onChange: e => setErrSubject(e.target.value),
     className: "w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
-  }, (contentPack.subjectDistribution || []).map(s => /*#__PURE__*/React.createElement("option", {
+  }, (contentPack.examPattern && contentPack.examPattern.subjectDistribution || contentPack.subjectDistribution || []).map(s => /*#__PURE__*/React.createElement("option", {
     key: s.subject,
     value: s.subject,
     className: "bg-slate-900"
@@ -3590,7 +3929,7 @@ function App() {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-2xl"
-  }, "🧪"), /*#__PURE__*/React.createElement("h3", {
+  }), /*#__PURE__*/React.createElement("h3", {
     className: "text-base font-bold text-white"
   }, "Section 3A Cloud Sync Test Suite")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowTestModal(false),
@@ -3604,7 +3943,7 @@ function App() {
     className: "p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-start gap-2.5"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm shrink-0"
-  }, t.passed ? '✅' : '❌'), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+  }, t.passed ? '' : ''), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
     className: `font-semibold ${t.passed ? 'text-emerald-300' : 'text-rose-400'}`
   }, t.test), t.error && /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-rose-300 font-mono mt-0.5"
@@ -3633,7 +3972,7 @@ function App() {
   }, "Close")), /*#__PURE__*/React.createElement("div", {
     className: "w-full max-h-96 bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-white/10"
   }, /*#__PURE__*/React.createElement("img", {
-    src: activeZoomImage.imageFile || activeZoomImage.placeholderSourceUrl,
+    src: activeZoomImage.imageUrl || activeZoomImage.imageFile || activeZoomImage.placeholderSourceUrl,
     alt: activeZoomImage.diagnosis,
     style: {
       transform: `scale(${zoomLevel})`
@@ -3656,6 +3995,6 @@ function App() {
     target: "_blank",
     rel: "noreferrer",
     className: "text-sky-400 hover:text-sky-300 underline"
-  }, "View Source →")))));
+  }, "View Source ")))));
 }
 ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(App, null));

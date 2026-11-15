@@ -1,7 +1,7 @@
 // ==============================================================================
-// NEET-MDS Top-10 Planner (MDS OS) — Universal Apple Workstation
-// Target: AIR 1-10 • Target Branch: OMFS • Real Cloud Sync & CBT Engine
-// Strict ASCII Quotes Only • Zero AI Images • Realtime Supabase
+// NEET-MDS Top-10 Planner (MDS OS) - Universal Apple Workstation
+// Target: AIR 1-10 - Target Branch: OMFS - Real Cloud Sync & CBT Engine
+// Strict ASCII Quotes Only - Zero AI Images - Realtime Supabase
 // ==============================================================================
 
 const { useState, useEffect, useMemo, useRef } = React;
@@ -96,11 +96,27 @@ function App() {
   });
   const [scrollTop, setScrollTop] = useState(0);
 
-  // Filter States
+  // Filter & Interactive Module States
   const [searchQuery, setSearchQuery] = useState('');
   const [partFilter, setPartFilter] = useState('ALL');
   const [ibqFilter, setIbqFilter] = useState('All');
   const [revealedIbqs, setRevealedIbqs] = useState({});
+  const [pedAngulation, setPedAngulation] = useState(1);
+  const [pedDepth, setPedDepth] = useState(2);
+  const [pedRamus, setPedRamus] = useState(3);
+  const [collegeSearch, setCollegeSearch] = useState('');
+  const [collegeSortBy, setCollegeSortBy] = useState('rank');
+  const [targetRankInput, setTargetRankInput] = useState(10);
+  const [predScoreInput, setPredScoreInput] = useState(786);
+  const [errFilterReason, setErrFilterReason] = useState('ALL');
+  const [pendingPackDiff, setPendingPackDiff] = useState(null);
+  const [previousContentPack, setPreviousContentPack] = useState(null);
+  const isApplyingRemoteRef = useRef(false);
+
+  useEffect(() => {
+    window.__setMdsView = setCurrentView;
+    return () => { delete window.__setMdsView; };
+  }, []);
 
   // Theme Management (Light / Dark / System)
   useEffect(() => {
@@ -169,19 +185,23 @@ function App() {
       { userSettings: {}, dailyRoutines: {}, planChecklist: {}, subjectProgress: {}, mockScores: [], errorLog: [], omfsChecklist: {}, hiddenRulesChecked: {}, masterChecklistsChecked: {}, collegeShortlist: [], counsellingTracker: {}, documentsChecklist: {}, imageDrillHistory: [], dailyQuizHistory: [], syncConflicts: [] };
   });
 
-  // Extracted React states for immediate reactive binding
+  // Extracted React states for immediate reactive binding (Rule R4: no personal defaults in code)
   const [userSettings, setUserSettings] = useState(() => {
     const s = localProgressDoc.userSettings || {};
     return {
-      examDate: (s.examDate && s.examDate.value !== undefined) ? s.examDate.value : '', // Fix 5: Empty by default
-      dailyHours: (s.dailyHours && s.dailyHours.value !== undefined) ? s.dailyHours.value : 8,
+      examDate: (s.examDate && s.examDate.value !== undefined) ? s.examDate.value : '',
+      internshipDate: (s.internshipDate && s.internshipDate.value !== undefined) ? s.internshipDate.value : '',
+      stateName: (s.stateName && s.stateName.value !== undefined) ? s.stateName.value : '',
+      statePortalUrl: (s.statePortalUrl && s.statePortalUrl.value !== undefined) ? s.statePortalUrl.value : '',
+      stateDomicileBasis: (s.stateDomicileBasis && s.stateDomicileBasis.value !== undefined) ? s.stateDomicileBasis.value : '',
+      reservationCategory: (s.reservationCategory && s.reservationCategory.value !== undefined) ? s.reservationCategory.value : '',
+      targetBranch: (s.targetBranch && s.targetBranch.value !== undefined) ? s.targetBranch.value : '',
+      dailyHours: (s.dailyHours && s.dailyHours.value !== undefined) ? s.dailyHours.value : '',
       targetScore: (s.targetScore && s.targetScore.value !== undefined) ? s.targetScore.value : 790,
       coachingName: (s.coachingName && s.coachingName.value !== undefined) ? s.coachingName.value : 'Dr. Anchal Agarwal Classes',
       studySpine: (s.studySpine && s.studySpine.value !== undefined) ? s.studySpine.value : 'Dental Pulse, 18th edition 2025',
-      stateName: (s.stateName && s.stateName.value !== undefined) ? s.stateName.value : '', // Fix 5: Empty by default
-      statePortalUrl: (s.statePortalUrl && s.statePortalUrl.value !== undefined) ? s.statePortalUrl.value : '', // Fix 5: Empty by default
       contentUpdateUrl: (s.contentUpdateUrl && s.contentUpdateUrl.value !== undefined) ? s.contentUpdateUrl.value : '',
-      soundEnabled: true,
+      soundEnabled: (s.soundEnabled && s.soundEnabled.value !== undefined) ? s.soundEnabled.value : true,
       dismissedWarning: (s.dismissedWarning && s.dismissedWarning.value !== undefined) ? s.dismissedWarning.value : false
     };
   });
@@ -219,7 +239,7 @@ function App() {
   const [masterChecklistsChecked, setMasterChecklistsChecked] = useState(() => localProgressDoc.masterChecklistsChecked || {});
   const [collegeShortlist, setCollegeShortlist] = useState(() => localProgressDoc.collegeShortlist || [
     { id: 'c1', name: "King George's Medical University (KGMU), Lucknow", priority: 1, notes: 'Target #1 for OMFS. Closing rank 4 in AIQ R1.' },
-    { id: 'c2', name: 'Institute of Medical Sciences (IMS), BHU, Varanasi', priority: 2, notes: 'Central seat, zero bond, ₹1.1L stipend.' }
+    { id: 'c2', name: 'Institute of Medical Sciences (IMS), BHU, Varanasi', priority: 2, notes: 'Central seat, zero bond, Rs 1.1L stipend.' }
   ]);
   const [counsellingTracker, setCounsellingTracker] = useState(() => localProgressDoc.counsellingTracker || {});
   const [documentsChecklist, setDocumentsChecklist] = useState(() => localProgressDoc.documentsChecklist || {});
@@ -360,35 +380,60 @@ function App() {
       setSyncConflictsState(info.conflicts || []);
       const localDoc = window.SyncEngine.getLocalProgressDoc();
       if (localDoc && localDoc.userSettings) {
-        if (localDoc.mockScores && Array.isArray(localDoc.mockScores)) setMockScores(localDoc.mockScores);
-        if (localDoc.errorLog && Array.isArray(localDoc.errorLog)) setErrorLog(localDoc.errorLog);
+        isApplyingRemoteRef.current = true;
+        const s = localDoc.userSettings;
+        setUserSettings(prev => ({
+          ...prev,
+          examDate: s.examDate?.value ?? prev.examDate,
+          internshipDate: s.internshipDate?.value ?? prev.internshipDate,
+          stateName: s.stateName?.value ?? prev.stateName,
+          statePortalUrl: s.statePortalUrl?.value ?? prev.statePortalUrl,
+          stateDomicileBasis: s.stateDomicileBasis?.value ?? prev.stateDomicileBasis,
+          reservationCategory: s.reservationCategory?.value ?? prev.reservationCategory,
+          targetBranch: s.targetBranch?.value ?? prev.targetBranch,
+          dailyHours: s.dailyHours?.value ?? prev.dailyHours,
+          targetScore: s.targetScore?.value ?? prev.targetScore,
+          coachingName: s.coachingName?.value ?? prev.coachingName,
+          studySpine: s.studySpine?.value ?? prev.studySpine,
+          contentUpdateUrl: s.contentUpdateUrl?.value ?? prev.contentUpdateUrl,
+          dismissedWarning: s.dismissedWarning?.value ?? prev.dismissedWarning
+        }));
+        if (Array.isArray(localDoc.mockScores)) setMockScores(localDoc.mockScores);
+        if (Array.isArray(localDoc.errorLog)) setErrorLog(localDoc.errorLog);
         if (localDoc.subjectProgress) setSubjectProgress(localDoc.subjectProgress);
         if (localDoc.planChecklist) setPlanChecklist(localDoc.planChecklist);
-        if (localDoc.collegeShortlist) setCollegeShortlist(localDoc.collegeShortlist);
+        if (localDoc.shakyCards) setShakyCards(localDoc.shakyCards);
+        if (localDoc.omfsChecklist) setOmfsChecklist(localDoc.omfsChecklist);
+        if (localDoc.hiddenRulesChecked) setHiddenRulesChecked(localDoc.hiddenRulesChecked);
+        if (localDoc.masterChecklistsChecked) setMasterChecklistsChecked(localDoc.masterChecklistsChecked);
+        if (Array.isArray(localDoc.collegeShortlist)) setCollegeShortlist(localDoc.collegeShortlist);
         if (localDoc.counsellingTracker) setCounsellingTracker(localDoc.counsellingTracker);
         if (localDoc.documentsChecklist) setDocumentsChecklist(localDoc.documentsChecklist);
+        if (Array.isArray(localDoc.imageDrillHistory)) setImageDrillHistory(localDoc.imageDrillHistory);
+        if (Array.isArray(localDoc.dailyQuizHistory)) setDailyQuizHistory(localDoc.dailyQuizHistory);
+        setTimeout(() => { isApplyingRemoteRef.current = false; }, 0);
       }
     });
     return unsub;
   }, []);
 
-  // Save Progress on state change with Field-Level Timestamps (Fix 4)
+  // Save Progress on state change with Isolated Field-Level Timestamps (Section 13.2 Fix)
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.SyncEngine) return;
+    if (typeof window === 'undefined' || !window.SyncEngine || isApplyingRemoteRef.current) return;
     const nowIso = new Date().toISOString();
     const todayKey = nowIso.split('T')[0];
 
     const fullDoc = window.SyncEngine.getLocalProgressDoc();
+    if (!fullDoc.userSettings) fullDoc.userSettings = {};
 
-    // Field-level updates
     Object.keys(userSettings).forEach(k => {
-      fullDoc.userSettings[k] = window.SyncEngine.toScalarObj(userSettings[k], nowIso);
+      fullDoc.userSettings[k] = window.SyncEngine.updateScalarIfChanged(fullDoc.userSettings[k], userSettings[k], nowIso);
     });
 
     if (!fullDoc.dailyRoutines) fullDoc.dailyRoutines = {};
     if (!fullDoc.dailyRoutines[todayKey]) fullDoc.dailyRoutines[todayKey] = {};
     Object.keys(dailyRoutine).forEach(k => {
-      fullDoc.dailyRoutines[todayKey][k] = window.SyncEngine.toScalarObj(dailyRoutine[k], nowIso);
+      fullDoc.dailyRoutines[todayKey][k] = window.SyncEngine.updateScalarIfChanged(fullDoc.dailyRoutines[todayKey][k], dailyRoutine[k], nowIso);
     });
 
     fullDoc.planChecklist = planChecklist;
@@ -422,7 +467,7 @@ function App() {
               setCbtPart('B');
               setCbtCurrentIndex(0);
               playAppleChime();
-              alert('⏰ Part A 75-Minute Time Limit Reached! Part A is now locked. Proceeding to Part B (105 Mins).');
+              alert(' Part A 75-Minute Time Limit Reached! Part A is now locked. Proceeding to Part B (105 Mins).');
               return 0;
             }
             return prev - 1;
@@ -920,24 +965,86 @@ function App() {
   const handleAddCollegeToShortlist = (college) => {
     triggerHaptic(10);
     playAppleClick();
-    if (collegeShortlist.some(c => c.id === college.id)) {
+    const activeList = collegeShortlist.filter(c => !c.deletedAt);
+    if (activeList.some(c => c.id === college.id)) {
       alert('College is already in your shortlist!');
       return;
     }
+    const nowIso = new Date().toISOString();
     const newEntry = {
       id: college.id,
       name: college.name,
-      priority: collegeShortlist.length + 1,
-      notes: `AIQ Round 1 Closing Rank: ${college.closingRank}. Stipend: ₹${college.stipendMonthly.toLocaleString()}/mo.`
+      priority: activeList.length + 1,
+      notes: `AIQ Round 1 Closing Rank: ${college.closingRank}. Stipend: Rs ${college.stipendMonthly.toLocaleString()}/mo.`,
+      updatedAt: nowIso,
+      deletedAt: null
     };
-    setCollegeShortlist(prev => [...prev, newEntry]);
-    alert(`Added ${college.name} to your shortlist!`);
+    setCollegeShortlist(prev => [...prev.filter(c => c.id !== college.id), newEntry]);
   };
 
   const handleRemoveCollegeFromShortlist = (id) => {
     triggerHaptic(10);
     playAppleClick();
-    setCollegeShortlist(prev => prev.filter(c => c.id !== id));
+    const nowIso = new Date().toISOString();
+    setCollegeShortlist(prev => prev.map(c => c.id === id ? { ...c, deletedAt: nowIso, updatedAt: nowIso, _deleted: true } : c));
+  };
+
+  const handleDeleteMockRecord = (id) => {
+    triggerHaptic(10);
+    playAppleClick();
+    const nowIso = new Date().toISOString();
+    setMockScores(prev => prev.map(m => m.id === id ? { ...m, deletedAt: nowIso, updatedAt: nowIso, _deleted: true } : m));
+  };
+
+  const handleDeleteErrorRecord = (id) => {
+    triggerHaptic(10);
+    playAppleClick();
+    const nowIso = new Date().toISOString();
+    setErrorLog(prev => prev.map(e => e.id === id ? { ...e, deletedAt: nowIso, updatedAt: nowIso, _deleted: true } : e));
+  };
+
+  const handleAdvanceErrorReview = (id) => {
+    triggerHaptic(10);
+    playAppleClick();
+    const nowIso = new Date().toISOString();
+    setErrorLog(prev => prev.map(e => {
+      if (e.id !== id) return e;
+      const curr = e.reviewDay || 2;
+      const nextDay = curr === 2 ? 7 : curr === 7 ? 21 : 21;
+      const isVolatile = curr >= 21 ? true : Boolean(e.isVolatile);
+      return { ...e, reviewDay: nextDay, isVolatile, updatedAt: nowIso };
+    }));
+  };
+
+  const handleLogCalculatedMock = () => {
+    triggerHaptic(12);
+    playAppleClick();
+    const aC = Math.max(0, Math.min(100, Number(calcPartAC) || 0));
+    const aW = Math.max(0, Math.min(100 - aC, Number(calcPartAW) || 0));
+    const aU = Math.max(0, 100 - aC - aW);
+    const bC = Math.max(0, Math.min(140, Number(calcPartBC) || 0));
+    const bW = Math.max(0, Math.min(140 - bC, Number(calcPartBW) || 0));
+    const bU = Math.max(0, 140 - bC - bW);
+    const totalScore = (aC + bC) * 4 - (aW + bW);
+    const att = aC + bC + aW + bW;
+    const accuracy = att > 0 ? Math.round(((aC + bC) / att) * 1000) / 10 : 0;
+    const nowIso = new Date().toISOString();
+    const rec = {
+      id: 'm_calc_' + Date.now(),
+      date: calcDate || nowIso.slice(0, 10),
+      source: calcSource || 'Ecdentistry Free Weekly Mock',
+      partA_C: aC,
+      partA_W: aW,
+      partA_U: aU,
+      partB_C: bC,
+      partB_W: bW,
+      partB_U: bU,
+      totalScore,
+      accuracy,
+      updatedAt: nowIso,
+      deletedAt: null
+    };
+    setMockScores(prev => [rec, ...prev]);
   };
 
   // Add Error Log Entry
@@ -998,13 +1105,17 @@ function App() {
     reader.onload = (evt) => {
       try {
         const imported = JSON.parse(evt.target.result);
-        if (!imported.userProgress) {
-          alert('Invalid backup file. Missing userProgress root.');
+        if (!imported.userProgress && !Array.isArray(imported.mocks) && !Array.isArray(imported.shortlist)) {
+          alert('Invalid backup file. Expected MDS OS userProgress or Build A backup format.');
           return;
         }
-        if (confirm('Importing will replace local study records on this device. Do you want to proceed?')) {
-          if (window.SyncEngine) {
-            window.SyncEngine.saveLocalProgressDoc(imported.userProgress);
+        if (confirm('Import and merge backup records (mocks, errors, shortlist, counselling & state quota) into this device?')) {
+          if (window.SyncEngine && window.SyncEngine.importBackupPayload) {
+            const merged = window.SyncEngine.importBackupPayload(imported);
+            setMockScores(merged.mockScores || []);
+            setErrorLog(merged.errorLog || []);
+            setCollegeShortlist(merged.collegeShortlist || []);
+            setCounsellingTracker(merged.counsellingTracker || {});
             window.location.reload();
           }
         }
@@ -1052,8 +1163,8 @@ function App() {
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Daily Rhythm</span>
             {[
-              { id: 'dashboard', label: 'Today', icon: '⚡' },
-              { id: 'daily_quiz', label: 'Daily Quiz', icon: '🎯' }
+              { id: 'dashboard', label: 'Today', icon: '' },
+              { id: 'daily_quiz', label: 'Daily Quiz', icon: '' }
             ].map(item => (
               <button
                 key={item.id}
@@ -1072,10 +1183,10 @@ function App() {
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Core Prep</span>
             {[
-              { id: 'plan', label: '23-Week Plan', icon: '📅' },
-              { id: 'curriculum', label: '17 Subjects', icon: '📚' },
-              { id: 'cbt_mock', label: 'CBT Simulator', icon: '⏱️' },
-              { id: 'error_log', label: 'Mistake Log', icon: '🔁' }
+              { id: 'plan', label: '23-Week Plan', icon: '' },
+              { id: 'curriculum', label: '17 Subjects', icon: '' },
+              { id: 'cbt_mock', label: 'CBT Simulator', icon: '' },
+              { id: 'error_log', label: 'Mistake Log', icon: '' }
             ].map(item => (
               <button
                 key={item.id}
@@ -1094,10 +1205,10 @@ function App() {
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">High-Yield Vault</span>
             {[
-              { id: 'volatile_vault', label: 'Volatile Formulas', icon: '💎' },
-              { id: 'ibq_spotter', label: 'Real Image Atlas', icon: '🩻' },
-              { id: 'omfs_deep_dive', label: 'OMFS Deep Dive', icon: '🔪' },
-              { id: 'colleges', label: 'Colleges & Shortlist', icon: '🏛️' }
+              { id: 'volatile_vault', label: 'Volatile Formulas', icon: '' },
+              { id: 'ibq_spotter', label: 'Real Image Atlas', icon: '' },
+              { id: 'omfs_deep_dive', label: 'OMFS Deep Dive', icon: '' },
+              { id: 'colleges', label: 'Colleges & Shortlist', icon: '' }
             ].map(item => (
               <button
                 key={item.id}
@@ -1116,9 +1227,9 @@ function App() {
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Strategy & Result</span>
             {[
-              { id: 'after_result', label: 'After the Result', icon: '🏆' },
-              { id: 'hidden_neglected', label: '16 Hidden Rules', icon: '⚠️' },
-              { id: 'watchlists', label: 'Master Checklists', icon: '📋' }
+              { id: 'after_result', label: 'After the Result', icon: '' },
+              { id: 'hidden_neglected', label: '16 Hidden Rules', icon: '' },
+              { id: 'watchlists', label: 'Master Checklists', icon: '' }
             ].map(item => (
               <button
                 key={item.id}
@@ -1137,8 +1248,8 @@ function App() {
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">System</span>
             {[
-              { id: 'update_centre', label: 'Update Centre', icon: '📡' },
-              { id: 'settings', label: 'Settings & Sync', icon: '⚙️' }
+              { id: 'update_centre', label: 'Update Centre', icon: '' },
+              { id: 'settings', label: 'Settings & Sync', icon: '' }
             ].map(item => (
               <button
                 key={item.id}
@@ -1158,7 +1269,7 @@ function App() {
               onClick={() => { triggerHaptic(10); playAppleClick(); }}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left apple-press transition-all bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/25 text-xs"
             >
-              <span className="text-base">📥</span>
+              <span className="text-base"></span>
               <span>Download PDF</span>
             </a>
           </div>
@@ -1203,7 +1314,7 @@ function App() {
                 syncState.status === 'error' ? 'bg-rose-500' : 'bg-slate-400'
               }`}></span>
               <span className="text-[11px] font-semibold text-slate-200 hidden sm:inline">
-                {syncState.status === 'synced' ? `Synced ✓ (${syncState.deviceName})` :
+                {syncState.status === 'synced' ? `Synced v (${syncState.deviceName})` :
                  syncState.status === 'syncing' ? 'Syncing...' :
                  syncState.status === 'offline' ? 'Offline' :
                  syncState.status === 'error' ? 'Sync Error' : 'Local Only'}
@@ -1220,7 +1331,7 @@ function App() {
               className="p-1.5 px-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs apple-press"
               title={`Current Theme: ${themeMode}`}
             >
-              {themeMode === 'light' ? '☀️ Light' : themeMode === 'dark' ? '🌙 Dark' : '⚙️ Auto'}
+              {themeMode === 'light' ? ' Light' : themeMode === 'dark' ? ' Dark' : ' Auto'}
             </button>
 
             {/* Direct PDF Download Button */}
@@ -1231,7 +1342,7 @@ function App() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold apple-press"
               title="Download Master AI Handover Report (PDF)"
             >
-              <span>📥</span>
+              <span></span>
               <span className="hidden sm:inline">Download PDF</span>
             </a>
 
@@ -1244,7 +1355,7 @@ function App() {
               className="p-1.5 px-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs apple-press"
               title={userSettings.soundEnabled ? 'Apple Sounds Active' : 'Muted'}
             >
-              {userSettings.soundEnabled ? '🔊' : '🔇'}
+              {userSettings.soundEnabled ? '' : ''}
             </button>
 
             {/* Spotlight Command Palette (Cmd+K) */}
@@ -1253,7 +1364,7 @@ function App() {
               className="p-1.5 px-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300 apple-press"
               title="Spotlight Search (Cmd+K)"
             >
-              <span>🔍 ⌘K</span>
+              <span> Cmd+K</span>
             </button>
           </div>
         </header>
@@ -1283,7 +1394,7 @@ function App() {
               {syncState.status === 'signed_out' && (
                 <div className="p-3.5 px-4 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between gap-3 text-slate-300 stagger-2">
                   <div className="flex items-center gap-2.5 text-xs">
-                    <span className="text-slate-400 text-base">☁️</span>
+                    <span className="text-slate-400 text-base"></span>
                     <span>Not signed in - progress is only on this device. Sign in in Settings to sync.</span>
                   </div>
                   <button
@@ -1299,7 +1410,7 @@ function App() {
               {!userSettings.dismissedWarning && (
                 <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start justify-between gap-3 text-amber-200 stagger-2">
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl">⚠️</span>
+                    <span className="text-2xl"></span>
                     <div className="text-xs space-y-1">
                       <div className="font-bold text-amber-300">Eligibility Warning (Provisional Baseline)</div>
                       <p className="leading-relaxed">
@@ -1325,7 +1436,7 @@ function App() {
                 <div className="glass-card rounded-2xl p-4">
                   <span className="text-[11px] font-bold text-sky-400 uppercase tracking-wider">Target Benchmark</span>
                   <h3 className="text-3xl font-extrabold text-white mt-1">785 <span className="text-xs font-normal text-slate-400">/ 960</span></h3>
-                  <p className="text-[11px] text-emerald-400 mt-1 font-semibold">202+ Correct • ≤22 Wrong</p>
+                  <p className="text-[11px] text-emerald-400 mt-1 font-semibold">202+ Correct - at most 22 Wrong</p>
                 </div>
 
                 <div className="glass-card rounded-2xl p-4">
@@ -1383,7 +1494,7 @@ function App() {
                           <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs ${
                             dailyRoutine[block.key] ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-400'
                           }`}>
-                            {dailyRoutine[block.key] ? '✓' : ''}
+                            {dailyRoutine[block.key] ? 'v' : ''}
                           </div>
                           <div>
                             <div className="text-xs font-bold text-white flex items-center gap-2">
@@ -1408,7 +1519,7 @@ function App() {
                       className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs apple-press flex items-center justify-between shadow-lg shadow-sky-500/25"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">🎯</span>
+                        <span className="text-lg"></span>
                         <div className="text-left">
                           <div>Start Daily Mixed Quiz</div>
                           <div className="text-[10px] text-sky-100 font-normal">10 Questions (Weak subjects weighted)</div>
@@ -1422,7 +1533,7 @@ function App() {
                       className="w-full py-3 px-4 rounded-2xl bg-white/[0.05] hover:bg-white/10 border border-white/10 text-white font-bold text-xs apple-press flex items-center justify-between"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">⏱️</span>
+                        <span className="text-lg"></span>
                         <div className="text-left">
                           <div>National CBT Mock Simulator</div>
                           <div className="text-[10px] text-slate-400 font-normal">Strict Part A 75-Min Lock</div>
@@ -1436,7 +1547,7 @@ function App() {
                       className="w-full py-3 px-4 rounded-2xl bg-white/[0.05] hover:bg-white/10 border border-white/10 text-white font-bold text-xs apple-press flex items-center justify-between"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">🩻</span>
+                        <span className="text-lg"></span>
                         <div className="text-left">
                           <div>15-Image Diagnosis Drill</div>
                           <div className="text-[10px] text-slate-400 font-normal">45s / Real Medical Radiograph</div>
@@ -1450,7 +1561,7 @@ function App() {
                       className="w-full py-3 px-4 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-bold text-xs apple-press flex items-center justify-between"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">🔁</span>
+                        <span className="text-lg"></span>
                         <div className="text-left">
                           <div>Log Mistake in Notebook</div>
                           <div className="text-[10px] text-amber-400/80 font-normal">Autopsy for spaced repetition</div>
@@ -1471,7 +1582,7 @@ function App() {
             <div className="space-y-6 max-w-6xl mx-auto">
               <div className="stagger-1">
                 <h1 className="text-3xl font-extrabold text-white tracking-tight">23-Week Study Plan</h1>
-                <p className="text-xs text-slate-400 mt-1">160 Days • 8 Hours/Day = 1,280 Focused Hours (Compress Phase 3, never Phase 1)</p>
+                <p className="text-xs text-slate-400 mt-1">160 Days - 8 Hours/Day = 1,280 Focused Hours (Compress Phase 3, never Phase 1)</p>
               </div>
 
               <div className="space-y-4 stagger-2">
@@ -1506,8 +1617,8 @@ function App() {
 
                     <div className="text-xs space-y-1 text-slate-300">
                       <div><strong className="text-white">Subjects:</strong> {week.subjects}</div>
-                      <div><strong className="text-white">Work:</strong> {week.work}</div>
-                      <div><strong className="text-white">Mocks / Tests:</strong> {week.mocks}</div>
+                      <div><strong className="text-white">Goal & Work:</strong> {week.goal}</div>
+                      <div><strong className="text-white">Phase:</strong> {week.phaseName} ({week.title})</div>
                     </div>
                   </div>
                 ))}
@@ -1523,7 +1634,7 @@ function App() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 stagger-1">
                 <div>
                   <h1 className="text-3xl font-extrabold text-white tracking-tight">17 BDS Subjects</h1>
-                  <p className="text-xs text-slate-400 mt-1">Every subject ≈ 56 marks (14 Qs). No subject can be safely skipped.</p>
+                  <p className="text-xs text-slate-400 mt-1">Every subject ~ 56 marks (14 Qs). No subject can be safely skipped.</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -1542,7 +1653,7 @@ function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-2">
-                {(contentPack.subjectDistribution || [])
+                {((contentPack.examPattern && contentPack.examPattern.subjectDistribution) || contentPack.subjectDistribution || [])
                   .filter(s => partFilter === 'ALL' || s.part === partFilter)
                   .map(subj => {
                     const prog = subjectProgress[subj.subject] || {};
@@ -1557,7 +1668,7 @@ function App() {
                               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-300 font-mono">Part {subj.part}</span>
                               <h3 className="text-xs font-bold text-white">{subj.subject}</h3>
                             </div>
-                            <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">{subj.questions} Questions • {subj.marks} Marks</span>
+                            <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">{subj.questions} Questions - {subj.marks} Marks</span>
                           </div>
 
                           {subj.isWeak && (
@@ -1652,7 +1763,7 @@ function App() {
                 <div className="glass-card rounded-3xl p-6 space-y-6 border border-sky-500/40 shadow-2xl stagger-2">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">🖥️</span>
+                      <span className="text-2xl"></span>
                       <div>
                         <div className="text-xs font-bold uppercase tracking-wider text-sky-400">
                           {cbtPart === 'A' ? 'Section 1: Part A (General Sciences)' : 'Section 2: Part B (Clinical Dental Sciences)'}
@@ -1665,7 +1776,7 @@ function App() {
 
                     <div className="flex items-center gap-3">
                       <div className="p-2 px-3 rounded-xl bg-black/40 border border-white/10 font-mono text-base font-bold text-amber-300">
-                        ⏱️ {cbtPart === 'A' ? formatTime(cbtTimerA) : formatTime(cbtTimerB)}
+                         {cbtPart === 'A' ? formatTime(cbtTimerA) : formatTime(cbtTimerB)}
                       </div>
 
                       {cbtPart === 'A' ? (
@@ -1673,7 +1784,7 @@ function App() {
                           onClick={handleLockPartA}
                           className="px-3.5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs apple-press shadow-md shadow-rose-500/20"
                         >
-                          🔒 Lock Part A & Proceed
+                           Lock Part A & Proceed
                         </button>
                       ) : (
                         <button
@@ -1703,7 +1814,7 @@ function App() {
                               flagged ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-white/5 border-white/10 text-slate-400'
                             }`}
                           >
-                            {flagged ? '🚩 Flagged' : '🏳️ Flag for Review'}
+                            {flagged ? ' Flagged' : ' Flag for Review'}
                           </button>
                         </div>
 
@@ -1787,7 +1898,7 @@ function App() {
               {!cbtActive && (
                 <div className="glass-card rounded-3xl p-6 text-center space-y-3 stagger-2">
                   <div className="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 text-2xl flex items-center justify-center mx-auto">
-                    ⏱️
+                    
                   </div>
                   <h3 className="text-base font-bold text-white">Launch National Timed CBT Simulator</h3>
                   <p className="text-xs text-slate-300 max-w-md mx-auto">
@@ -1802,11 +1913,57 @@ function App() {
                 </div>
               )}
 
+              {/* Mock Score Calculator (+4 / -1 / 0) & Target Chart (765 / 790) */}
+              <div className="glass-card rounded-3xl p-6 space-y-4 stagger-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-white">NBEMS Mock Score Calculator (+4 / -1 / 0)</h3>
+                    <p className="text-xs text-slate-400">Benchmark check: 202 Correct & 22 Wrong (16 Unattempted) = 786 / 960. Guessing EV = 5p - 1.</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400">Calculated Score: </span>
+                    <strong className="text-lg font-extrabold text-emerald-400">
+                      {((Number(calcPartAC)||0) + (Number(calcPartBC)||0)) * 4 - ((Number(calcPartAW)||0) + (Number(calcPartBW)||0))} / 960
+                    </strong>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs">
+                  <div>
+                    <label className="text-slate-400 block mb-1">Source / Mock Name</label>
+                    <input type="text" value={calcSource} onChange={e => setCalcSource(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
+                  </div>
+                  <div>
+                    <label className="text-slate-400 block mb-1">Part A Correct (100)</label>
+                    <input type="number" min="0" max="100" value={calcPartAC} onChange={e => setCalcPartAC(parseInt(e.target.value||'0',10))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
+                  </div>
+                  <div>
+                    <label className="text-slate-400 block mb-1">Part A Wrong</label>
+                    <input type="number" min="0" max="100" value={calcPartAW} onChange={e => setCalcPartAW(parseInt(e.target.value||'0',10))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
+                  </div>
+                  <div>
+                    <label className="text-slate-400 block mb-1">Part B Correct (140)</label>
+                    <input type="number" min="0" max="140" value={calcPartBC} onChange={e => setCalcPartBC(parseInt(e.target.value||'0',10))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
+                  </div>
+                  <div>
+                    <label className="text-slate-400 block mb-1">Part B Wrong</label>
+                    <input type="number" min="0" max="140" value={calcPartBW} onChange={e => setCalcPartBW(parseInt(e.target.value||'0',10))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
+                  </div>
+                  <div className="flex items-end">
+                    <button onClick={handleLogCalculatedMock} className="w-full py-2 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs apple-press">
+                      + Log Mock
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Score History & Past Mocks */}
               <div className="glass-card rounded-3xl p-6 space-y-4 stagger-3">
-                <h3 className="text-sm font-bold text-white">Mock Test History & Analytics</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-white">Mock Test History & Analytics (Target Lines: 765 AIR-10 & 790 Goal)</h3>
+                  <span className="text-xs text-slate-400">{mockScores.filter(m => !m.deletedAt).length} Active Mocks</span>
+                </div>
                 <div className="space-y-2">
-                  {mockScores.map(m => (
+                  {mockScores.filter(m => !m.deletedAt).map(m => (
                     <div key={m.id} className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                       <div>
                         <div className="font-bold text-white flex items-center gap-2">
@@ -1814,16 +1971,17 @@ function App() {
                           <span className="text-[10px] text-slate-400 font-mono">{m.date}</span>
                         </div>
                         <div className="text-[11px] text-slate-400 mt-0.5">
-                          Part A: {m.partA_C}C / {m.partA_W}W • Part B: {m.partB_C}C / {m.partB_W}W • Accuracy: {m.accuracy}%
+                          Part A: {m.partA_C}C / {m.partA_W}W - Part B: {m.partB_C}C / {m.partB_W}W - Accuracy: {m.accuracy}%
                         </div>
                       </div>
                       <div className="text-right">
                         <div className={`text-xl font-extrabold ${m.totalScore >= 765 ? 'text-emerald-400' : 'text-sky-400'}`}>
                           {m.totalScore} <span className="text-xs text-slate-400">/ 960</span>
                         </div>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-slate-400 block">
                           {m.totalScore >= 765 ? 'AIR 10 Range' : `${765 - m.totalScore} pts to AIR 10`}
                         </span>
+                        <button onClick={() => handleDeleteMockRecord(m.id)} className="text-[10px] text-rose-400 hover:underline mt-1">Delete</button>
                       </div>
                     </div>
                   ))}
@@ -1839,7 +1997,7 @@ function App() {
             <div className="space-y-6 max-w-6xl mx-auto">
               <div className="stagger-1">
                 <h1 className="text-3xl font-extrabold text-white tracking-tight">Daily Mixed Diagnostic Quiz</h1>
-                <p className="text-xs text-slate-400 mt-1">10 High-Yield Questions • Weak subjects (PHD, Physiology, Dental Materials) weighted heavier.</p>
+                <p className="text-xs text-slate-400 mt-1">10 High-Yield Questions - Weak subjects (PHD, Physiology, Dental Materials) weighted heavier.</p>
               </div>
 
               {!quizFinished ? (
@@ -1897,7 +2055,7 @@ function App() {
               ) : (
                 <div className="glass-card rounded-3xl p-8 text-center space-y-4 stagger-2">
                   <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 text-3xl flex items-center justify-center mx-auto">
-                    🎯
+                    
                   </div>
                   <h3 className="text-lg font-extrabold text-white">Daily Quiz Completed!</h3>
                   <div className="text-3xl font-extrabold text-sky-400">{quizScore} <span className="text-xs text-slate-400">/ 40</span></div>
@@ -1933,7 +2091,7 @@ function App() {
               </div>
 
               <div className="space-y-3 stagger-2">
-                {errorLog.map(err => (
+                {errorLog.filter(err => !err.deletedAt).map(err => (
                   <div key={err.id} className="glass-card rounded-3xl p-5 space-y-2.5">
                     <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-2">
                       <div>
@@ -1948,7 +2106,11 @@ function App() {
                     <div className="text-xs space-y-1 text-slate-300">
                       <div><strong className="text-slate-400">What went wrong:</strong> {err.whatWentWrong}</div>
                       <div><strong className="text-emerald-400">Correct Fact:</strong> {err.correctFact}</div>
-                      <div className="text-[11px] text-slate-400"><strong className="text-slate-300">Reference:</strong> {err.reference}</div>
+                      <div className="text-[11px] text-slate-400"><strong className="text-slate-300">Reference:</strong> {err.reference} | Review Stage: +{err.reviewDay || 2}d {err.isVolatile ? '(Volatile Sheet)' : ''}</div>
+                      <div className="flex items-center gap-2 pt-1">
+                        <button onClick={() => handleAdvanceErrorReview(err.id)} className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold text-[11px]">Advance Review (+2/+7/+21d)</button>
+                        <button onClick={() => handleDeleteErrorRecord(err.id)} className="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 font-bold text-[11px]">Delete</button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1969,10 +2131,10 @@ function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-2">
                 {[
                   { id: 'v_la_lido', category: 'Pharmacology', title: 'Lidocaine Doses & Ceilings', front: 'Maximum dose with vs without adrenaline?', back: 'Without adrenaline: 4.4 mg/kg (max 300 mg). With adrenaline: 7.0 mg/kg (max 500 mg). 2% cartridge = 36 mg per 1.8ml or 40 mg per 2.0ml.' },
-                  { id: 'v_la_adren', category: 'Pharmacology', title: 'Adrenaline Ceilings', front: 'Healthy vs Cardiac patient adrenaline ceilings?', back: 'Healthy: 200 µg (0.2 mg) per appointment. Cardiac: 40 µg (0.04 mg) = approx 2 cartridges of 1:100,000.' },
+                  { id: 'v_la_adren', category: 'Pharmacology', title: 'Adrenaline Ceilings', front: 'Healthy vs Cardiac patient adrenaline ceilings?', back: 'Healthy: 200 ug (0.2 mg) per appointment. Cardiac: 40 ug (0.04 mg) = approx 2 cartridges of 1:100,000.' },
                   { id: 'v_gypsum', category: 'Dental Materials', title: 'Gypsum W:P Ratios', front: 'W:P ratios for Type I, II, III, IV, V gypsum?', back: 'Type I Plaster: 0.50-0.75; Type II Model: 0.45-0.50; Type III Stone: 0.28-0.30; Type IV Die Stone: 0.22-0.24; Type V High Strength/Expansion: 0.18-0.22. Gauging water = 18.6 ml/100g.' },
                   { id: 'v_amalgam', category: 'Dental Materials', title: 'Amalgam Phases & Chemistry', front: 'Which phase is weakest and eliminated in high-copper amalgam?', back: 'Gamma-2 (Sn7-8Hg) is weakest and most corrosion-prone. Eliminated in high-Cu (>6%) alloys by eta-prime (Cu6Sn5) phase.' },
-                  { id: 'v_ceph', category: 'Orthodontics', title: 'Steiner Cephalometrics Norms', front: 'Steiner norms for SNA, SNB, ANB, U1-NA, L1-NB?', back: 'SNA: 82° ± 2°; SNB: 80° ± 2°; ANB: 2° ± 2° (Class I 2-4°, Class II >4°, Class III <2°); U1-NA: 22° / 4mm; L1-NB: 25° / 4mm; Interincisal: 130-135°.' },
+                  { id: 'v_ceph', category: 'Orthodontics', title: 'Steiner Cephalometrics Norms', front: 'Steiner norms for SNA, SNB, ANB, U1-NA, L1-NB?', back: 'SNA: 82 deg +/- 2 deg; SNB: 80 deg +/- 2 deg; ANB: 2 deg +/- 2 deg (Class I 2-4 deg, Class II >4 deg, Class III <2 deg); U1-NA: 22 deg / 4mm; L1-NB: 25 deg / 4mm; Interincisal: 130-135 deg.' },
                   { id: 'v_pederson', category: 'OMFS', title: 'Pederson Index for Impactions', front: 'Difficulty scoring breakdown in Pederson index?', back: 'Angulation: Mesioangular 1, Horizontal 2, Vertical 3, Distoangular 4. Depth: Level A 1, Level B 2, Level C 3. Ramus: Class I 1, Class II 2, Class III 3. Sum 3-4 Easy, 5-6 Moderate, 7-10 Difficult.' }
                 ].map(card => {
                   const isShaky = !!(shakyCards[card.id] && shakyCards[card.id].value);
@@ -1995,7 +2157,7 @@ function App() {
                             isShaky ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-white/5 border-white/10 text-slate-400'
                           }`}
                         >
-                          {isShaky ? '⚠️ Still Shaky' : '✓ Mastered'}
+                          {isShaky ? ' Still Shaky' : 'v Mastered'}
                         </button>
                       </div>
 
@@ -2044,7 +2206,7 @@ function App() {
                   onClick={handleStart15ImageDrill}
                   className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs apple-press shadow-md shadow-sky-500/20"
                 >
-                  ⚡ Start 15-Image Diagnosis Drill
+                   Start 15-Image Diagnosis Drill
                 </button>
               </div>
 
@@ -2055,7 +2217,7 @@ function App() {
                     <span className="text-xs font-bold text-sky-400 px-2.5 py-1 rounded-full bg-sky-500/20 border border-sky-500/30">
                       Image {drillIndex + 1} of 15
                     </span>
-                    <span className="text-xs font-mono font-bold text-amber-300">⏱️ {drillTimer}s</span>
+                    <span className="text-xs font-mono font-bold text-amber-300"> {drillTimer}s</span>
                   </div>
 
                   {(() => {
@@ -2065,7 +2227,7 @@ function App() {
                       <div className="space-y-4">
                         <div className="w-full max-h-72 bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-white/10">
                           <img
-                            src={q.image.imageFile || q.image.placeholderSourceUrl}
+                            src={q.image.imageUrl || q.image.imageFile || q.image.placeholderSourceUrl}
                             alt={q.image.diagnosis}
                             className="max-h-72 object-contain"
                           />
@@ -2110,20 +2272,35 @@ function App() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 stagger-3">
                 {imageLibrary.map(img => (
                   <div key={img.id} className="glass-card rounded-3xl p-4 space-y-3 overflow-hidden">
-                    <div
-                      onClick={() => { setActiveZoomImage(img); setZoomLevel(1); }}
-                      className="w-full h-48 bg-black/60 rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 cursor-pointer relative group"
-                    >
-                      <img
-                        src={img.imageFile || img.placeholderSourceUrl}
-                        alt={img.diagnosis}
-                        loading="lazy"
-                        className="max-h-48 object-contain transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold">
-                        🔍 Tap to Zoom
+                    {img.isPlaceholder || (!img.imageUrl && !img.imageFile) ? (
+                      <div className="w-full h-48 bg-white/[0.04] rounded-2xl p-4 flex flex-col items-center justify-center text-center border border-white/10 space-y-2">
+                        <span className="text-xs font-bold text-amber-300">Linked External Case (Licence Requires Direct Link)</span>
+                        <p className="text-[11px] text-slate-300">{img.diagnosis}</p>
+                        <a
+                          href={img.placeholderSourceUrl || img.sourcePageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 rounded-xl bg-sky-500/20 border border-sky-400/30 text-sky-300 text-xs font-bold hover:bg-sky-500/30"
+                        >
+                          View Original at Source
+                        </a>
                       </div>
-                    </div>
+                    ) : (
+                      <div
+                        onClick={() => { setActiveZoomImage(img); setZoomLevel(1); }}
+                        className="w-full h-48 bg-black/60 rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 cursor-pointer relative group"
+                      >
+                        <img
+                          src={img.imageUrl || img.imageFile}
+                          alt={img.diagnosis}
+                          loading="lazy"
+                          className="max-h-48 object-contain transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold">
+                          Tap to Zoom
+                        </div>
+                      </div>
+                    )}
 
                     <div>
                       <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider">{img.subject}</span>
@@ -2163,13 +2340,56 @@ function App() {
               {/* Why Top 10 Matters Card */}
               <div className="glass-card rounded-3xl p-6 space-y-3 border border-sky-500/30 stagger-2">
                 <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-                  <span>🏆</span> Why Top-10 Matters for OMFS Aspirants
+                  <span></span> Why Top-10 Matters for OMFS Aspirants
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   {contentPack.omfsDeepDive?.whyTop10Matters || 'KGMU Lucknow and BHU Varanasi OMFS seats close in the Top 10 (Ranks 4 and 9 in 2025 Round 1). MAIDS New Delhi closed at Rank 1 in 2026 Round 1. Any government OMFS seat in AIQ Round 1 closes by Rank ~156.'}
                 </p>
                 <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
                   <strong>Important Notice:</strong> AIIMS New Delhi, JIPMER, and PGIMER dental seats are NOT through NEET-MDS - they are admitted through INI-CET, a completely separate exam with negative marking of -1/3.
+                </div>
+              </div>
+
+              {/* Interactive Pederson Difficulty Index Calculator (Asked NEET-MDS 2024: 1+2+3 = 6) */}
+              <div className="glass-card rounded-3xl p-6 space-y-4 border border-sky-500/30 stagger-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Interactive Pederson Difficulty Index Calculator (Mandibular 3rd Molar)</h3>
+                    <p className="text-xs text-slate-400">Total Score = Angulation (1-4) + Depth (1-3) + Ramus Relationship (1-3). 3-4 Easy, 5-6 Moderate, 7-10 Very Difficult.</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400">Difficulty Score: </span>
+                    <strong className="text-lg font-extrabold text-sky-400">
+                      {pedAngulation + pedDepth + pedRamus} / 10 ({pedAngulation + pedDepth + pedRamus <= 4 ? 'Easy' : pedAngulation + pedDepth + pedRamus <= 6 ? 'Moderate' : 'Very Difficult'})
+                    </strong>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">Winter Angulation</label>
+                    <select value={pedAngulation} onChange={e => setPedAngulation(Number(e.target.value))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white">
+                      <option value={1}>Mesioangular (1) - Most Common</option>
+                      <option value={2}>Horizontal (2)</option>
+                      <option value={3}>Vertical (3)</option>
+                      <option value={4}>Distoangular (4) - Most Difficult</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">Pell & Gregory Depth</label>
+                    <select value={pedDepth} onChange={e => setPedDepth(Number(e.target.value))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white">
+                      <option value={1}>Level A (1) - Occlusal plane at/above 2nd molar</option>
+                      <option value={2}>Level B (2) - Between occlusal & cervical line</option>
+                      <option value={3}>Level C (3) - Below cervical line</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">Ramus Relationship</label>
+                    <select value={pedRamus} onChange={e => setPedRamus(Number(e.target.value))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white">
+                      <option value={1}>Class I (1) - Sufficient space</option>
+                      <option value={2}>Class II (2) - Less than crown width</option>
+                      <option value={3}>Class III (3) - Completely within ramus</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -2183,7 +2403,7 @@ function App() {
                 ].map((item, idx) => (
                   <div key={idx} className="glass-card rounded-3xl p-5 space-y-2">
                     <h3 className="text-xs font-bold text-white flex items-center gap-2">
-                      <span className="text-sky-400">❖</span> {item.title}
+                      <span className="text-sky-400"></span> {item.title}
                     </h3>
                     <p className="text-xs text-slate-300 leading-relaxed">{item.desc}</p>
                   </div>
@@ -2207,14 +2427,14 @@ function App() {
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div>
                     <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-                      <span>🏛️</span> My College Priority Shortlist ({collegeShortlist.length})
+                      <span></span> My College Priority Shortlist ({collegeShortlist.filter(c => !c.deletedAt).length})
                     </h2>
-                    <p className="text-xs text-slate-400">Use ▲ / ▼ buttons to adjust priority order. Persists and syncs across devices.</p>
+                    <p className="text-xs text-slate-400">Use Up / Down buttons to adjust priority order. Persists and syncs across devices.</p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  {collegeShortlist.map((col, idx) => (
+                  {collegeShortlist.filter(c => !c.deletedAt).map((col, idx, arr) => (
                     <div key={col.id} className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-3">
                         <span className="w-6 h-6 rounded-lg bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center font-mono">
@@ -2233,22 +2453,22 @@ function App() {
                           className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-bold"
                           title="Move Up"
                         >
-                          ▲
+                          Up
                         </button>
                         <button
                           onClick={() => handleMoveCollegeShortlist(idx, 1)}
-                          disabled={idx === collegeShortlist.length - 1}
+                          disabled={idx === arr.length - 1}
                           className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-bold"
                           title="Move Down"
                         >
-                          ▼
+                          Down
                         </button>
                         <button
                           onClick={() => handleRemoveCollegeFromShortlist(col.id)}
                           className="px-2 py-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 font-bold ml-1"
                           title="Remove from shortlist"
                         >
-                          ✕
+                          x
                         </button>
                       </div>
                     </div>
@@ -2278,8 +2498,8 @@ function App() {
                           <td className="py-3 px-3 font-semibold text-white">{c.name}</td>
                           <td className="py-3 px-3">{c.state}</td>
                           <td className="py-3 px-3 font-mono font-bold text-sky-400">{c.closingRank}</td>
-                          <td className="py-3 px-3 font-mono text-emerald-400">₹{c.stipendMonthly.toLocaleString()}</td>
-                          <td className="py-3 px-3 font-mono">₹{c.feeAnnual.toLocaleString()}</td>
+                          <td className="py-3 px-3 font-mono text-emerald-400">Rs {c.stipendMonthly.toLocaleString()}</td>
+                          <td className="py-3 px-3 font-mono">Rs {c.feeAnnual.toLocaleString()}</td>
                           <td className="py-3 px-3">{c.bondYears > 0 ? `${c.bondYears} Year` : 'No Bond'}</td>
                           <td className="py-3 px-3 text-right">
                             <button
@@ -2312,7 +2532,7 @@ function App() {
               <div className="glass-card rounded-3xl p-6 space-y-4 stagger-2">
                 <div className="flex items-center justify-between border-b border-white/10 pb-2">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>🔮</span> NEET-MDS Rank Estimator (Historical 2024-2026 Anchors)
+                    <span></span> NEET-MDS Rank Estimator (Historical 2024-2026 Anchors)
                   </h3>
                   <span className="text-[10px] text-amber-400 font-bold">Estimate only, not a promise</span>
                 </div>
@@ -2344,37 +2564,37 @@ function App() {
               {/* 2. 3-Year Cost vs Stipend Comparison Calculator */}
               <div className="glass-card rounded-3xl p-6 space-y-4 stagger-3">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <span>💰</span> 3-Year Cost vs Stipend Comparison Calculator
+                  <span></span> 3-Year Cost vs Stipend Comparison Calculator
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                   <div className="p-4 rounded-2xl bg-black/30 border border-white/10 space-y-2">
                     <span className="font-bold text-white">Central / Delhi Institutes</span>
                     <p className="text-[11px] text-slate-400">e.g. MAIDS, Lady Hardinge, BHU, AMU</p>
-                    <div className="pt-1 text-emerald-400 font-mono text-sm font-bold">Stipend: ₹1.1L - 1.25L / mo</div>
-                    <div className="text-slate-300">Annual Fee: ~₹18,000 - 25,000</div>
+                    <div className="pt-1 text-emerald-400 font-mono text-sm font-bold">Stipend: Rs 1.1L - 1.25L / mo</div>
+                    <div className="text-slate-300">Annual Fee: ~Rs 18,000 - 25,000</div>
                     <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-300 text-[11px] font-bold">
-                      Net 3-Year Surplus: +₹39 Lakhs
+                      Net 3-Year Surplus: +Rs 39 Lakhs
                     </div>
                   </div>
 
                   <div className="p-4 rounded-2xl bg-black/30 border border-white/10 space-y-2">
                     <span className="font-bold text-white">State Government Colleges</span>
                     <p className="text-[11px] text-slate-400">e.g. Mumbai, Jaipur, Raipur, Hyderabad</p>
-                    <div className="pt-1 text-sky-400 font-mono text-sm font-bold">Stipend: ₹70k - 85k / mo</div>
-                    <div className="text-slate-300">Annual Fee: ~₹35,000 - 60,000</div>
+                    <div className="pt-1 text-sky-400 font-mono text-sm font-bold">Stipend: Rs 70k - 85k / mo</div>
+                    <div className="text-slate-300">Annual Fee: ~Rs 35,000 - 60,000</div>
                     <div className="p-2 rounded-xl bg-sky-500/10 text-sky-300 text-[11px] font-bold">
-                      Net 3-Year Surplus: +₹25 Lakhs
+                      Net 3-Year Surplus: +Rs 25 Lakhs
                     </div>
                   </div>
 
                   <div className="p-4 rounded-2xl bg-black/30 border border-white/10 space-y-2">
                     <span className="font-bold text-white">Deemed Universities</span>
                     <p className="text-[11px] text-slate-400">e.g. Manipal, A.B. Shetty, DY Patil</p>
-                    <div className="pt-1 text-amber-400 font-mono text-sm font-bold">Stipend: ₹15k - 30k / mo</div>
-                    <div className="text-slate-300">Annual Fee: ~₹12L - 18L / yr</div>
+                    <div className="pt-1 text-amber-400 font-mono text-sm font-bold">Stipend: Rs 15k - 30k / mo</div>
+                    <div className="text-slate-300">Annual Fee: ~Rs 12L - 18L / yr</div>
                     <div className="p-2 rounded-xl bg-rose-500/10 text-rose-300 text-[11px] font-bold">
-                      Net 3-Year Cost: -₹35 to 45 Lakhs
+                      Net 3-Year Cost: -Rs 35 to 45 Lakhs
                     </div>
                   </div>
                 </div>
@@ -2383,7 +2603,7 @@ function App() {
               {/* 3. Freeze vs Float Choice-Filling Helper */}
               <div className="glass-card rounded-3xl p-6 space-y-3 stagger-4">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <span>🧊</span> Freeze vs Float Visual Rules (MCC 2026 Protocol)
+                  <span></span> Freeze vs Float Visual Rules (MCC 2026 Protocol)
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs leading-relaxed text-slate-300">
                   <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1.5">
@@ -2402,12 +2622,12 @@ function App() {
               {/* 4. Round-by-Round Counselling Tracker */}
               <div className="glass-card rounded-3xl p-6 space-y-4 stagger-5">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <span>🗺️</span> Round-by-Round Counselling Tracker (Saved & Synced)
+                  <span></span> Round-by-Round Counselling Tracker (Saved & Synced)
                 </h3>
                 <div className="space-y-3 text-xs">
                   {[
                     { key: 'r1', name: 'Round 1 (AIQ & Deemed)', rules: 'Registration, choice filling, allotment. Free exit available (deposit safe).' },
-                    { key: 'r2', name: 'Round 2 (Fresh Choices)', rules: 'Fresh choices required. Seat allotted and not joined = forfeiture of ₹25,000 deposit.' },
+                    { key: 'r2', name: 'Round 2 (Fresh Choices)', rules: 'Fresh choices required. Seat allotted and not joined = forfeiture of Rs 25,000 deposit.' },
                     { key: 'r3', name: 'Round 3 (Mop-Up)', rules: 'Non-joining here results in deposit forfeiture + debarment from further MCC rounds.' },
                     { key: 'stray', name: 'Stray Vacancy Round', rules: 'Only for candidates with no seat in any earlier round. Allotted seat MUST be joined.' }
                   ].map(r => {
@@ -2431,7 +2651,7 @@ function App() {
                           <div className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs ${
                             isDone ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-400'
                           }`}>
-                            {isDone ? '✓' : ''}
+                            {isDone ? 'v' : ''}
                           </div>
                           <div>
                             <div className="font-bold text-white">{r.name}</div>
@@ -2474,15 +2694,15 @@ function App() {
                       }`}
                     >
                       <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                        <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider">{rule.category}</span>
+                        <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider">{rule.group || rule.category} ({rule.year || '2026'})</span>
                         <div className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs ${
                           isChecked ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-400'
                         }`}>
-                          {isChecked ? '✓' : ''}
+                          {isChecked ? 'v' : ''}
                         </div>
                       </div>
                       <h3 className="text-xs font-bold text-white">{rule.title}</h3>
-                      <p className="text-xs text-slate-300 leading-relaxed">{rule.content}</p>
+                      <p className="text-xs text-slate-300 leading-relaxed">{rule.detail || rule.content}</p>
                     </div>
                   );
                 })}
@@ -2510,11 +2730,13 @@ function App() {
 
                     <div className="space-y-2 text-xs">
                       {cl.items.map((item, iIdx) => {
-                        const itemKey = `${cl.id}_${iIdx}`;
+                        const itemId = (item && typeof item === 'object' && item.id) ? item.id : iIdx;
+                        const itemText = (item && typeof item === 'object' && item.text) ? item.text : String(item);
+                        const itemKey = `${cl.id}_${itemId}`;
                         const isDone = !!(masterChecklistsChecked[itemKey] && masterChecklistsChecked[itemKey].value);
                         return (
                           <div
-                            key={iIdx}
+                            key={itemKey}
                             onClick={() => {
                               triggerHaptic(8);
                               playAppleClick();
@@ -2530,9 +2752,9 @@ function App() {
                             <div className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs shrink-0 ${
                               isDone ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-400'
                             }`}>
-                              {isDone ? '✓' : ''}
+                              {isDone ? 'v' : ''}
                             </div>
-                            <span className="leading-relaxed">{item}</span>
+                            <span className="leading-relaxed">{itemText}</span>
                           </div>
                         );
                       })}
@@ -2559,7 +2781,7 @@ function App() {
                   disabled={proxyCheckState.checking}
                   className="px-4 py-2.5 rounded-2xl bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-white font-bold text-xs apple-press shadow-md shadow-sky-500/20"
                 >
-                  {proxyCheckState.checking ? 'Checking Portals...' : '⚡ Check Portals Now'}
+                  {proxyCheckState.checking ? 'Checking Portals...' : ' Check Portals Now'}
                 </button>
               </div>
 
@@ -2646,7 +2868,7 @@ function App() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">☁️</span>
+                      <span className="text-xl"></span>
                       <h2 className="text-base font-extrabold text-white">Cross-Device Real Cloud Sync</h2>
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-400 font-bold border border-sky-500/30">
                         Priority #1
@@ -2665,7 +2887,7 @@ function App() {
                       syncState.status === 'error' ? 'bg-rose-500' : 'bg-slate-400'
                     }`}></span>
                     <span className="text-xs font-bold text-white">
-                      {syncState.status === 'synced' ? 'Synced ✓' :
+                      {syncState.status === 'synced' ? 'Synced v' :
                        syncState.status === 'syncing' ? 'Syncing...' :
                        syncState.status === 'offline' ? 'Offline (Saved Locally)' :
                        syncState.status === 'error' ? 'Sync Error' : 'Local Only'}
@@ -2677,12 +2899,12 @@ function App() {
                 <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold text-white flex items-center gap-2">
-                      <span>⚡</span> Supabase Backend Connection
+                      <span></span> Supabase Backend Connection
                     </h3>
                     {syncState.isConfigured ? (
-                      <span className="text-[10px] text-emerald-400 font-bold">● Connected</span>
+                      <span className="text-[10px] text-emerald-400 font-bold"> Connected</span>
                     ) : (
-                      <span className="text-[10px] text-amber-400 font-bold">○ Setup Required</span>
+                      <span className="text-[10px] text-amber-400 font-bold"> Setup Required</span>
                     )}
                   </div>
 
@@ -2744,7 +2966,7 @@ function App() {
                 {/* Sub-Card 2: Account Authentication */}
                 <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4">
                   <h3 className="text-xs font-bold text-white flex items-center gap-2">
-                    <span>👤</span> Sync Account & Authentication
+                    <span></span> Sync Account & Authentication
                   </h3>
 
                   {!syncState.user ? (
@@ -2756,7 +2978,7 @@ function App() {
                             authMode === 'magic' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'text-slate-400'
                           }`}
                         >
-                          ✉️ Magic Link
+                           Magic Link
                         </button>
                         <button
                           onClick={() => setAuthMode('password')}
@@ -2764,7 +2986,7 @@ function App() {
                             authMode === 'password' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'text-slate-400'
                           }`}
                         >
-                          🔑 Email & Password
+                           Email & Password
                         </button>
                       </div>
 
@@ -2786,7 +3008,7 @@ function App() {
                               type="password"
                               value={authPassword}
                               onChange={e => setAuthPassword(e.target.value)}
-                              placeholder="••••••••••••"
+                              placeholder="------------"
                               className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
                             />
                           </div>
@@ -2838,7 +3060,7 @@ function App() {
                             onClick={handleManualSyncNow}
                             className="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs apple-press flex items-center gap-1.5"
                           >
-                            <span>🔄</span> Sync Now
+                            <span></span> Sync Now
                           </button>
                           <button
                             onClick={handleSignOutUser}
@@ -2874,7 +3096,7 @@ function App() {
                       <div className="text-[11px] text-slate-400 flex items-center gap-2 pt-1">
                         <span>Status: <strong className="text-slate-200">{syncState.statusMessage}</strong></span>
                         {syncState.lastSyncedAt && (
-                          <span>• Last Synced: <strong className="text-slate-200">{new Date(syncState.lastSyncedAt).toLocaleTimeString()}</strong></span>
+                          <span>- Last Synced: <strong className="text-slate-200">{new Date(syncState.lastSyncedAt).toLocaleTimeString()}</strong></span>
                         )}
                       </div>
                     </div>
@@ -2886,7 +3108,7 @@ function App() {
                   <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xs font-bold text-amber-300 flex items-center gap-2">
-                        <span>⚠️</span> Unresolved Sync Conflicts ({syncConflictsState.length})
+                        <span></span> Unresolved Sync Conflicts ({syncConflictsState.length})
                       </h3>
                       <span className="text-[10px] text-amber-400">Losing versions preserved safely</span>
                     </div>
@@ -2895,7 +3117,7 @@ function App() {
                         <div key={conf.id} className="p-2.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-3">
                           <div>
                             <div className="font-bold text-white">{conf.title}</div>
-                            <div className="text-[10px] text-slate-400">{conf.collection} • {new Date(conf.timestamp).toLocaleTimeString()}</div>
+                            <div className="text-[10px] text-slate-400">{conf.collection} - {new Date(conf.timestamp).toLocaleTimeString()}</div>
                           </div>
                           <button
                             onClick={() => handleRestoreConflict(conf.id)}
@@ -2913,7 +3135,7 @@ function App() {
                 {syncState.snapshots && syncState.snapshots.length > 0 && (
                   <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 text-xs">
                     <h3 className="text-xs font-bold text-white flex items-center gap-2">
-                      <span>⏪</span> Rolling Cloud Snapshots (Last 3 Auto-Saved)
+                      <span></span> Rolling Cloud Snapshots (Last 3 Auto-Saved)
                     </h3>
                     <div className="space-y-2">
                       {syncState.snapshots.map((snap, idx) => (
@@ -2938,7 +3160,7 @@ function App() {
                 {syncState.user && (
                   <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 space-y-3 text-xs">
                     <h3 className="text-xs font-bold text-rose-300 flex items-center gap-2">
-                      <span>⛔</span> Danger Zone - Delete Cloud Data
+                      <span></span> Danger Zone - Delete Cloud Data
                     </h3>
                     <p className="text-[11px] text-slate-300">
                       Permanently wipe all cloud database records and snapshots in Supabase. Your local device progress will remain completely untouched.
@@ -2963,7 +3185,7 @@ function App() {
                 )}
 
                 <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 flex items-start gap-2.5">
-                  <span className="text-base">🔒</span>
+                  <span className="text-base"></span>
                   <p>
                     <strong className="text-slate-300">Privacy Notice:</strong> Your study progress is stored in your own private Supabase project, protected by your login. Only you can read it. Export a JSON backup any time.
                   </p>
@@ -2976,14 +3198,76 @@ function App() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-300">Exam Date</label>
+                    <label className="font-semibold text-slate-300">Exam Date (No Default)</label>
                     <input
                       type="date"
                       value={userSettings.examDate}
                       onChange={e => setUserSettings(prev => ({ ...prev, examDate: e.target.value }))}
                       className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
                     />
-                    <span className="text-[10px] text-slate-400">Leave blank if 2027 date not announced yet</span>
+                    <span className="text-[10px] text-slate-400">Leave blank until official 2027 bulletin announces date</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-300">Internship Completion Date (No Default)</label>
+                    <input
+                      type="date"
+                      value={userSettings.internshipDate || ''}
+                      onChange={e => setUserSettings(prev => ({ ...prev, internshipDate: e.target.value }))}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-300">Reservation Category (No Default)</label>
+                    <input
+                      type="text"
+                      value={userSettings.reservationCategory || ''}
+                      placeholder="e.g. UR, EWS, OBC-NCL, SC, ST, PwBD"
+                      onChange={e => setUserSettings(prev => ({ ...prev, reservationCategory: e.target.value }))}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-300">Target Branch (No Default)</label>
+                    <input
+                      type="text"
+                      value={userSettings.targetBranch || ''}
+                      placeholder="e.g. Oral and Maxillofacial Surgery (OMFS)"
+                      onChange={e => setUserSettings(prev => ({ ...prev, targetBranch: e.target.value }))}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-300">Daily Study Hours (No Default)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="16"
+                      value={userSettings.dailyHours === '' ? '' : userSettings.dailyHours}
+                      placeholder="e.g. 8"
+                      onChange={e => setUserSettings(prev => ({ ...prev, dailyHours: e.target.value === '' ? '' : parseInt(e.target.value, 10) }))}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-300">Realtime Cloud Sync</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic(8);
+                        playAppleClick();
+                        if (window.SyncEngine && window.SyncEngine.setRealtimeEnabled) {
+                          window.SyncEngine.setRealtimeEnabled(!syncState.realtimeEnabled);
+                        }
+                      }}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-left text-white font-bold"
+                    >
+                      {syncState.realtimeEnabled !== false ? 'Realtime Subscription: ON' : 'Realtime Subscription: OFF'}
+                    </button>
                   </div>
 
                   <div className="space-y-1">
@@ -3057,17 +3341,17 @@ function App() {
                     onClick={handleExportJSON}
                     className="py-3 px-4 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold apple-press flex items-center justify-center gap-2"
                   >
-                    <span>💾</span> Export JSON
+                    <span></span> Export JSON
                   </button>
                   <label className="py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold apple-press flex items-center justify-center gap-2 cursor-pointer">
-                    <span>📂</span> Import JSON
+                    <span></span> Import JSON
                     <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
                   </label>
                   <button
                     onClick={handleCopyBackupCode}
                     className="py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold apple-press flex items-center justify-center gap-2"
                   >
-                    <span>📋</span> Copy Code
+                    <span></span> Copy Code
                   </button>
                 </div>
               </div>
@@ -3083,7 +3367,7 @@ function App() {
                     onClick={handleRunSyncDiagnostics}
                     className="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs apple-press"
                   >
-                    🧪 Run Section 3A Sync Diagnostics
+                     Run Section 3A Sync Diagnostics
                   </button>
                 </div>
 
@@ -3110,11 +3394,11 @@ function App() {
       {/* ========================================================================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-tab-bar px-2 py-1.5 flex justify-around items-center safe-bottom">
         {[
-          { id: 'dashboard', label: 'Today', icon: '⚡' },
-          { id: 'plan', label: 'Plan', icon: '📅' },
-          { id: 'curriculum', label: 'Subjects', icon: '📚' },
-          { id: 'cbt_mock', label: 'Mocks', icon: '⏱️' },
-          { id: 'more_menu', label: 'More', icon: '⋯' }
+          { id: 'dashboard', label: 'Today', icon: '' },
+          { id: 'plan', label: 'Plan', icon: '' },
+          { id: 'curriculum', label: 'Subjects', icon: '' },
+          { id: 'cbt_mock', label: 'Mocks', icon: '' },
+          { id: 'more_menu', label: 'More', icon: '...' }
         ].map(tab => (
           <button
             key={tab.id}
@@ -3150,17 +3434,17 @@ function App() {
             </div>
             <div className="grid grid-cols-2 gap-2.5 text-xs">
               {[
-                { id: 'daily_quiz', label: 'Daily Quiz', icon: '🎯' },
-                { id: 'colleges', label: 'Colleges & Shortlist', icon: '🏛️' },
-                { id: 'after_result', label: 'After the Result', icon: '🏆' },
-                { id: 'error_log', label: 'Mistake Log', icon: '🔁' },
-                { id: 'volatile_vault', label: 'Volatile Sheet', icon: '💎' },
-                { id: 'ibq_spotter', label: 'Real Image Atlas', icon: '🩻' },
-                { id: 'omfs_deep_dive', label: 'OMFS Deep Dive', icon: '🔪' },
-                { id: 'hidden_neglected', label: '16 Hidden Rules', icon: '⚠️' },
-                { id: 'watchlists', label: 'Master Checklists', icon: '📋' },
-                { id: 'update_centre', label: 'Update Centre', icon: '📡' },
-                { id: 'settings', label: 'Settings & Sync', icon: '⚙️' }
+                { id: 'daily_quiz', label: 'Daily Quiz', icon: '' },
+                { id: 'colleges', label: 'Colleges & Shortlist', icon: '' },
+                { id: 'after_result', label: 'After the Result', icon: '' },
+                { id: 'error_log', label: 'Mistake Log', icon: '' },
+                { id: 'volatile_vault', label: 'Volatile Sheet', icon: '' },
+                { id: 'ibq_spotter', label: 'Real Image Atlas', icon: '' },
+                { id: 'omfs_deep_dive', label: 'OMFS Deep Dive', icon: '' },
+                { id: 'hidden_neglected', label: '16 Hidden Rules', icon: '' },
+                { id: 'watchlists', label: 'Master Checklists', icon: '' },
+                { id: 'update_centre', label: 'Update Centre', icon: '' },
+                { id: 'settings', label: 'Settings & Sync', icon: '' }
               ].map(item => (
                 <button
                   key={item.id}
@@ -3188,7 +3472,7 @@ function App() {
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/75 backdrop-blur-md animate-fade-in" onClick={() => setShowCommandPalette(false)}>
           <div className="w-full max-w-xl glass-card rounded-2xl border border-white/20 shadow-2xl overflow-hidden animate-sheet-up" onClick={e => e.stopPropagation()}>
             <div className="p-3 border-b border-white/10 flex items-center gap-3">
-              <span className="text-slate-400">🔍</span>
+              <span className="text-slate-400"></span>
               <input
                 type="text"
                 autoFocus
@@ -3201,18 +3485,18 @@ function App() {
             </div>
             <div className="max-h-80 overflow-y-auto p-2 space-y-1 text-xs">
               {[
-                { title: 'Today Command Center', id: 'dashboard', icon: '⚡' },
-                { title: 'Daily Mixed Quiz (10 Qs)', id: 'daily_quiz', icon: '🎯' },
-                { title: '23-Week Study Plan', id: 'plan', icon: '📅' },
-                { title: '17 Subjects Tracker', id: 'curriculum', icon: '📚' },
-                { title: 'CBT National Mock Simulator (Part A Lock)', id: 'cbt_mock', icon: '⏱️' },
-                { title: 'Colleges & Priority Shortlist', id: 'colleges', icon: '🏛️' },
-                { title: 'After the Result Hub', id: 'after_result', icon: '🏆' },
-                { title: 'Mistake Notebook (+2, +7, +21 Days)', id: 'error_log', icon: '🔁' },
-                { title: 'Volatile Formulas Sheet', id: 'volatile_vault', icon: '💎' },
-                { title: 'Real Medical Image Atlas', id: 'ibq_spotter', icon: '🩻' },
-                { title: 'OMFS Deep Dive & Ranks', id: 'omfs_deep_dive', icon: '🔪' },
-                { title: 'Settings & Supabase Real Cloud Sync', id: 'settings', icon: '⚙️' }
+                { title: 'Today Command Center', id: 'dashboard', icon: '' },
+                { title: 'Daily Mixed Quiz (10 Qs)', id: 'daily_quiz', icon: '' },
+                { title: '23-Week Study Plan', id: 'plan', icon: '' },
+                { title: '17 Subjects Tracker', id: 'curriculum', icon: '' },
+                { title: 'CBT National Mock Simulator (Part A Lock)', id: 'cbt_mock', icon: '' },
+                { title: 'Colleges & Priority Shortlist', id: 'colleges', icon: '' },
+                { title: 'After the Result Hub', id: 'after_result', icon: '' },
+                { title: 'Mistake Notebook (+2, +7, +21 Days)', id: 'error_log', icon: '' },
+                { title: 'Volatile Formulas Sheet', id: 'volatile_vault', icon: '' },
+                { title: 'Real Medical Image Atlas', id: 'ibq_spotter', icon: '' },
+                { title: 'OMFS Deep Dive & Ranks', id: 'omfs_deep_dive', icon: '' },
+                { title: 'Settings & Supabase Real Cloud Sync', id: 'settings', icon: '' }
               ]
                 .filter(i => !cmdQuery || i.title.toLowerCase().includes(cmdQuery.toLowerCase()))
                 .map((item, idx) => (
@@ -3254,7 +3538,7 @@ function App() {
                   onChange={e => setErrSubject(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
                 >
-                  {(contentPack.subjectDistribution || []).map(s => (
+                  {((contentPack.examPattern && contentPack.examPattern.subjectDistribution) || contentPack.subjectDistribution || []).map(s => (
                     <option key={s.subject} value={s.subject} className="bg-slate-900">{s.subject}</option>
                   ))}
                 </select>
@@ -3334,7 +3618,7 @@ function App() {
           <div className="max-w-xl w-full glass-card rounded-3xl p-6 space-y-4 border border-white/20 animate-sheet-up" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🧪</span>
+                <span className="text-2xl"></span>
                 <h3 className="text-base font-bold text-white">Section 3A Cloud Sync Test Suite</h3>
               </div>
               <button onClick={() => setShowTestModal(false)} className="p-1 px-2.5 rounded-full bg-white/10 text-slate-400 text-xs">Close</button>
@@ -3345,7 +3629,7 @@ function App() {
             <div className="space-y-2 max-h-80 overflow-y-auto text-xs">
               {syncTestReport.map((t, idx) => (
                 <div key={idx} className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-start gap-2.5">
-                  <span className="text-sm shrink-0">{t.passed ? '✅' : '❌'}</span>
+                  <span className="text-sm shrink-0">{t.passed ? '' : ''}</span>
                   <div>
                     <span className={`font-semibold ${t.passed ? 'text-emerald-300' : 'text-rose-400'}`}>{t.test}</span>
                     {t.error && <p className="text-[10px] text-rose-300 font-mono mt-0.5">{t.error}</p>}
@@ -3378,7 +3662,7 @@ function App() {
             </div>
             <div className="w-full max-h-96 bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-white/10">
               <img
-                src={activeZoomImage.imageFile || activeZoomImage.placeholderSourceUrl}
+                src={activeZoomImage.imageUrl || activeZoomImage.imageFile || activeZoomImage.placeholderSourceUrl}
                 alt={activeZoomImage.diagnosis}
                 style={{ transform: `scale(${zoomLevel})` }}
                 className="max-h-96 object-contain transition-transform duration-200"
