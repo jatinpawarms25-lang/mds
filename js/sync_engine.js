@@ -1,24 +1,26 @@
 // ==============================================================================
-// NEET-MDS Top-10 Planner — Real Cloud Sync Engine (Section 3A)
-// Offline-First • Record-by-Record Three-Way Merge • Tombstones • RLS
+// NEET-MDS Top-10 Planner - Real Cloud Sync Engine (Section 3A)
+// Offline-First - Record-by-Record Three-Way Merge - 90-Day Tombstones - RLS
 // Supabase Free Tier: Postgres + Auth (Magic Link & Password) + Realtime
-// Strict ASCII Quotes Only • Scalar Field-Level Timestamps
+// Strict ASCII Quotes Only - Scalar Field-Level Timestamps
 // ==============================================================================
 
 (function(window) {
   'use strict';
 
-  // Storage Keys (Strict ASCII)
   const STORAGE_KEYS = {
     CONFIG: 'mds_supabase_config',
     DEVICE_NAME: 'mds_device_name',
     LOCAL_PROGRESS: 'mds_user_progress_doc',
     CONFLICTS: 'mds_sync_conflicts',
     LAST_SYNC: 'mds_last_synced_at',
-    SYNC_STATUS: 'mds_sync_status_state'
+    SYNC_STATUS: 'mds_sync_status_state',
+    REALTIME_ENABLED: 'mds_realtime_enabled'
   };
 
-  // Device Detection
+  // 90-day tombstone retention per Rule R9 & Phase 1.6
+  const TOMBSTONE_RETENTION_MS = 90 * 24 * 60 * 60 * 1000;
+
   function detectDefaultDeviceName() {
     const ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
     if (/iPad|iPhone|iPod/.test(ua)) return 'iPhone';
@@ -28,7 +30,6 @@
     return 'Desktop Browser';
   }
 
-  // Generate UUID v4
   function generateUUID() {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return crypto.randomUUID();
@@ -39,7 +40,6 @@
     });
   }
 
-  // Wrap raw scalar value in { value, updatedAt }
   function toScalarObj(raw, fallbackTime) {
     if (raw !== null && typeof raw === 'object' && 'value' in raw && 'updatedAt' in raw) {
       return raw;
@@ -50,20 +50,45 @@
     };
   }
 
-  // Engine State
+  // Only update updatedAt when the scalar value actually changes
+  function updateScalarIfChanged(existingScalarObj, newRawValue, nowIso) {
+    const ts = nowIso || new Date().toISOString();
+    if (
+      existingScalarObj !== null &&
+      typeof existingScalarObj === 'object' &&
+      'value' in existingScalarObj &&
+      'updatedAt' in existingScalarObj
+    ) {
+      if (JSON.stringify(existingScalarObj.value) === JSON.stringify(newRawValue)) {
+        return existingScalarObj;
+      }
+    }
+    return { value: newRawValue, updatedAt: ts };
+  }
+
+  function stripVolatileTimestamps(doc) {
+    if (!doc || typeof doc !== 'object') return {};
+    const copy = JSON.parse(JSON.stringify(doc));
+    delete copy.docUpdatedAt;
+    delete copy.lastSyncedAt;
+    return copy;
+  }
+
   const state = {
     client: null,
     user: null,
     session: null,
-    status: 'signed_out', // 'signed_out' | 'syncing' | 'synced' | 'offline' | 'error'
+    status: 'signed_out',
     statusMessage: 'Not signed in - progress is only on this device.',
     lastSyncedAt: (typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEYS.LAST_SYNC)) || null,
     deviceName: (typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEYS.DEVICE_NAME)) || detectDefaultDeviceName(),
+    realtimeEnabled: (typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEYS.REALTIME_ENABLED)) !== 'false',
     conflicts: [],
     snapshots: [],
     listeners: new Set(),
     syncTimeout: null,
     realtimeSubscription: null,
+    broadcastChannel: null,
     lastPulledRemoteTime: null
   };
 
@@ -73,6 +98,7 @@
       statusMessage: state.statusMessage,
       user: state.user,
       deviceName: state.deviceName,
+      realtimeEnabled: state.realtimeEnabled,
       lastSyncedAt: state.lastSyncedAt,
       conflicts: state.conflicts,
       snapshots: state.snapshots,
@@ -122,9 +148,22 @@
     notifySubscribers();
   }
 
-  // Setup Realtime listener on user_progress row
+  function setRealtimeEnabled(enabled) {
+    state.realtimeEnabled = Boolean(enabled);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.REALTIME_ENABLED, String(state.realtimeEnabled));
+    }
+    if (state.realtimeEnabled) {
+      setupRealtimeListener();
+    } else if (state.realtimeSubscription) {
+      try { state.realtimeSubscription.unsubscribe(); } catch(e) {}
+      state.realtimeSubscription = null;
+    }
+    notifySubscribers();
+  }
+
   function setupRealtimeListener() {
-    if (!state.client || !state.user) return;
+    if (!state.realtimeEnabled || !state.client || !state.user) return;
     if (state.realtimeSubscription) {
       try { state.realtimeSubscription.unsubscribe(); } catch(e) {}
       state.realtimeSubscription = null;
@@ -140,13 +179,12 @@
           filter: 'user_id=eq.' + state.user.id
         }, (payload) => {
           if (payload.new && payload.new.data) {
-            // Ignore echoes originating from this device
             if (payload.new.last_device === state.deviceName) return;
 
             const remoteDoc = payload.new.data;
             const localDoc = getLocalProgressDoc();
-            const { mergedDoc, conflicts } = mergeUserProgress(localDoc, remoteDoc);
-            saveLocalProgressDoc(mergedDoc);
+            const { mergedDoc } = mergeUserProgress(localDoc, remoteDoc);
+            saveLocalProgressDoc(mergedDoc, true);
             state.conflicts = mergedDoc.syncConflicts || [];
             state.lastPulledRemoteTime = payload.new.updated_at;
             const nowIso = new Date().toISOString();
@@ -162,7 +200,28 @@
     }
   }
 
+  // Local BroadcastChannel for instant multi-tab / multi-context sync verification
+  function setupBroadcastChannel() {
+    if (typeof BroadcastChannel === 'undefined') return;
+    try {
+      if (state.broadcastChannel) state.broadcastChannel.close();
+      state.broadcastChannel = new BroadcastChannel('mds_os_sync_channel');
+      state.broadcastChannel.onmessage = (evt) => {
+        if (!state.realtimeEnabled) return;
+        const msg = evt && evt.data;
+        if (msg && msg.type === 'PROGRESS_UPDATE' && msg.doc) {
+          const localDoc = getLocalProgressDoc();
+          const { mergedDoc } = mergeUserProgress(localDoc, msg.doc);
+          saveLocalProgressDoc(mergedDoc, true);
+          state.conflicts = mergedDoc.syncConflicts || [];
+          notifySubscribers();
+        }
+      };
+    } catch(e) {}
+  }
+
   function initClient() {
+    setupBroadcastChannel();
     const config = getSavedConfig();
     if (!config.url || !config.anonKey) {
       state.client = null;
@@ -225,8 +284,6 @@
 
   // ============================================================================
   // RECORD-BY-RECORD MERGE ENGINE (Heart of Section 3A & Fix 4)
-  // Union by id; later updatedAt wins; tombstone wins over older live record;
-  // Scalars stored as { value, updatedAt }; losing concurrent offline edits land in syncConflicts.
   // ============================================================================
 
   function mergeUserProgress(localDoc, remoteDoc) {
@@ -236,6 +293,7 @@
 
     const l = normalizeDoc(localDoc);
     const r = normalizeDoc(remoteDoc);
+    const nowMs = Date.now();
 
     const merged = {
       schema_version: Math.max(l.schema_version || 1, r.schema_version || 1),
@@ -253,6 +311,7 @@
       collegeShortlist: [],
       counsellingTracker: {},
       documentsChecklist: {},
+      noticesInbox: [],
       imageDrillHistory: [],
       dailyQuizHistory: [],
       userImages: [],
@@ -261,7 +320,6 @@
 
     const newConflicts = [];
 
-    // Helper: Merge key-value maps with scalar { value, updatedAt }
     function mergeScalarKeyMap(targetKey) {
       const localMap = l[targetKey] || {};
       const remoteMap = r[targetKey] || {};
@@ -276,7 +334,6 @@
         } else if (rVal === undefined) {
           res[k] = lVal;
         } else {
-          // If values are scalar objects { value, updatedAt }
           const lTime = lVal && typeof lVal === 'object' && lVal.updatedAt ? new Date(lVal.updatedAt).getTime() : 0;
           const rTime = rVal && typeof rVal === 'object' && rVal.updatedAt ? new Date(rVal.updatedAt).getTime() : 0;
           res[k] = rTime > lTime ? rVal : lVal;
@@ -285,7 +342,6 @@
       merged[targetKey] = res;
     }
 
-    // Helper: Merge subjectProgress field-by-field
     function mergeSubjectProgress() {
       const lSubjs = l.subjectProgress || {};
       const rSubjs = r.subjectProgress || {};
@@ -314,7 +370,6 @@
       merged.subjectProgress = res;
     }
 
-    // Helper: Merge daily routines field-by-field per day
     function mergeDailyRoutines() {
       const lDays = l.dailyRoutines || {};
       const rDays = r.dailyRoutines || {};
@@ -343,25 +398,7 @@
       merged.dailyRoutines = res;
     }
 
-    // 1. Merge settings (field by field by updatedAt)
-    const lSet = l.userSettings || {};
-    const rSet = r.userSettings || {};
-    const allSetKeys = new Set([...Object.keys(lSet), ...Object.keys(rSet)]);
-    const resSet = {};
-    allSetKeys.forEach(k => {
-      const lVal = lSet[k];
-      const rVal = rSet[k];
-      if (lVal === undefined) resSet[k] = rVal;
-      else if (rVal === undefined) resSet[k] = lVal;
-      else {
-        const lTime = lVal && typeof lVal === 'object' && lVal.updatedAt ? new Date(lVal.updatedAt).getTime() : 0;
-        const rTime = rVal && typeof rVal === 'object' && rVal.updatedAt ? new Date(rVal.updatedAt).getTime() : 0;
-        resSet[k] = rTime > lTime ? rVal : lVal;
-      }
-    });
-    merged.userSettings = resSet;
-
-    // 2. Merge maps
+    mergeScalarKeyMap('userSettings');
     mergeDailyRoutines();
     mergeSubjectProgress();
     mergeScalarKeyMap('planChecklist');
@@ -372,7 +409,12 @@
     mergeScalarKeyMap('counsellingTracker');
     mergeScalarKeyMap('documentsChecklist');
 
-    // 3. Helper: Merge record arrays (mockScores, errorLog, userImages, imageDrillHistory, collegeShortlist, dailyQuizHistory)
+    function isExpiredTombstone(item) {
+      if (!item || !item.deletedAt) return false;
+      const dTime = new Date(item.deletedAt).getTime();
+      return !isNaN(dTime) && (nowMs - dTime > TOMBSTONE_RETENTION_MS);
+    }
+
     function mergeRecordArray(arrayKey, idField = 'id', titleField = 'title') {
       const localArr = Array.isArray(l[arrayKey]) ? l[arrayKey] : [];
       const remoteArr = Array.isArray(r[arrayKey]) ? r[arrayKey] : [];
@@ -390,23 +432,30 @@
         const lItem = localMap.get(id);
         const rItem = remoteMap.get(id);
 
-        if (!lItem) { mergedList.push(rItem); return; }
-        if (!rItem) { mergedList.push(lItem); return; }
+        if (!lItem) {
+          if (!isExpiredTombstone(rItem)) mergedList.push(rItem);
+          return;
+        }
+        if (!rItem) {
+          if (!isExpiredTombstone(lItem)) mergedList.push(lItem);
+          return;
+        }
 
         const lDeleted = lItem.deletedAt ? new Date(lItem.deletedAt).getTime() : null;
         const rDeleted = rItem.deletedAt ? new Date(rItem.deletedAt).getTime() : null;
         const lUpdated = lItem.updatedAt ? new Date(lItem.updatedAt).getTime() : 0;
         const rUpdated = rItem.updatedAt ? new Date(rItem.updatedAt).getTime() : 0;
 
-        // Tombstone check
         if (lDeleted || rDeleted) {
+          let chosen;
           if (lDeleted && !rDeleted) {
-            mergedList.push(lDeleted >= rUpdated ? lItem : rItem);
+            chosen = lDeleted >= rUpdated ? { ...lItem, _deleted: true } : rItem;
           } else if (rDeleted && !lDeleted) {
-            mergedList.push(rDeleted >= lUpdated ? rItem : lItem);
+            chosen = rDeleted >= lUpdated ? { ...rItem, _deleted: true } : lItem;
           } else {
-            mergedList.push(lDeleted >= rDeleted ? lItem : rItem);
+            chosen = lDeleted >= rDeleted ? { ...lItem, _deleted: true } : { ...rItem, _deleted: true };
           }
+          if (!isExpiredTombstone(chosen)) mergedList.push(chosen);
           return;
         }
 
@@ -423,7 +472,6 @@
         }
         mergedList.push(winner);
 
-        // Record conflict
         newConflicts.push({
           id: 'conf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
           collection: arrayKey,
@@ -445,54 +493,39 @@
     mergeRecordArray('dailyQuizHistory', 'id', 'date');
     mergeRecordArray('collegeShortlist', 'id', 'name');
     mergeRecordArray('userImages', 'id', 'title');
+    mergeRecordArray('noticesInbox', 'id', 'title');
 
     merged.syncConflicts = [...newConflicts, ...merged.syncConflicts].slice(0, 50);
     return { mergedDoc: merged, conflicts: newConflicts };
   }
 
-  // Normalization: Ensure all scalars have { value, updatedAt }
   function normalizeDoc(rawDoc) {
     if (!rawDoc) return createEmptyProgressDoc();
     const doc = JSON.parse(JSON.stringify(rawDoc));
     const nowIso = new Date().toISOString();
+    const defaults = createEmptyProgressDoc().userSettings;
 
-    // Normalize settings
     if (!doc.userSettings) doc.userSettings = {};
+    Object.keys(defaults).forEach(k => {
+      if (doc.userSettings[k] === undefined) {
+        doc.userSettings[k] = defaults[k];
+      }
+    });
     Object.keys(doc.userSettings).forEach(k => {
       doc.userSettings[k] = toScalarObj(doc.userSettings[k], nowIso);
     });
 
-    // Normalize planChecklist
-    if (!doc.planChecklist) doc.planChecklist = {};
-    Object.keys(doc.planChecklist).forEach(k => {
-      doc.planChecklist[k] = toScalarObj(doc.planChecklist[k], nowIso);
+    const scalarMaps = [
+      'planChecklist', 'omfsChecklist', 'hiddenRulesChecked',
+      'masterChecklistsChecked', 'shakyCards', 'counsellingTracker', 'documentsChecklist'
+    ];
+    scalarMaps.forEach(mapKey => {
+      if (!doc[mapKey]) doc[mapKey] = {};
+      Object.keys(doc[mapKey]).forEach(k => {
+        doc[mapKey][k] = toScalarObj(doc[mapKey][k], nowIso);
+      });
     });
 
-    // Normalize omfsChecklist
-    if (!doc.omfsChecklist) doc.omfsChecklist = {};
-    Object.keys(doc.omfsChecklist).forEach(k => {
-      doc.omfsChecklist[k] = toScalarObj(doc.omfsChecklist[k], nowIso);
-    });
-
-    // Normalize hiddenRulesChecked
-    if (!doc.hiddenRulesChecked) doc.hiddenRulesChecked = {};
-    Object.keys(doc.hiddenRulesChecked).forEach(k => {
-      doc.hiddenRulesChecked[k] = toScalarObj(doc.hiddenRulesChecked[k], nowIso);
-    });
-
-    // Normalize masterChecklistsChecked
-    if (!doc.masterChecklistsChecked) doc.masterChecklistsChecked = {};
-    Object.keys(doc.masterChecklistsChecked).forEach(k => {
-      doc.masterChecklistsChecked[k] = toScalarObj(doc.masterChecklistsChecked[k], nowIso);
-    });
-
-    // Normalize shakyCards
-    if (!doc.shakyCards) doc.shakyCards = {};
-    Object.keys(doc.shakyCards).forEach(k => {
-      doc.shakyCards[k] = toScalarObj(doc.shakyCards[k], nowIso);
-    });
-
-    // Normalize subjectProgress
     if (!doc.subjectProgress) doc.subjectProgress = {};
     Object.keys(doc.subjectProgress).forEach(s => {
       const sObj = doc.subjectProgress[s];
@@ -503,7 +536,6 @@
       }
     });
 
-    // Normalize dailyRoutines
     if (!doc.dailyRoutines) doc.dailyRoutines = {};
     Object.keys(doc.dailyRoutines).forEach(d => {
       const dObj = doc.dailyRoutines[d];
@@ -517,6 +549,7 @@
     if (!Array.isArray(doc.mockScores)) doc.mockScores = [];
     if (!Array.isArray(doc.errorLog)) doc.errorLog = [];
     if (!Array.isArray(doc.collegeShortlist)) doc.collegeShortlist = [];
+    if (!Array.isArray(doc.noticesInbox)) doc.noticesInbox = [];
     if (!Array.isArray(doc.imageDrillHistory)) doc.imageDrillHistory = [];
     if (!Array.isArray(doc.dailyQuizHistory)) doc.dailyQuizHistory = [];
     if (!Array.isArray(doc.userImages)) doc.userImages = [];
@@ -525,22 +558,28 @@
     return doc;
   }
 
-  // Create clean initial progress doc without invented dates
+  // Rule R4: Exam date, state, reservation category, target branch, internship date and study hours
+  // are Settings fields with NO defaults anywhere in code.
   function createEmptyProgressDoc() {
-    const nowIso = new Date().toISOString();
+    const epochIso = '1970-01-01T00:00:00.000Z';
     return {
       schema_version: 1,
-      docUpdatedAt: nowIso,
+      docUpdatedAt: new Date().toISOString(),
       userSettings: {
-        examDate: toScalarObj('', nowIso), // Fix 5: Empty by default
-        dailyHours: toScalarObj(8, nowIso),
-        targetScore: toScalarObj(790, nowIso),
-        coachingName: toScalarObj('Dr. Anchal Agarwal Classes', nowIso),
-        studySpine: toScalarObj('Dental Pulse, 18th edition 2025', nowIso),
-        stateName: toScalarObj('', nowIso), // Fix 5: Empty by default
-        statePortalUrl: toScalarObj('', nowIso), // Fix 5: Empty by default
-        contentUpdateUrl: toScalarObj('', nowIso),
-        dismissedWarning: toScalarObj(false, nowIso)
+        examDate: toScalarObj('', epochIso),
+        internshipDate: toScalarObj('', epochIso),
+        stateName: toScalarObj('', epochIso),
+        statePortalUrl: toScalarObj('', epochIso),
+        stateDomicileBasis: toScalarObj('', epochIso),
+        reservationCategory: toScalarObj('', epochIso),
+        targetBranch: toScalarObj('', epochIso),
+        dailyHours: toScalarObj('', epochIso),
+        targetScore: toScalarObj(790, epochIso),
+        coachingName: toScalarObj('Dr. Anchal Agarwal Classes', epochIso),
+        studySpine: toScalarObj('Dental Pulse, 18th edition 2025', epochIso),
+        contentUpdateUrl: toScalarObj('', epochIso),
+        soundEnabled: toScalarObj(true, epochIso),
+        dismissedWarning: toScalarObj(false, epochIso)
       },
       dailyRoutines: {},
       planChecklist: {},
@@ -554,11 +593,119 @@
       collegeShortlist: [],
       counsellingTracker: {},
       documentsChecklist: {},
+      noticesInbox: [],
       imageDrillHistory: [],
       dailyQuizHistory: [],
       userImages: [],
       syncConflicts: []
     };
+  }
+
+  // Convert and merge either Build A JSON backup OR MDS OS JSON backup without loss
+  function importBackupPayload(imported, existingDoc) {
+    if (!imported || typeof imported !== 'object') {
+      throw new Error('Invalid JSON backup payload');
+    }
+    const baseDoc = existingDoc ? normalizeDoc(existingDoc) : getLocalProgressDoc();
+    const nowIso = new Date().toISOString();
+
+    // Case 1: MDS OS backup format ({ userProgress: { ... } })
+    if (imported.userProgress && typeof imported.userProgress === 'object') {
+      const { mergedDoc } = mergeUserProgress(baseDoc, imported.userProgress);
+      saveLocalProgressDoc(mergedDoc);
+      return mergedDoc;
+    }
+
+    // Case 2: Build A static planner backup format ({ exported, exam, targetBranch, mocks, errors, shortlist, counselling, stateQuota })
+    const converted = createEmptyProgressDoc();
+    if (imported.targetBranch) {
+      converted.userSettings.targetBranch = toScalarObj(String(imported.targetBranch), nowIso);
+    }
+    if (imported.stateQuota && typeof imported.stateQuota === 'object') {
+      if (imported.stateQuota.state) converted.userSettings.stateName = toScalarObj(String(imported.stateQuota.state), nowIso);
+      if (imported.stateQuota.portal) converted.userSettings.statePortalUrl = toScalarObj(String(imported.stateQuota.portal), nowIso);
+      if (imported.stateQuota.domicile) converted.userSettings.stateDomicileBasis = toScalarObj(String(imported.stateQuota.domicile), nowIso);
+    }
+    if (Array.isArray(imported.mocks)) {
+      converted.mockScores = imported.mocks.map((m, idx) => {
+        const aC = Number(m.aC ?? m.partA_C ?? 0);
+        const aW = Number(m.aW ?? m.partA_W ?? 0);
+        const aS = Number(m.aS ?? m.partA_U ?? Math.max(0, 100 - aC - aW));
+        const bC = Number(m.bC ?? m.partB_C ?? 0);
+        const bW = Number(m.bW ?? m.partB_W ?? 0);
+        const bS = Number(m.bS ?? m.partB_U ?? Math.max(0, 140 - bC - bW));
+        const totalScore = m.totalScore !== undefined ? Number(m.totalScore) : (m.score !== undefined ? Number(m.score) : ((aC + bC) * 4 - (aW + bW)));
+        const att = aC + bC + aW + bW;
+        const accuracy = m.accuracy !== undefined ? Number(m.accuracy) : (m.acc !== undefined ? Number(m.acc) : (att ? Math.round(((aC + bC) / att) * 1000) / 10 : 0));
+        return {
+          id: m.id || ('build_a_mock_' + idx + '_' + (m.label || 'mock').replace(/\W+/g, '_')),
+          date: m.date || imported.exported || nowIso.slice(0, 10),
+          source: m.source || m.label || ('Build A Mock ' + (idx + 1)),
+          partA_C: aC,
+          partA_W: aW,
+          partA_U: aS,
+          partB_C: bC,
+          partB_W: bW,
+          partB_U: bS,
+          totalScore,
+          accuracy,
+          updatedAt: m.updatedAt || nowIso,
+          deletedAt: m.deletedAt || null
+        };
+      });
+    }
+    if (Array.isArray(imported.errors)) {
+      converted.errorLog = imported.errors.map((e, idx) => ({
+        id: e.id || ('build_a_err_' + idx + '_' + (e.topic || 'err').slice(0, 20).replace(/\W+/g, '_')),
+        subject: e.subject || 'General',
+        topic: e.topic || 'Imported error',
+        whatWentWrong: e.whatWentWrong || e.topic || '',
+        reason: e.reason || 'Concept Gap',
+        correctFact: e.correctFact || e.topic || '',
+        reference: e.reference || 'Imported from Build A',
+        reviewDate: e.review || e.reviewDate || '',
+        reviewDay: e.reviewDay || 2,
+        revised: Boolean(e.revised),
+        isVolatile: Boolean(e.isVolatile),
+        date: e.date || imported.exported || nowIso.slice(0, 10),
+        updatedAt: e.updatedAt || nowIso,
+        deletedAt: e.deletedAt || null
+      }));
+    }
+    if (Array.isArray(imported.shortlist)) {
+      converted.collegeShortlist = imported.shortlist.map((item, idx) => {
+        if (typeof item === 'string') {
+          return {
+            id: 'build_a_col_' + item.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+            name: item,
+            priority: idx + 1,
+            notes: 'Imported from Build A shortlist (Choice #' + (idx + 1) + ')',
+            updatedAt: nowIso,
+            deletedAt: null
+          };
+        }
+        return {
+          id: item.id || ('col_' + idx),
+          name: item.name || String(item),
+          priority: item.priority || (idx + 1),
+          notes: item.notes || '',
+          updatedAt: item.updatedAt || nowIso,
+          deletedAt: item.deletedAt || null
+        };
+      });
+    }
+    if (Array.isArray(imported.counselling)) {
+      const roundKeys = ['r1', 'r1_choices', 'r1_exit', 'r2_choices', 'r2', 'r3_reg', 'r3', 'stray_elig', 'stray', 'refund', 'cross_check', 'state_reg'];
+      imported.counselling.forEach((done, idx) => {
+        const key = roundKeys[idx] || ('step_' + (idx + 1));
+        converted.counsellingTracker[key] = toScalarObj(Boolean(done), nowIso);
+        converted.counsellingTracker['build_a_step_' + idx] = toScalarObj(Boolean(done), nowIso);
+      });
+    }
+
+    const { mergedDoc } = mergeUserProgress(baseDoc, converted);
+    saveLocalProgressDoc(mergedDoc);
+    return mergedDoc;
   }
 
   function getLocalProgressDoc() {
@@ -569,12 +716,15 @@
     return createEmptyProgressDoc();
   }
 
-  function saveLocalProgressDoc(doc) {
+  function saveLocalProgressDoc(doc, fromRemote) {
     if (!doc) return;
     const normalized = normalizeDoc(doc);
     normalized.docUpdatedAt = new Date().toISOString();
     try {
       localStorage.setItem(STORAGE_KEYS.LOCAL_PROGRESS, JSON.stringify(normalized));
+      if (!fromRemote && state.broadcastChannel && state.realtimeEnabled) {
+        state.broadcastChannel.postMessage({ type: 'PROGRESS_UPDATE', doc: normalized });
+      }
     } catch(e) {}
   }
 
@@ -601,7 +751,6 @@
     try {
       let localDoc = getLocalProgressDoc();
 
-      // Step 1: PULL latest remote record
       const { data: remoteRows, error: pullError } = await state.client
         .from('user_progress')
         .select('*')
@@ -612,6 +761,7 @@
       let mergedDoc;
       let conflictsAdded = [];
       let remoteUpdatedAt = null;
+      let remoteDoc = null;
 
       if (!remoteRows || remoteRows.length === 0) {
         mergedDoc = localDoc;
@@ -619,18 +769,15 @@
         const remoteRow = remoteRows[0];
         remoteUpdatedAt = remoteRow.updated_at;
         state.lastPulledRemoteTime = remoteUpdatedAt;
-        const remoteDoc = remoteRow.data || {};
+        remoteDoc = remoteRow.data || {};
         const mergeResult = mergeUserProgress(localDoc, remoteDoc);
         mergedDoc = mergeResult.mergedDoc;
         conflictsAdded = mergeResult.conflicts;
       }
 
-      // Save merged locally first
-      saveLocalProgressDoc(mergedDoc);
+      saveLocalProgressDoc(mergedDoc, true);
       state.conflicts = mergedDoc.syncConflicts || [];
 
-      // Step 2: Concurrency Check before PUSH
-      // Verify cloud has not been updated since our pull
       if (remoteUpdatedAt) {
         const { data: checkRows } = await state.client
           .from('user_progress')
@@ -638,46 +785,50 @@
           .eq('user_id', state.user.id);
 
         if (checkRows && checkRows.length > 0 && checkRows[0].updated_at !== remoteUpdatedAt) {
-          // Cloud was touched concurrently! Re-pull and re-merge
-          console.warn('Concurrent edit detected on cloud. Re-pulling...');
           const { data: freshRemote } = await state.client
             .from('user_progress')
             .select('*')
             .eq('user_id', state.user.id);
 
           if (freshRemote && freshRemote.length > 0) {
-            const reMerge = mergeUserProgress(mergedDoc, freshRemote[0].data || {});
+            remoteDoc = freshRemote[0].data || {};
+            const reMerge = mergeUserProgress(mergedDoc, remoteDoc);
             mergedDoc = reMerge.mergedDoc;
             conflictsAdded.push(...reMerge.conflicts);
-            saveLocalProgressDoc(mergedDoc);
+            saveLocalProgressDoc(mergedDoc, true);
           }
         }
       }
 
-      // Step 3: PUSH merged data
       const nowIso = new Date().toISOString();
-      const { error: pushError } = await state.client
-        .from('user_progress')
-        .upsert({
-          user_id: state.user.id,
-          data: mergedDoc,
-          schema_version: mergedDoc.schema_version || 1,
-          updated_at: nowIso,
-          last_device: state.deviceName
-        });
+      const hasMeaningfulDiff = !remoteDoc || (
+        JSON.stringify(stripVolatileTimestamps(mergedDoc)) !== JSON.stringify(stripVolatileTimestamps(remoteDoc))
+      );
 
-      if (pushError) throw new Error('Cloud push error: ' + pushError.message);
+      if (hasMeaningfulDiff) {
+        const { error: pushError } = await state.client
+          .from('user_progress')
+          .upsert({
+            user_id: state.user.id,
+            data: mergedDoc,
+            schema_version: mergedDoc.schema_version || 1,
+            updated_at: nowIso,
+            last_device: state.deviceName
+          });
+
+        if (pushError) throw new Error('Cloud push error: ' + pushError.message);
+      }
 
       state.lastSyncedAt = nowIso;
       state.lastPulledRemoteTime = nowIso;
       localStorage.setItem(STORAGE_KEYS.LAST_SYNC, nowIso);
 
       const conflictMsg = conflictsAdded.length > 0 ? ` (${conflictsAdded.length} conflicts recorded)` : '';
-      setStatus('synced', `Synced ✓ · just now${conflictMsg}`);
+      setStatus('synced', `Synced - just now${conflictMsg}`);
       fetchSnapshots().catch(() => {});
 
       isSyncing = false;
-      return { success: true, doc: mergedDoc, conflicts: conflictsAdded };
+      return { success: true, doc: mergedDoc, conflicts: conflictsAdded, pushed: hasMeaningfulDiff };
     } catch(err) {
       isSyncing = false;
       setStatus('error', 'Sync error: ' + err.message);
@@ -810,6 +961,7 @@
 
     losingVersion.updatedAt = new Date().toISOString();
     losingVersion.deletedAt = null;
+    delete losingVersion._deleted;
 
     if (Array.isArray(localDoc[collection])) {
       const idx = localDoc[collection].findIndex(item => String(item.id) === String(target.recordId));
@@ -867,7 +1019,7 @@
   }
 
   // ============================================================================
-  // COMPREHENSIVE SECTION 3A SELF-TEST HARNESS (Fix 4: Test 6 Rewritten)
+  // COMPREHENSIVE SECTION 3A + PHASE 0 SELF-TEST HARNESS (12 Assertions)
   // ============================================================================
 
   function runSelfTests() {
@@ -888,7 +1040,7 @@
         confidence: { value: 85, updatedAt: '2026-11-15T11:00:00.000Z' },
         mcqsDone: { value: 350, updatedAt: '2026-11-15T11:00:00.000Z' }
       };
-      docB2.errorLog.push({ id: 'err_test_1', topic: 'Amalgam Gamma-2', reason: 'Knowledge Gap', updatedAt: '2026-11-15T11:05:00.000Z' });
+      docB2.errorLog.push({ id: 'err_test_1', topic: 'Amalgam Gamma-2', reason: 'Concept Gap', updatedAt: '2026-11-15T11:05:00.000Z' });
       const docA2 = createEmptyProgressDoc();
       const { mergedDoc: m2 } = mergeUserProgress(docA2, docB2);
       assert('Test 2: Subject confidence & error on B appear on A',
@@ -916,14 +1068,14 @@
 
       // Test 5: Delete mock on A -> disappears on B and does not resurrect
       const docA5 = createEmptyProgressDoc();
-      docA5.mockScores.push({ id: 'm_del', source: 'Delete Me', totalScore: 700, updatedAt: '2026-11-15T10:00:00.000Z', deletedAt: '2026-11-15T14:00:00.000Z' });
+      docA5.mockScores.push({ id: 'm_del', source: 'Delete Me', totalScore: 700, updatedAt: '2026-11-15T10:00:00.000Z', deletedAt: new Date().toISOString() });
       const docB5 = createEmptyProgressDoc();
       docB5.mockScores.push({ id: 'm_del', source: 'Delete Me', totalScore: 700, updatedAt: '2026-11-15T10:00:00.000Z', deletedAt: null });
       const { mergedDoc: m5 } = mergeUserProgress(docB5, docA5);
       const delItem = m5.mockScores.find(m => m.id === 'm_del');
       assert('Test 5: Tombstone deletion wins and prevents resurrection', delItem && delItem.deletedAt !== null);
 
-      // Test 6: REWRITTEN - Real Offline Storage Roundtrip (Write, Read & Verify Equality)
+      // Test 6: Real Offline Storage Roundtrip
       const testKey = 'mds_test_offline_roundtrip_' + Date.now();
       const testPayload = {
         testId: 'roundtrip_verification',
@@ -935,7 +1087,6 @@
       const readRaw = localStorage.getItem(testKey);
       const parsedPayload = readRaw ? JSON.parse(readRaw) : null;
       localStorage.removeItem(testKey);
-
       const roundtripSuccess = parsedPayload &&
         parsedPayload.testId === testPayload.testId &&
         parsedPayload.targetScore === 790 &&
@@ -956,13 +1107,50 @@
       assert('Test 8: Fresh install successfully downloads complete cloud progress',
         m8.mockScores.length === 1 && m8.mockScores[0].id === 'm_prior_cloud');
 
+      // Test 9: Build A JSON backup imports without loss
+      const sampleBuildA = {
+        exported: '2026-11-15',
+        exam: 'NEET-MDS 2027',
+        targetBranch: 'OMFS',
+        mocks: [{ label: 'Baseline (Week 1)', date: '2026-11-15', aC: 82, aW: 14, aS: 4, bC: 120, bW: 8, bS: 12, score: 786, acc: 90.2, gap: -21 }],
+        errors: [{ subject: 'Public Health Dentistry', reason: 'Concept gap', review: '2026-11-17', topic: 'CPI black band 3.5-5.5 mm', revised: false }],
+        shortlist: ['KGMU, Lucknow (UP)', 'BHU, Varanasi (UP)'],
+        counselling: [true, true, false, false],
+        stateQuota: { state: 'Uttar Pradesh', portal: 'https://dgme.up.gov.in', domicile: 'BDS from a college in the state' }
+      };
+      const importedDoc = importBackupPayload(sampleBuildA, createEmptyProgressDoc());
+      assert('Test 9: Build A JSON backup imports mocks, errors, shortlist, counselling & stateQuota without loss',
+        importedDoc.mockScores.some(m => m.totalScore === 786) &&
+        importedDoc.errorLog.some(e => e.topic.includes('CPI black band')) &&
+        importedDoc.collegeShortlist.length === 2 &&
+        importedDoc.counsellingTracker.r1?.value === true &&
+        importedDoc.userSettings.stateName?.value === 'Uttar Pradesh'
+      );
+
+      // Test 10: Shortlist tombstone prevents resurrection and purges after 90 days
+      const docShortA = createEmptyProgressDoc();
+      docShortA.collegeShortlist.push({ id: 'c1', name: 'KGMU', updatedAt: '2026-11-15T10:00:00.000Z', deletedAt: new Date().toISOString() });
+      const docShortB = createEmptyProgressDoc();
+      docShortB.collegeShortlist.push({ id: 'c1', name: 'KGMU', updatedAt: '2026-11-15T10:00:00.000Z', deletedAt: null });
+      const { mergedDoc: m10 } = mergeUserProgress(docShortB, docShortA);
+      const shortDel = m10.collegeShortlist.find(c => c.id === 'c1');
+      assert('Test 10: Shortlist tombstone deletion prevents resurrection across devices', shortDel && shortDel.deletedAt !== null);
+
+      // Test 11: Scalar timestamp isolation (unchanged fields keep original updatedAt)
+      const origScalar = { value: 'OMFS', updatedAt: '2026-11-10T08:00:00.000Z' };
+      const sameScalar = updateScalarIfChanged(origScalar, 'OMFS', '2026-11-15T20:00:00.000Z');
+      const changedScalar = updateScalarIfChanged(origScalar, 'Orthodontics', '2026-11-15T20:00:00.000Z');
+      assert('Test 11: Scalar edit isolation preserves unchanged field timestamps',
+        sameScalar.updatedAt === '2026-11-10T08:00:00.000Z' &&
+        changedScalar.updatedAt === '2026-11-15T20:00:00.000Z'
+      );
+
     } catch(e) {
       results.push({ test: 'Self-test execution error', passed: false, error: e.message });
     }
     return results;
   }
 
-  // Export to global window
   window.SyncEngine = {
     init: initClient,
     getSavedConfig,
@@ -970,6 +1158,8 @@
     clearConfig,
     setDeviceName,
     getDeviceName: () => state.deviceName,
+    setRealtimeEnabled,
+    getRealtimeEnabled: () => state.realtimeEnabled,
     getStatus: () => ({ status: state.status, message: state.statusMessage }),
     getUser: () => state.user,
     getSession: () => state.session,
@@ -982,9 +1172,13 @@
       return () => state.listeners.delete(fn);
     },
     mergeUserProgress,
+    createEmptyProgressDoc,
     getLocalProgressDoc,
     saveLocalProgressDoc,
+    importBackupPayload,
     toScalarObj,
+    updateScalarIfChanged,
+    stripVolatileTimestamps,
     normalizeDoc,
     syncNow,
     triggerSync,

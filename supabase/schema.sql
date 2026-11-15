@@ -1,8 +1,8 @@
 -- ==============================================================================
--- NEET-MDS Top-10 Planner — Supabase Database Schema
+-- NEET-MDS Top-10 Planner - Supabase Database Schema
 -- Architecture: PostgreSQL + Supabase Auth + Row Level Security (RLS)
--- Designed for NEET-MDS 2027 & INI-CET Aspirants • AIR 1-10 Workstation
--- Strict ASCII Quotes Only • Snapshot Deduping • Realtime Enabled
+-- Designed for NEET-MDS 2027 & INI-CET Aspirants - AIR 1-10 Workstation
+-- Strict ASCII Quotes Only - Snapshot Deduping - Realtime Enabled
 -- ==============================================================================
 
 -- 1. Create table for user progress (Single-document local-first store)
@@ -25,16 +25,15 @@ CREATE TABLE IF NOT EXISTS public.user_progress_snapshots (
 );
 
 -- Index on snapshots for fast retrieval by user ordered by timestamp
-CREATE INDEX IF NOT EXISTS idx_snapshots_user_created 
+CREATE INDEX IF NOT EXISTS idx_snapshots_user_created
   ON public.user_progress_snapshots(user_id, created_at DESC);
 
 -- 3. Automatic Snapshot Rotation Trigger with Deduplication
--- Only creates a snapshot when data is meaningfully distinct from prior state
+-- Strips volatile sync timestamps (docUpdatedAt, lastSyncedAt) so syncing twice with no changes never creates a snapshot
 CREATE OR REPLACE FUNCTION public.handle_user_progress_snapshot()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Deduplicate: Only archive snapshot if data has actually changed
-  IF (TG_OP = 'INSERT') OR (OLD.data IS DISTINCT FROM NEW.data) THEN
+  IF (TG_OP = 'INSERT') OR ((OLD.data - 'docUpdatedAt' - 'lastSyncedAt') IS DISTINCT FROM (NEW.data - 'docUpdatedAt' - 'lastSyncedAt')) THEN
     INSERT INTO public.user_progress_snapshots (user_id, data, schema_version, device_name, created_at)
     VALUES (NEW.user_id, NEW.data, NEW.schema_version, NEW.last_device, now());
 
