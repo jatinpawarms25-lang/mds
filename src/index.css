@@ -15,6 +15,11 @@
   --accent: #007aff;
   --ambient-1: rgba(30, 58, 138, 0.35);
   --ambient-2: rgba(88, 28, 135, 0.25);
+  --mem-again: #ef4444;
+  --mem-hard: #f59e0b;
+  --mem-good: #10b981;
+  --mem-easy: #0ea5e9;
+  --mem-card-radius: 1.5rem;
 }
 
 [data-theme="light"] {

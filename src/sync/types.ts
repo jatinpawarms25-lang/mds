@@ -15,7 +15,10 @@ export type CollectionName =
   | 'notices_inbox'
   | 'image_drills'
   | 'daily_quizzes'
-  | 'user_images';
+  | 'user_images'
+  | 'notes'
+  | 'cards'
+  | 'decks';
 
 export type SyncStatusKind =
   | 'saved_locally'

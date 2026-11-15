@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { DEFAULT_CONTENT_PACK } from '../data/contentPack';
 import { useSyncCollection } from '../hooks/useSyncStore';
+import { buildCardsFromNote } from '../memory/notes';
+import type { CardRecord, NoteRecord } from '../memory/types';
 import { generateUuid } from '../sync/syncEngine';
 
 interface ErrorEntry {
@@ -14,10 +16,13 @@ interface ErrorEntry {
   reviewDay: number;
   isVolatile: boolean;
   date: string;
+  cardCreated?: boolean;
 }
 
 export default function ErrorLogScreen() {
   const { items: errors, putItem, deleteItem } = useSyncCollection<ErrorEntry>('errors');
+  const { putItem: putNote } = useSyncCollection<NoteRecord>('notes');
+  const { putItem: putCard } = useSyncCollection<CardRecord>('cards');
   const [subject, setSubject] = useState('Public Health Dentistry');
   const [topic, setTopic] = useState('');
   const [reason, setReason] = useState('Concept Gap');
@@ -47,11 +52,33 @@ export default function ErrorLogScreen() {
     setReference('');
   };
 
+  const handleCreateFlashcard = async (entry: ErrorEntry) => {
+    const nowIso = new Date().toISOString();
+    const note: NoteRecord = {
+      id: generateUuid(),
+      deck: entry.subject || 'Mistakes',
+      noteType: 'basic',
+      front: `${entry.subject}: ${entry.topic}${entry.whatWentWrong ? `\n(Trap: ${entry.whatWentWrong})` : ''}`,
+      back: `${entry.correctFact}${entry.reference ? `\n\nRef: ${entry.reference}` : ''}`,
+      tags: [entry.subject, entry.reason, 'mistake-loop'].filter(Boolean),
+      sourceRef: entry.reference || undefined,
+      mistakeId: entry.id,
+      createdAt: nowIso,
+      updatedAt: nowIso
+    };
+    const cards = buildCardsFromNote(note, nowIso);
+    await putNote(note.id, note);
+    for (const c of cards) {
+      await putCard(c.id, c);
+    }
+    await putItem(entry.id, { ...entry, cardCreated: true });
+  };
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
         <h1 className="text-3xl font-extrabold text-white tracking-tight">Mistake Log</h1>
-        <p className="text-xs text-slate-400 mt-1">Spaced review at +2, +7, +21 days. Tombstone deletes never resurrect.</p>
+        <p className="text-xs text-slate-400 mt-1">Spaced review at +2, +7, +21 days or convert directly into FSRS flashcards.</p>
       </div>
 
       <form onSubmit={(e) => void handleSubmit(e)} className="glass-card rounded-3xl p-6 space-y-3 text-xs">
@@ -89,7 +116,13 @@ export default function ErrorLogScreen() {
             </div>
             <div className="text-emerald-300">Correct: {err.data.correctFact}</div>
             <div className="text-slate-400">Ref: {err.data.reference || 'N/A'} | Stage: +{err.data.reviewDay || 2}d</div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => void handleCreateFlashcard(err.data)}
+                className="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 font-bold"
+              >
+                {err.data.cardCreated ? 'Flashcard Created (Add Another)' : '+ Create Flashcard (FSRS)'}
+              </button>
               <button
                 onClick={() => void putItem(err.id, { ...err.data, reviewDay: err.data.reviewDay === 2 ? 7 : 21, isVolatile: err.data.reviewDay >= 21 })}
                 className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold"

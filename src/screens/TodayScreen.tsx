@@ -18,7 +18,8 @@ export type ScreenId =
   | 'hidden_neglected'
   | 'watchlists'
   | 'update_centre'
-  | 'settings';
+  | 'settings'
+  | 'memory';
 
 interface Props {
   onNavigate: (id: ScreenId) => void;

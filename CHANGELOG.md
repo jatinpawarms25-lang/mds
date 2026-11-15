@@ -1,5 +1,13 @@
 # Changelog (`CHANGELOG.md`)
 
+## [2.0.0-phase2a] - 2026-11-15
+
+### Added
+- **MDS Memory Engine (`src/memory/`)**: Implemented pure TypeScript FSRS-5 scheduler (`fsrs.ts`) and Classic Anki SM-2 fallback (`sm2.ts`) verified against the live Anki manual and `ts-fsrs`, plus `Basic`, `Basic-reversed`, and `Cloze` note-to-card generation (`notes.ts`), daily review queue with sibling burying (`queue.ts`), and RFC-4180 CSV import/export (`csv.ts`).
+- **Algorithm Verification Docs (`docs/ALGORITHMS.md`)**: Recorded exact FSRS-5 / SM-2 formulas, Anki learning-step Hard behavior, 8-lapse leech threshold (plus half-threshold warnings), fuzz >= 2.5d, and 60s answer timer cap.
+- **Memory Review UI & Closed Loop (`src/screens/MemoryScreen.tsx`, `ErrorLogScreen.tsx`)**: Added token-styled Memory screen with keyboard shortcuts (`Space`/`1-4`), 7-day due forecast, CSV import/export, scheduler options, and one-click **Mistake Log -> Flashcard** conversion.
+- **Unit Tests (`src/memory/__tests__/`)**: Added 8 unit tests covering FSRS retrievability/intervals/learning steps/leeches/fuzz, SM-2 ease & overdue credit, note types, sibling burying, and CSV round-trip (18/18 total tests passing).
+
 ## [1.0.0-phase1] - 2026-11-15
 
 ### Added

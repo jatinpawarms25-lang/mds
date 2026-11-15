@@ -19,6 +19,7 @@ const HiddenRulesScreen = lazy(() => import('./screens/HiddenRulesScreen'));
 const ChecklistsScreen = lazy(() => import('./screens/ChecklistsScreen'));
 const UpdateCentreScreen = lazy(() => import('./screens/UpdateCentreScreen'));
 const SettingsScreen = lazy(() => import('./screens/SettingsScreen'));
+const MemoryScreen = lazy(() => import('./screens/MemoryScreen'));
 
 interface NavItem {
   id: ScreenId;
@@ -31,6 +32,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'dashboard', label: 'Today', group: 'Core' },
   { id: 'plan', label: '23-Week Plan', group: 'Core' },
   { id: 'curriculum', label: '17 Subjects', group: 'Core' },
+  { id: 'memory', label: 'Memory (FSRS)', group: 'Practice' },
   { id: 'daily_quiz', label: 'Daily Quiz', group: 'Practice' },
   { id: 'cbt_mock', label: 'CBT & Mocks', group: 'Practice' },
   { id: 'error_log', label: 'Mistake Log', group: 'Practice' },
@@ -48,11 +50,12 @@ const NAV_ITEMS: NavItem[] = [
 const MOBILE_TABS: { id: ScreenId; label: string }[] = [
   { id: 'dashboard', label: 'Today' },
   { id: 'plan', label: 'Plan' },
-  { id: 'curriculum', label: 'Subjects' },
+  { id: 'memory', label: 'Memory' },
   { id: 'cbt_mock', label: 'Mocks' }
 ];
 
 const SIMPLE_SCREENS: Record<Exclude<ScreenId, 'dashboard'>, LazyExoticComponent<ComponentType<Record<string, never>>>> = {
+  memory: MemoryScreen,
   daily_quiz: DailyQuizScreen,
   plan: PlanScreen,
   curriculum: SubjectsScreen,
