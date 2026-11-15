@@ -1,0 +1,49 @@
+{
+  "name": "MDS OS — AIR 1–10 Command Center",
+  "short_name": "MDS OS",
+  "description": "Apple-Inspired Universal NEET MDS & INI-CET Study Operating System",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "orientation": "any",
+  "categories": ["education", "productivity", "medical"],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "CBT Exam Simulator",
+      "short_name": "CBT Mock",
+      "description": "Start timed NBEMS Mock Test",
+      "url": "./index.html?view=cbt_mock",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Volatile Cheat Sheet",
+      "short_name": "Cheat Sheet",
+      "description": "High-Yield Dental Formulas & Golden Numbers",
+      "url": "./index.html?view=volatile_vault",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Image Spotter Vault",
+      "short_name": "Spotters",
+      "description": "Histopath & Radiology Spotters",
+      "url": "./index.html?view=ibq_spotter",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

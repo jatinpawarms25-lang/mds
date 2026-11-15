@@ -1,0 +1,52 @@
+{
+  "subjectProgress": {
+    "anat": []
+  },
+  "confidenceLevels": {},
+  "errorLog": [
+    {
+      "id": 1,
+      "subject": "General & Dental Pharmacology",
+      "stem": "Epinephrine cardiac safety limit",
+      "correctAns": "0.04 mg (2 cartridges of 1:100k)",
+      "trapClicked": "0.2 mg (Healthy patient limit)",
+      "reason": "Silly / Confused cardiac vs healthy",
+      "reviewBox": 1,
+      "date": "2026-11-15"
+    },
+    {
+      "id": 2,
+      "subject": "Dental Materials",
+      "stem": "High copper amalgam phase elimination",
+      "correctAns": "Gamma-2 (Sn7-8Hg) eliminated by Eta-prime",
+      "trapClicked": "Gamma-1 eliminated",
+      "reason": "Factual Recall Gap",
+      "reviewBox": 2,
+      "date": "2026-11-14"
+    }
+  ],
+  "mockScores": [
+    {
+      "id": "m1",
+      "name": "Baseline Grand Test 01",
+      "date": "2026-11-01",
+      "attempted": 220,
+      "correct": 184,
+      "wrong": 36,
+      "netScore": 700,
+      "targetAIR": "AIR 60\u201380"
+    },
+    {
+      "id": "m2",
+      "name": "Subject Combined Test 02",
+      "date": "2026-11-10",
+      "attempted": 226,
+      "correct": 196,
+      "wrong": 30,
+      "netScore": 754,
+      "targetAIR": "AIR 15\u201325"
+    }
+  ],
+  "routineChecks": {},
+  "lastUpdated": 1794745483841
+}

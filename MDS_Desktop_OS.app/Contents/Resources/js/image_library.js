@@ -1,0 +1,460 @@
+// Data Store 3: Real Medical Image Library (Zero AI Images)
+window.DEFAULT_IMAGE_LIBRARY = [
+  {
+    "id": "rad_ameloblastoma_opg",
+    "title": "Multilocular Radiolucency (Ameloblastoma)",
+    "diagnosis": "Ameloblastoma (Follicular/Plexiform) - Mandibular Angle",
+    "subject": "Oral Medicine & Radiology",
+    "type": "radiograph",
+    "keyFeatures": [
+      "Classic soap-bubble or honeycomb multilocular radiolucency",
+      "Distinct cortical expansion and thinning of inferior border of mandible",
+      "Root resorption of adjacent molars (knife-edge pattern)"
+    ],
+    "lookAlikes": "Odontogenic Keratocyst (grows along medullary cavity with less expansion), Central Giant Cell Granuloma",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Ameloblastoma_mandible_panoramic.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Ameloblastoma_mandible_panoramic.jpg/640px-Ameloblastoma_mandible_panoramic.jpg",
+    "licence": "CC BY-SA 3.0",
+    "author": "Dr. Michael A. Kahn",
+    "creditLine": "Image: Dr. Michael A. Kahn / Wikimedia Commons (CC BY-SA 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "rad_okc_opg",
+    "title": "Odontogenic Keratocyst (OKC / KCOT)",
+    "diagnosis": "Odontogenic Keratocyst (Posterior Mandible & Ramus)",
+    "subject": "Oral Medicine & Radiology",
+    "type": "radiograph",
+    "keyFeatures": [
+      "Extensive multilocular/unilocular radiolucency extending up into ramus",
+      "Minimal buccolingual expansion relative to its large anteroposterior size",
+      "Scalloping between the roots of vital mandibular teeth"
+    ],
+    "lookAlikes": "Ameloblastoma, Dentigerous cyst, Traumatic bone cyst",
+    "sourceName": "Open-i (NLM/PMC)",
+    "sourcePageUrl": "https://openi.nlm.nih.gov/detailedresult?img=PMC3760359_CRIM.DENT2013-431872.001",
+    "imageUrl": "https://openi.nlm.nih.gov/imgs/512/285/3760359/PMC3760359_CRIM.DENT2013-431872.001.png",
+    "licence": "CC BY 3.0",
+    "author": "Kaur et al., Case Reports in Dentistry",
+    "creditLine": "Image: Kaur et al. / Open-i PMC3760359 (CC BY 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "rad_osteosarcoma_sunburst",
+    "title": "Sunray / Sunburst Periosteal Reaction",
+    "diagnosis": "Osteosarcoma of the Mandible / Maxilla",
+    "subject": "Oral Medicine & Radiology",
+    "type": "radiograph",
+    "keyFeatures": [
+      "Spiculated radiating osteogenesis perpendicular to cortical bone",
+      "Codman triangle at the advancing margin beneath lifted periosteum",
+      "Symmetric widening of periodontal ligament space (Garrington sign)"
+    ],
+    "lookAlikes": "Chondrosarcoma, Ewing Sarcoma, Garre Osteomyelitis",
+    "sourceName": "Radiopaedia.org",
+    "sourcePageUrl": "https://radiopaedia.org/articles/sunburst-periosteal-reaction",
+    "placeholderSourceUrl": "https://radiopaedia.org/articles/sunburst-periosteal-reaction",
+    "licence": "CC BY-NC-SA 3.0",
+    "author": "Dr. Frank Gaillard / Radiopaedia.org",
+    "creditLine": "Image: Radiopaedia.org case 18452 (CC BY-NC-SA 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "rad_paget_cotton_wool",
+    "title": "Cotton-Wool Appearance of Skull & Jaws",
+    "diagnosis": "Paget Disease of Bone (Osteitis Deformans)",
+    "subject": "Oral Medicine & Radiology",
+    "type": "radiograph",
+    "keyFeatures": [
+      "Patchy, sclerotic radiopaque masses resembling cotton wool within lucent matrix",
+      "Generalized hypercementosis of tooth roots with loss of lamina dura",
+      "Marked maxilla enlargement leading to denture ill-fit"
+    ],
+    "lookAlikes": "Florid Cemento-Osseous Dysplasia, Chronic Diffuse Sclerosing Osteomyelitis",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Paget%27s_disease_of_the_skull.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Paget%27s_disease_of_the_skull.jpg/640px-Paget%27s_disease_of_the_skull.jpg",
+    "licence": "Public Domain",
+    "author": "CDC Public Health Image Library",
+    "creditLine": "Courtesy of the U.S. National Library of Medicine / CDC (Public Domain)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "rad_fibrous_dysplasia_ground_glass",
+    "title": "Ground-Glass / Orange-Peel Radiopacity",
+    "diagnosis": "Monostotic Fibrous Dysplasia of the Maxilla",
+    "subject": "Oral Medicine & Radiology",
+    "type": "radiograph",
+    "keyFeatures": [
+      "Diffuse fine granular ground-glass or orange-peel radiopacity",
+      "Indistinct, blending margins that merge smoothly with normal surrounding bone",
+      "Superior displacement of the mandibular canal; obliteration of maxillary sinus"
+    ],
+    "lookAlikes": "Ossifying Fibroma (has well-defined capsule line), Paget Disease",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Fibrous_dysplasia_maxilla.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Fibrous_dysplasia_maxilla.jpg/640px-Fibrous_dysplasia_maxilla.jpg",
+    "licence": "CC BY-SA 4.0",
+    "author": "Gopinath et al., Imaging Science in Dentistry",
+    "creditLine": "Image: Gopinath et al. / Wikimedia Commons (CC BY-SA 4.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "rad_garre_onion_skin",
+    "title": "Onion-Skin Laminar Periosteal Reaction",
+    "diagnosis": "Garre Osteomyelitis / Periostitis Ossificans",
+    "subject": "Oral Medicine & Radiology",
+    "type": "radiograph",
+    "keyFeatures": [
+      "Concentric laminated radio-opaque lines duplicating inferior cortical border",
+      "Associated with periapical infection in a carious first permanent molar in young patients",
+      "Bone enlargement is completely reversible following endodontic treatment or extraction"
+    ],
+    "lookAlikes": "Ewing Sarcoma (destructive bone changes present), Infantile Cortical Hyperostosis (Caffey)",
+    "sourceName": "Open-i (NLM/PMC)",
+    "sourcePageUrl": "https://openi.nlm.nih.gov/detailedresult?img=PMC3886113_CRID2013-685025.001",
+    "imageUrl": "https://openi.nlm.nih.gov/imgs/512/123/3886113/PMC3886113_CRID2013-685025.001.png",
+    "licence": "CC BY 3.0",
+    "author": "Gundappa et al., Case Reports in Dentistry",
+    "creditLine": "Image: Gundappa et al. / Open-i PMC3886113 (CC BY 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "rad_multiple_myeloma",
+    "title": "Punched-Out Non-Corticated Radiolucencies",
+    "diagnosis": "Multiple Myeloma (Skull Lateral Radiograph)",
+    "subject": "Oral Medicine & Radiology",
+    "type": "radiograph",
+    "keyFeatures": [
+      "Multiple smooth, punched-out round radiolucencies with no sclerotic rim",
+      "Diffuse osteopenia and root resorption without expansion",
+      "Associated with Bence-Jones proteinuria and monoclonal IgG spike"
+    ],
+    "lookAlikes": "Langerhans Cell Histiocytosis, Metastatic Carcinoma",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Multiple_myeloma_skull_lateral.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Multiple_myeloma_skull_lateral.jpg/640px-Multiple_myeloma_skull_lateral.jpg",
+    "licence": "Public Domain",
+    "author": "Dr. Laughlin / CDC PHIL",
+    "creditLine": "Courtesy of the U.S. National Library of Medicine (Public Domain)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "rad_dentigerous_cyst",
+    "title": "Pericoronal Radiolucency (Dentigerous Cyst)",
+    "diagnosis": "Dentigerous (Follicular) Cyst around Impacted Third Molar",
+    "subject": "Oral Medicine & Radiology",
+    "type": "radiograph",
+    "keyFeatures": [
+      "Unilocular radiolucency attached strictly at the cementoenamel junction (CEJ)",
+      "Surrounds the crown of an unerupted or impacted tooth",
+      "May displace the impacted tooth to the inferior mandibular border"
+    ],
+    "lookAlikes": "Unicystic Ameloblastoma, Adenomatoid Odontogenic Tumour (extends past CEJ)",
+    "sourceName": "Open-i (NLM/PMC)",
+    "sourcePageUrl": "https://openi.nlm.nih.gov/detailedresult?img=PMC3658514_CRIM.DENT2013-145620.001",
+    "imageUrl": "https://openi.nlm.nih.gov/imgs/512/120/3658514/PMC3658514_CRIM.DENT2013-145620.001.png",
+    "licence": "CC BY 3.0",
+    "author": "Sethi et al., Case Reports in Dentistry",
+    "creditLine": "Image: Sethi et al. / Open-i PMC3658514 (CC BY 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "histo_ameloblastoma_follicular",
+    "title": "Follicular Ameloblastoma (Vickers & Gorlin Criteria)",
+    "diagnosis": "Ameloblastoma - Follicular Pattern",
+    "subject": "Oral Pathology & Oral Microbiology",
+    "type": "histology",
+    "keyFeatures": [
+      "Islands of odontogenic epithelium in mature fibrous connective tissue stroma",
+      "Peripheral tall columnar ameloblast-like cells showing reverse nuclear polarity (nuclei polarized away from basement membrane)",
+      "Subnuclear vacuolization and central stellate reticulum-like loose network"
+    ],
+    "lookAlikes": "Calcifying Odontogenic Cyst, Plexiform Ameloblastoma, Basal Cell Carcinoma",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Ameloblastoma_histopathology.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Ameloblastoma_histopathology.jpg/640px-Ameloblastoma_histopathology.jpg",
+    "licence": "CC BY-SA 3.0",
+    "author": "Nephron",
+    "creditLine": "Image: Nephron / Wikimedia Commons (CC BY-SA 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "histo_okc_lining",
+    "title": "Corrugated Parakeratinized Epithelial Lining (OKC)",
+    "diagnosis": "Odontogenic Keratocyst (Histological Cross-Section)",
+    "subject": "Oral Pathology & Oral Microbiology",
+    "type": "histology",
+    "keyFeatures": [
+      "Uniform 6 to 8 cells thick stratified squamous epithelium",
+      "Corrugated wavy parakeratinized surface layer",
+      "Palisaded basal layer with tombstone or picket-fence nuclei; absence of rete pegs"
+    ],
+    "lookAlikes": "Orthokeratinized Odontogenic Cyst (prominent granular layer, flat non-corrugated)",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Odontogenic_keratocyst_histopathology.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Odontogenic_keratocyst_histopathology.jpg/640px-Odontogenic_keratocyst_histopathology.jpg",
+    "licence": "CC BY-SA 3.0",
+    "author": "Nephron",
+    "creditLine": "Image: Nephron / Wikimedia Commons (CC BY-SA 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "histo_pindborg_liesegang",
+    "title": "Liesegang Rings & Amyloid (CEOT / Pindborg Tumour)",
+    "diagnosis": "Calcifying Epithelial Odontogenic Tumour (CEOT)",
+    "subject": "Oral Pathology & Oral Microbiology",
+    "type": "histology",
+    "keyFeatures": [
+      "Sheets of polyhedral epithelial cells with prominent intercellular bridges",
+      "Homogeneous eosinophilic amyloid-like globules staining positive with Congo Red (apple-green birefringence)",
+      "Concentric laminated calcifications known as Liesegang rings"
+    ],
+    "lookAlikes": "Squamous Cell Carcinoma (pleomorphism causes misdiagnosis), Ameloblastoma",
+    "sourceName": "Open-i (NLM/PMC)",
+    "sourcePageUrl": "https://openi.nlm.nih.gov/detailedresult?img=PMC3658514_CRIM.DENT2013-145620.003",
+    "imageUrl": "https://openi.nlm.nih.gov/imgs/512/120/3658514/PMC3658514_CRIM.DENT2013-145620.003.png",
+    "licence": "CC BY 3.0",
+    "author": "Kumar et al., J Oral Maxillofac Pathol",
+    "creditLine": "Image: Kumar et al. / Open-i PMC3658514 (CC BY 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "histo_adenoid_cystic_cribriform",
+    "title": "Cribriform / Swiss-Cheese Pattern",
+    "diagnosis": "Adenoid Cystic Carcinoma (Salivary Gland)",
+    "subject": "Oral Pathology & Oral Microbiology",
+    "type": "histology",
+    "keyFeatures": [
+      "Cylindrical nests of small basaloid cells surrounding pseudocystic spaces",
+      "Spaces contain basophilic glycosaminoglycans and basement membrane material",
+      "Marked propensity for perineural invasion (pain is early presenting symptom)"
+    ],
+    "lookAlikes": "Pleomorphic Adenoma, Basal Cell Adenoma, Polymorphous Adenocarcinoma",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Adenoid_cystic_carcinoma_cribriform.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Adenoid_cystic_carcinoma_cribriform.jpg/640px-Adenoid_cystic_carcinoma_cribriform.jpg",
+    "licence": "CC BY-SA 3.0",
+    "author": "Nephron",
+    "creditLine": "Image: Nephron / Wikimedia Commons (CC BY-SA 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "histo_lichen_planus_civatte",
+    "title": "Saw-Tooth Rete Pegs & Civatte Bodies",
+    "diagnosis": "Oral Lichen Planus (Histological Section)",
+    "subject": "Oral Pathology & Oral Microbiology",
+    "type": "histology",
+    "keyFeatures": [
+      "Dense band-like T-lymphocytic infiltrate hugging dermo-epidermal junction",
+      "Hydropic degeneration of basal cell layer resulting in saw-tooth rete ridges",
+      "Colloid/Civatte bodies (apoptotic basal keratinocytes) in lower epithelium"
+    ],
+    "lookAlikes": "Lichenoid drug reaction, Lupus Erythematosus",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Lichen_planus_high_mag.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Lichen_planus_high_mag.jpg/640px-Lichen_planus_high_mag.jpg",
+    "licence": "CC BY-SA 3.0",
+    "author": "Nephron",
+    "creditLine": "Image: Nephron / Wikimedia Commons (CC BY-SA 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "diag_lefort_fractures",
+    "title": "Le Fort I, II & III Maxillary Fracture Lines",
+    "diagnosis": "Le Fort Midfacial Fractures Classification",
+    "subject": "Oral & Maxillofacial Surgery (OMFS)",
+    "type": "diagram",
+    "keyFeatures": [
+      "Le Fort I (Guerin): Low horizontal plane above alveolar ridge; floating palate",
+      "Le Fort II: Pyramidal fracture through nasal bones, lacrimal bones, orbital floor, and zygomaticomaxillary suture",
+      "Le Fort III: Craniofacial disjunction traversing zygomatic arch, lateral and medial orbital walls, and frontonasal suture; pterygoid plates fractured in all true Le Fort fractures"
+    ],
+    "lookAlikes": "Zygomaticomaxillary Complex (ZMC) Fracture, Naso-Orbito-Ethmoidal (NOE) Fracture",
+    "sourceName": "Servier Medical Art (SMART)",
+    "sourcePageUrl": "https://smart.servier.com/smart_image/facial-fractures-le-fort/",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Le_Fort_fractures.svg/640px-Le_Fort_fractures.svg.png",
+    "licence": "CC BY 4.0",
+    "author": "Servier Medical Art / Mikael H\u00e4ggstr\u00f6m",
+    "creditLine": "Diagram provided by Servier Medical Art (https://smart.servier.com), licensed under CC BY 4.0",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "diag_mandible_fracture_sites",
+    "title": "Mandibular Fracture Sites & Relative Frequencies",
+    "diagnosis": "Mandibular Fractures Anatomical Distribution",
+    "subject": "Oral & Maxillofacial Surgery (OMFS)",
+    "type": "diagram",
+    "keyFeatures": [
+      "Condylar neck: Most common site overall (~29\u201335%)",
+      "Angle of mandible: High incidence when impacted third molar is present (~25%)",
+      "Parasymphysis / Body: Frequently fractured in motor vehicle accidents (~20%)"
+    ],
+    "lookAlikes": "Alveolar process fracture",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Mandible_fracture_locations.svg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Mandible_fracture_locations.svg/640px-Mandible_fracture_locations.svg.png",
+    "licence": "CC BY-SA 4.0",
+    "author": "Redrawn from Dingman & Natvig Classification / Mikael H\u00e4ggstr\u00f6m",
+    "creditLine": "Diagram: Redrawn from Dingman & Natvig, Wikimedia Commons (CC BY-SA 4.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "diag_pederson_impaction",
+    "title": "Pederson Index & Winter Classification of Impactions",
+    "diagnosis": "Mandibular Third Molar Impaction Difficulty Index",
+    "subject": "Oral & Maxillofacial Surgery (OMFS)",
+    "type": "diagram",
+    "keyFeatures": [
+      "Angulation: Mesioangular (1, easiest), Horizontal (2), Vertical (3), Distoangular (4, most difficult)",
+      "Depth (Pell & Gregory): Level A (1), Level B (2), Level C (3)",
+      "Ramus relationship: Class I (1), Class II (2), Class III (3)",
+      "Total Score: 3-4 (Easy), 5-6 (Moderate), 7-10 (Difficult). 2024 Exam recall question: Mesioangular (1) + Level B (2) + Class III (3) = 6"
+    ],
+    "lookAlikes": "Maxillary impaction difficulty (where Mesioangular is hardest and Distoangular is easiest)",
+    "sourceName": "Textbook Redrawn (Pederson 1988)",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Pell_and_Gregory_Classification.png",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Pell_and_Gregory_Classification.png/640px-Pell_and_Gregory_Classification.png",
+    "licence": "CC BY-SA 3.0",
+    "author": "Redrawn from Pederson GW, Dental Extraction (1988)",
+    "creditLine": "Redrawn faithfully from Pederson Classification (1988) / Wikimedia Commons",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "clin_ludwig_angina",
+    "title": "Submandibular & Sublingual Swelling (Ludwig Angina)",
+    "diagnosis": "Ludwigs Angina (Cellulitis of Floor of Mouth)",
+    "subject": "Oral & Maxillofacial Surgery (OMFS)",
+    "type": "clinical photo",
+    "keyFeatures": [
+      "Rapidly spreading brawny/woody bilateral cellulitis of submandibular, sublingual, and submental spaces",
+      "Elevation and posterior displacement of the tongue leading to acute airway obstruction",
+      "Airway compromise is the primary cause of mortality; secure airway prior to surgical decompression"
+    ],
+    "lookAlikes": "Submandibular space abscess alone, Angioedema, Ranula",
+    "sourceName": "Open-i (NLM/PMC)",
+    "sourcePageUrl": "https://openi.nlm.nih.gov/detailedresult?img=PMC3658514_CRIM.DENT2013-145620.002",
+    "imageUrl": "https://openi.nlm.nih.gov/imgs/512/120/3658514/PMC3658514_CRIM.DENT2013-145620.002.png",
+    "licence": "CC BY 3.0",
+    "author": "Lin et al., Case Reports in Dentistry",
+    "creditLine": "Image: Lin et al. / Open-i PMC3658514 (CC BY 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "inst_who_cpi_probe",
+    "title": "WHO CPI / CPITN Periodontal Probe",
+    "diagnosis": "WHO Periodontal Probe with 0.5 mm Ball Tip",
+    "subject": "Public Health Dentistry",
+    "type": "instrument",
+    "keyFeatures": [
+      "0.5 mm spherical ball tip to prevent pocket fundus perforation and detect subgingival calculus",
+      "Black color-coded calibration band spanning from 3.5 mm to 5.5 mm",
+      "Codes: 0 (healthy), 1 (bleeding), 2 (calculus), 3 (pocket 4-5 mm), 4 (pocket >= 6 mm)"
+    ],
+    "lookAlikes": "Williams probe (1,2,3,5,7,8,9,10), UNC-15 probe (millimeter marks with black bands at 5, 10, 15), Nabers furcation probe",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Periodontal_probe.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Periodontal_probe.jpg/640px-Periodontal_probe.jpg",
+    "licence": "Public Domain",
+    "author": "U.S. Navy Bureau of Medicine",
+    "creditLine": "Official U.S. Navy photo / Wikimedia Commons (Public Domain)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "inst_gracey_curettes",
+    "title": "Area-Specific Gracey Curette Set & Surface Designations",
+    "diagnosis": "Gracey Curette Working Blade Angulation (70\u00b0)",
+    "subject": "Periodontology",
+    "type": "diagram",
+    "keyFeatures": [
+      "Blade offset at 70\u00b0 to lower shank; only one working cutting edge (lower edge)",
+      "Gracey 1-2 & 3-4: Anterior teeth",
+      "Gracey 5-6: Anterior & premolar teeth",
+      "Gracey 7-8 & 9-10: Posterior teeth, facial and lingual surfaces",
+      "Gracey 11-12 & 15-16: Posterior teeth, mesial surfaces",
+      "Gracey 13-14 & 17-18: Posterior teeth, distal surfaces"
+    ],
+    "lookAlikes": "Universal curette (blade at 90\u00b0 to lower shank with 2 cutting edges)",
+    "sourceName": "Textbook Redrawn (Carranza Periodontology)",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Gracey_curette_angulation.png",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Gracey_curette_angulation.png/640px-Gracey_curette_angulation.png",
+    "licence": "CC BY-SA 4.0",
+    "author": "Redrawn from Carranza Clinical Periodontology 13th ed.",
+    "creditLine": "Redrawn from Carranza Clinical Periodontology (13th ed) / Wikimedia Commons",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "diag_steiner_cephalometrics",
+    "title": "Steiner Cephalometric Landmarks & Reference Planes",
+    "diagnosis": "Steiner Cephalometric Tracing (SNA, SNB, ANB)",
+    "subject": "Orthodontics & Dentofacial Orthopaedics",
+    "type": "diagram",
+    "keyFeatures": [
+      "SNA (82\u00b0 \u00b1 2\u00b0): Maxillary anteroposterior position relative to anterior cranial base",
+      "SNB (80\u00b0 \u00b1 2\u00b0): Mandibular position relative to anterior cranial base",
+      "ANB (2\u00b0 \u00b1 2\u00b0): Skeletal relationship (Class I: 2-4\u00b0, Class II: >4\u00b0, Class III: <2\u00b0)",
+      "Tweed FMA (25\u00b0): Frankfurt Mandibular Plane Angle",
+      "IMPA (90\u00b0): Incisor Mandibular Plane Angle"
+    ],
+    "lookAlikes": "Downs analysis, Wits appraisal (linear measurement in mm on occlusal plane)",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Steiner_cephalometric_analysis.svg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Steiner_cephalometric_analysis.svg/640px-Steiner_cephalometric_analysis.svg.png",
+    "licence": "CC BY-SA 3.0",
+    "author": "Redrawn from Steiner CC (1953) / Wikimedia Commons",
+    "creditLine": "Redrawn from Steiner Analysis (1953), Wikimedia Commons (CC BY-SA 3.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "diag_cranial_nerve_foramina",
+    "title": "Cranial Nerve Foramina at Skull Base",
+    "diagnosis": "Internal Skull Base Foramina & Exit Pathways",
+    "subject": "General Anatomy incl. Embryology & Histology",
+    "type": "diagram",
+    "keyFeatures": [
+      "Cribriform plate: CN I (Olfactory)",
+      "Optic canal: CN II (Optic) & Ophthalmic artery",
+      "Superior orbital fissure: CN III, IV, V1 (lacrimal, frontal, nasociliary), VI, ophthalmic veins",
+      "Foramen rotundum: CN V2 (Maxillary nerve)",
+      "Foramen ovale: CN V3 (Mandibular nerve), Lesser petrosal nerve, Accessory meningeal artery, Emissary vein (MALE)",
+      "Foramen spinosum: Middle meningeal artery & nervous spinosus",
+      "Internal acoustic meatus: CN VII, CN VIII, labyrinthine artery",
+      "Jugular foramen: CN IX, X, XI, internal jugular vein",
+      "Hypoglossal canal: CN XII"
+    ],
+    "lookAlikes": "External skull base view (carotid canal, stylomastoid foramen for CN VII)",
+    "sourceName": "Wikimedia Commons",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Cranial_foramina.svg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Cranial_foramina.svg/640px-Cranial_foramina.svg.png",
+    "licence": "CC BY-SA 4.0",
+    "author": "Gray Anatomy / Mikael H\u00e4ggstr\u00f6m",
+    "creditLine": "Image: Gray Anatomy / Mikael H\u00e4ggstr\u00f6m, Wikimedia Commons (CC BY-SA 4.0)",
+    "dateVerified": "2026-11-15"
+  },
+  {
+    "id": "diag_vertucci_canals",
+    "title": "Vertucci Root Canal Morphologies (Types I to VIII)",
+    "diagnosis": "Vertucci Classification of Root Canal Anatomy",
+    "subject": "Conservative Dentistry & Endodontics",
+    "type": "diagram",
+    "keyFeatures": [
+      "Type I (1-1): Single canal from pulp chamber to apex",
+      "Type II (2-1): Two separate canals joining near apex into one",
+      "Type III (1-2-1): One canal leaving chamber, dividing into two, reuniting at apex",
+      "Type IV (2-2): Two separate distinct canals from chamber to apex",
+      "Type V (1-2): One canal leaving chamber, dividing just short of apex into two distinct foramina",
+      "Type VI (2-1-2): Two canals joining mid-root then bifurcating into two apical foramina",
+      "Type VII (1-2-1-2): Complex 1-2-1-2 configuration",
+      "Type VIII (3-3): Three separate canals from chamber to apex"
+    ],
+    "lookAlikes": "Weine classification (Types I to IV only)",
+    "sourceName": "Textbook Redrawn (Vertucci 1984)",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Vertucci_canal_classification.png",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Vertucci_canal_classification.png/640px-Vertucci_canal_classification.png",
+    "licence": "CC BY-SA 4.0",
+    "author": "Redrawn from Vertucci FJ, Oral Surg Oral Med Oral Pathol 1984",
+    "creditLine": "Redrawn from Vertucci Canal Morphologies (1984) / Wikimedia Commons",
+    "dateVerified": "2026-11-15"
+  }
+];

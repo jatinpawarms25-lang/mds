@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MDS OS" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#090d16" />
+  <title>MDS OS — AIR 1-10 Universal Workstation</title>
+  
+  <!-- Apple Touch & PWA Icons -->
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Offline-First Vendor Scripts with Auto-Fallback -->
+  <script src="vendor/tailwindcss.js"></script>
+  <script>if (!window.tailwind) document.write('<script src="https://cdn.tailwindcss.com"><\/script>');</script>
+  <script src="vendor/react.min.js"></script>
+  <script>if (!window.React) document.write('<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"><\/script>');</script>
+  <script src="vendor/react-dom.min.js"></script>
+  <script>if (!window.ReactDOM) document.write('<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/script>');</script>
+  <script src="vendor/supabase.min.js"></script>
+  <script>if (!window.supabase) document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/script>');</script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Plus Jakarta Sans", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, monospace;
+      
+      /* Dark Theme (Default) */
+      --bg-base: #090d16;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --card-bg: rgba(255, 255, 255, 0.07);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --card-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      --bar-bg: rgba(10, 15, 26, 0.72);
+      --accent: #007aff;
+      --ambient-1: rgba(30, 58, 138, 0.35);
+      --ambient-2: rgba(88, 28, 135, 0.25);
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f2f2f7;
+      --text-primary: #1c1c1e;
+      --text-secondary: #636366;
+      --card-bg: rgba(255, 255, 255, 0.65);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --card-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      --bar-bg: rgba(242, 242, 247, 0.75);
+      --accent: #007aff;
+      --ambient-1: rgba(186, 230, 253, 0.55);
+      --ambient-2: rgba(221, 214, 254, 0.45);
+    }
+
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text-primary);
+      background-color: var(--bg-base);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .mono { font-family: var(--font-mono); }
+
+    /* Ambient Colorful Background for Real Glass Light Refraction */
+    .ambient-canvas {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .ambient-blob-1 {
+      position: absolute;
+      top: -10%; left: 5%;
+      width: 65vw; height: 65vw;
+      max-width: 700px; max-height: 700px;
+      background: radial-gradient(circle, var(--ambient-1) 0%, transparent 70%);
+      filter: blur(60px);
+      border-radius: 50%;
+    }
+    .ambient-blob-2 {
+      position: absolute;
+      bottom: -15%; right: 5%;
+      width: 70vw; height: 70vw;
+      max-width: 800px; max-height: 800px;
+      background: radial-gradient(circle, var(--ambient-2) 0%, transparent 70%);
+      filter: blur(75px);
+      border-radius: 50%;
+    }
+
+    /* Apple System Materials */
+    .material-ultra-thin {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--card-highlight), 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    [data-theme="light"] .material-ultra-thin {
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .glass-card, .material-regular {
+      background: var(--card-bg);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--card-highlight), 0 8px 32px rgba(0, 0, 0, 0.12);
+      transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease, border-color 0.24s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(0, 122, 255, 0.35);
+      box-shadow: var(--card-highlight), 0 12px 36px rgba(0, 122, 255, 0.14);
+    }
+
+    /* Translucent Bars so Content Scrolls Underneath */
+    .glass-nav-bar {
+      background: var(--bar-bg);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border-bottom: 1px solid var(--card-border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    .glass-sidebar {
+      background: var(--bar-bg);
+      backdrop-filter: blur(32px) saturate(200%);
+      -webkit-backdrop-filter: blur(32px) saturate(200%);
+      border-right: 1px solid var(--card-border);
+    }
+    .glass-tab-bar {
+      background: var(--bar-bg);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border-top: 1px solid var(--card-border);
+    }
+
+    /* Apple Tactile & Spring Physics */
+    .apple-press {
+      transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.16s ease;
+      cursor: pointer;
+    }
+    .apple-press:active {
+      transform: scale(0.97);
+      opacity: 0.88;
+    }
+
+    .apple-spring {
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Staggered Screen Entrances */
+    @keyframes appleSlideFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .stagger-1 { animation: appleSlideFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.02s both; }
+    .stagger-2 { animation: appleSlideFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both; }
+    .stagger-3 { animation: appleSlideFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both; }
+    .stagger-4 { animation: appleSlideFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both; }
+    .stagger-5 { animation: appleSlideFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both; }
+
+    /* Bottom Sheets Slide-Up with Dimmed Scrim */
+    @keyframes appleSheetSlide {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .animate-sheet-up {
+      animation: appleSheetSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Animated Progress Ring */
+    .progress-ring-circle {
+      transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    /* Large Title shrinking transitions */
+    .large-title {
+      transition: font-size 0.22s ease, opacity 0.22s ease;
+    }
+
+    /* Safe Area Insets */
+    .safe-top { padding-top: max(env(safe-area-inset-top, 14px), 14px); }
+    .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 16px), 16px); }
+
+    /* Respect Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Canvas for Glass Refraction -->
+  <div class="ambient-canvas">
+    <div class="ambient-blob-1"></div>
+    <div class="ambient-blob-2"></div>
+  </div>
+
+  <div id="root" style="position:relative; z-index:1;"></div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
+    }
+  </script>
+
+  <!-- Preloaded Data Stores & Cloud Sync Engine -->
+  <script src="js/content_pack.js"></script>
+  <script src="js/image_library.js"></script>
+  <script src="js/study_data.js"></script>
+  <script src="js/sync_engine.js"></script>
+
+  <!-- Production App -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+// Data Store 2: Content Pack (Versioned Exam Facts)
+window.DEFAULT_CONTENT_PACK = {
+  "version": "2026-11-15.1",
+  "lastVerified": "2026-11-15",
+  "sourceStatus": "Verified 2026 baseline. 2027 official bulletin not out as of 15 Nov 2026.",
+  "examPattern": {
+    "totalQuestions": 240,
+    "totalMarks": 960,
+    "durationMinutes": 180,
+    "marking": { "correct": 4, "wrong": -1, "unattempted": 0 },
+    "sections": [
+      {
+        "name": "Part A",
+        "questions": 100,
+        "marks": 400,
+        "timeMinutes": 75,
+        "timeLock": true,
+        "targetPacingSeconds": 45,
+        "description": "Strict 75-minute time-lock. When time expires, section locks permanently and unused time does not carry over. Cannot return to Part A once Part B begins."
+      },
+      {
+        "name": "Part B",
+        "questions": 140,
+        "marks": 560,
+        "timeMinutes": 105,
+        "timeLock": true,
+        "targetPacingSeconds": 45,
+        "description": "105-minute clinical & dental specialty section. 10 subjects with 14 questions each."
+      }
+    ],
+    "subjectDistribution": [
+      { "part": "A", "subject": "General Anatomy incl. Embryology & Histology", "questions": 14, "marks": 56, "status": "standard" },
+      { "part": "A", "subject": "General Human Physiology & Biochemistry", "questions": 14, "marks": 56, "status": "weak" },
+      { "part": "A", "subject": "Dental Anatomy, Embryology & Oral Histology", "questions": 14, "marks": 56, "status": "diagnostic" },
+      { "part": "A", "subject": "General Pathology & Microbiology", "questions": 14, "marks": 56, "status": "standard" },
+      { "part": "A", "subject": "General & Dental Pharmacology & Therapeutics", "questions": 14, "marks": 56, "status": "standard" },
+      { "part": "A", "subject": "General Medicine", "questions": 15, "marks": 60, "status": "standard" },
+      { "part": "A", "subject": "General Surgery", "questions": 15, "marks": 60, "status": "standard" },
+      { "part": "B", "subject": "Dental Materials", "questions": 14, "marks": 56, "status": "weak_hardest" },
+      { "part": "B", "subject": "Oral Pathology & Oral Microbiology", "questions": 14, "marks": 56, "status": "strength" },
+      { "part": "B", "subject": "Oral Medicine & Radiology", "questions": 14, "marks": 56, "status": "strength" },
+      { "part": "B", "subject": "Pedodontics & Preventive Dentistry", "questions": 14, "marks": 56, "status": "strength" },
+      { "part": "B", "subject": "Orthodontics & Dentofacial Orthopaedics", "questions": 14, "marks": 56, "status": "strength" },
+      { "part": "B", "subject": "Periodontology", "questions": 14, "marks": 56, "status": "strength" },
+      { "part": "B", "subject": "Prosthodontics & Crown & Bridge", "questions": 14, "marks": 56, "status": "strength" },
+      { "part": "B", "subject": "Conservative Dentistry & Endodontics", "questions": 14, "marks": 56, "status": "strength" },
+      { "part": "B", "subject": "Oral & Maxillofacial Surgery (OMFS)", "questions": 14, "marks": 56, "status": "target_branch" },
+      { "part": "B", "subject": "Public Health Dentistry", "questions": 14, "marks": 56, "status": "weak" }
+    ],
+    "keyArithmetic": "Every subject carries ≈56 marks. No subject is skippable. The 4 weak/diagnostic subjects (PHD, Physio & Biochem, Dental Materials, Dental Anatomy) total 56 Qs = 224 marks = 23.3% of the paper. Part A totals 400/960 (41.7%) and is the most under-prepared section."
+  },
+  "scoresAndCutoffs": {
+    "top10Bar": [
+      { "year": 2026, "air1": 802, "air10": 765, "fullTop10": "802, 785, 778, 778, 774, 772, 768, 767, 765, 765", "air1Name": "Dr. Namira Siddiqui (802/960, press-identified; NBEMS publishes roll numbers only)" },
+      { "year": 2025, "air1": 779, "air10": 742, "fullTop10": "779, 761, 754, 750, 748, 748, 746, 744, 744, 742", "note": "Conflict in secondary sources: Shiksha reports 779 for 2025; a coaching source claimed 772 (772 is the 2024 AIR 1)." },
+      { "year": 2024, "air1": 772, "air10": 720, "fullTop10": "772, 753, 752, 745, —, 739, 731, 724, 720, 720 (AIR 5 unstated in source)", "note": "2024 baseline" }
+    ],
+    "targetGuidance": {
+      "workingTarget": 790,
+      "top10Range": "765 – 802",
+      "accuracyRequirement": "786 requires ~202 correct and ≤22 wrong out of 224 attempted (16 unattempted). In 2026, only 37 marks separated AIR 1 (802) from AIR 10 (765) — just 9 to 10 net questions."
+    },
+    "qualifyingCutoffs": [
+      {
+        "year": "2026 Revised (14 Oct 2026)",
+        "generalEws": "234 (29.424th %ile)",
+        "generalPwbd": "218 (24.424th %ile)",
+        "scStObc": "200 (19.424th %ile)",
+        "note": "MoHFW letter 12 Oct 2026 lowered percentile by 20.576 points. Percentile revision changes eligibility, NEVER published merit ranks."
+      },
+      {
+        "year": "2026 Original (2 Jun 2026)",
+        "generalEws": "308 (50th %ile)",
+        "generalPwbd": "289 (45th %ile)",
+        "scStObc": "271 (40th %ile)",
+        "note": "Original qualifying cutoff."
+      },
+      {
+        "year": "2025 Revised (Aug 2025)",
+        "generalEws": "197 (orig 261)",
+        "generalPwbd": "182 (orig 244)",
+        "scStObc": "168 (orig 227)",
+        "note": "Lowered by 19.863 percentile points."
+      },
+      {
+        "year": "2024",
+        "generalEws": "263",
+        "generalPwbd": "246",
+        "scStObc": "230",
+        "note": "2024 cutoff"
+      }
+    ],
+    "automaticLoweringClause": "Per 2026 bulletin: If qualified candidates in any category are fewer than 3x the number of vacant seats, the Central Govt in consultation with DCI lowers the percentile so eligible applicants = 3x seats. Do not plan on revisions."
+  },
+  "cycle2026Timeline": {
+    "bulletinDate": "13 Mar 2026",
+    "applicationWindow": "14 Mar (3 pm) – 30 Mar 2026 (11:55 pm)",
+    "correctionWindow": "4–6 Apr 2026",
+    "finalImageEdit": "21–22 Apr 2026",
+    "cityIntimation": "22 Apr 2026",
+    "admitCard": "29 Apr 2026",
+    "examDate": "2 May 2026 (2:00 – 5:00 pm)",
+    "internshipCutoff": "31 May 2026",
+    "resultDate": "2 Jun 2026",
+    "scorecardDownload": "10 Jun 2026 (downloadable for 6 months only)",
+    "applicationFee": "General/OBC/EWS: ₹3,500; SC/ST/PwD: ₹2,500",
+    "pastDates": "2025: 19 Apr 2025; 2024: 18 Mar 2024; 2023: 1 Mar 2023. Exam moves by weeks between years."
+  },
+  "guessingMath": {
+    "formula": "EV = 5p - 1 (positive only if probability p > 0.20)",
+    "blindGuessEV": "+0.25 (p = 0.25 -> 5*0.25 - 1 = +0.25)",
+    "eliminateOneEV": "+0.67 (p = 0.33 -> 5*0.33 - 1 = +0.67)",
+    "eliminateTwoEV": "+1.50 (p = 0.50 -> 5*0.50 - 1 = +1.50)",
+    "tieBreakNuance": "EV mathematics ignores tie-breaks. Every wrong answer worsens tie-break (a) [fewer incorrect overall] and tie-break (c) [fewer incorrect in Part B]. For Top-10 rank, only attempt if you can eliminate at least 1 (ideally 2) options. Skip if you have zero clue."
+  },
+  "omfsDeepDive": {
+    "targetBranch": "Oral and Maxillofacial Surgery (OMFS)",
+    "whyTop10Matters": "KGMU Lucknow and BHU Varanasi OMFS seats close in the Top 10 (Ranks 4 and 9 in 2025 Round 1). MAIDS New Delhi closed at Rank 1 in 2026 Round 1. Any government OMFS seat in AIQ Round 1 closes by Rank ~156.",
+    "aiqRound1ClosingRanks2025": [
+      { "institute": "King George's Medical University (KGMU), Lucknow", "closingRank": 4 },
+      { "institute": "Institute of Medical Sciences (IMS), BHU, Varanasi", "closingRank": 9 },
+      { "institute": "Govt Dental College, Rohtak (PGIDS)", "closingRank": 18 },
+      { "institute": "Lady Hardinge Medical College, New Delhi", "closingRank": 24 },
+      { "institute": "SCB Dental College, Cuttack", "closingRank": 39 },
+      { "institute": "Dr. Ziauddin Ahmad Dental College, Aligarh (AMU)", "closingRank": 51 },
+      { "institute": "Govt Dental College, Mumbai", "closingRank": 54 },
+      { "institute": "Govt Dental College, Jaipur", "closingRank": 58 },
+      { "institute": "Govt Dental College, Raipur", "closingRank": 75 },
+      { "institute": "Govt Dental College, Hyderabad", "closingRank": 77 },
+      { "institute": "Govt Dental College, Aurangabad", "closingRank": 78 },
+      { "institute": "Govt Dental College, Thiruvananthapuram", "closingRank": "74–80" },
+      { "institute": "Tamil Nadu Govt Dental College, Chennai", "closingRank": 93 },
+      { "institute": "Govt Dental College, Jamnagar", "closingRank": 115 },
+      { "institute": "Goa Dental College, Bambolim", "closingRank": 131 },
+      { "institute": "Govt Dental College, Kadapa (Last listed govt seat)", "closingRank": 156 }
+    ],
+    "maidsFigures": "MAIDS New Delhi: OMFS closed at Rank 1 in 2026 Round 1. Prosthodontics closed at Rank 3 in 2026 Round 1 (2–3 range across years).",
+    "deemedOmfsRanks": "A.B. Shetty Mangalore: 555 (2024), 1854 (2025), 2245 (2026); Manipal Mangalore: 477 (2024), 3715 (2025), 3847 (2026); Bharati Vidyapeeth Sangli: 3810; DY Patil Pune: 3357–5042; Meenakshi Ammal Chennai: 5227.",
+    "iniCetWarning": "AIIMS New Delhi, JIPMER, and PGIMER dental seats are NOT through NEET-MDS — they are admitted through INI-CET, a completely separate exam with negative marking of -1/3."
+  },
+  "conflictsAndUnconfirmed2027": [
+    { "id": "conf_jk", "topic": "J&K BDS Graduates 50% AIQ Eligibility", "detail": "Some 2026 sources state J&K BDS graduates are eligible for 50% AIQ; others state they are NOT eligible unless GoI-nominated or AFMS. Check 2027 bulletin verbatim upon release." },
+    { "id": "conf_cutoff_date", "topic": "Internship Cut-off Date 2026 Discrepancy", "detail": "NBEMS 2026 official bulletin specified 31 May 2026; an MCC counselling guide mentioned 30 June 2026. NBEMS bulletin date is always authoritative." },
+    { "id": "conf_demo_size", "topic": "NBEMS Official Demo Test Size", "detail": "Secondary sources conflict on official demo test length (12 Qs in 10 mins vs 210 Qs). Use whichever is live for 2027 cycle." },
+    { "id": "conf_air1_2025", "topic": "2025 AIR 1 Score Conflict", "detail": "Shiksha reports 2025 AIR 1 score as 779; coaching claims reported 772 (772 was verified as the 2024 AIR 1)." },
+    { "id": "conf_toughest", "topic": "2026 Toughest Subjects Discrepancy", "detail": "Careers360 reported clinical sciences/OMFS/Perio as toughest; Shiksha subject table reported Dental Materials as Difficult and Oral Path as Moderate. Stable signal: Dental Materials consistently perceived hardest." },
+    { "id": "conf_lidocaine", "topic": "Lidocaine Maximum Dose Framing", "detail": "FDA/BNF guidelines allow 4.4 mg/kg plain (max 300 mg) and 7 mg/kg with adrenaline (max 500 mg). Traditional dental schools teach a flat 4.4 mg/kg (300 mg) cap even with vasoconstrictor. Indian recalls expect 4.4 without / 7 with adrenaline." },
+    { "id": "conf_bds_cutoff", "topic": "Minimum BDS Aggregate % Claim", "detail": "An uncorroborated coaching claim asserted '50% BDS aggregate required to sit'. NBEMS bulletin requires only BDS pass from DCI-recognized institution. BDS aggregate % is used for tie-break (d)." },
+    { "id": "conf_age_limit", "topic": "Minimum Age Requirement", "detail": "Some coaching sites state minimum age 20 years; official bulletin lists no minimum or maximum age limit." },
+    { "id": "conf_ranks_marks", "topic": "Marks vs Rank Variations", "detail": "Secondary aggregators vary by up to ~50 ranks for the same mark bracket. Use 790+ as primary target." }
+  ],
+  "officialWatchlist": [
+    { "id": "nbems_main", "name": "NBEMS Official Portal", "url": "https://natboard.edu.in/", "purpose": "Official examination announcements and notices" },
+    { "id": "nbems_neetmds", "name": "NBEMS NEET-MDS Official Page", "url": "https://natboard.edu.in/viewnbeexam?exam=neetmds", "purpose": "Information bulletin 2027, application forms, notices" },
+    { "id": "nbems_nbe", "name": "NBE Secondary Portal & Caution Notices", "url": "https://nbe.edu.in/", "purpose": "Direct exam server and candidate login" },
+    { "id": "mcc_main", "name": "MCC Official Portal", "url": "https://mcc.nic.in/", "purpose": "50% AIQ and Deemed University counselling schedules" },
+    { "id": "mcc_mds", "name": "MCC MDS Counselling Scheme", "url": "https://mcc.nic.in/mds-counselling/", "purpose": "Seat matrices, allotments, and counselling rounds" },
+    { "id": "dci_main", "name": "Dental Council of India (DCI / NDC)", "url": "https://dciindia.gov.in/", "purpose": "BDS/MDS regulations, college recognitions and seat counts" }
+  ]
+}
+;
