@@ -23,7 +23,8 @@ export type ScreenId =
   | 'update_centre'
   | 'settings'
   | 'memory'
-  | 'open_source_hub';
+  | 'open_source_hub'
+  | 'pdf_report';
 
 interface Props {
   onNavigate: (id: ScreenId) => void;
@@ -210,6 +211,9 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
             </button>
             <button onClick={() => onNavigate('ibq_spotter')} className="w-full py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-xs apple-press text-left">
               15-Image Diagnosis Drill
+            </button>
+            <button onClick={() => onNavigate('pdf_report')} className="w-full py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-xs apple-press text-left">
+              PDF to Report Studio
             </button>
             <button onClick={() => onNavigate('error_log')} className="w-full py-3 px-4 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold text-xs apple-press text-left">
               Open Mistake Log

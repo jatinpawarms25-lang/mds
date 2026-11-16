@@ -22,6 +22,7 @@ const UpdateCentreScreen = lazy(() => import('./screens/UpdateCentreScreen'));
 const SettingsScreen = lazy(() => import('./screens/SettingsScreen'));
 const MemoryScreen = lazy(() => import('./screens/MemoryScreen'));
 const OpenSourceHubScreen = lazy(() => import('./screens/OpenSourceHubScreen'));
+const PdfReportScreen = lazy(() => import('./screens/PdfReportScreen'));
 
 interface NavItem {
   id: ScreenId;
@@ -41,6 +42,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'error_log', label: 'Mistake Log', group: 'Practice' },
   { id: 'volatile_vault', label: 'Volatile Vault', group: 'Practice' },
   { id: 'ibq_spotter', label: 'Image Atlas', group: 'Practice' },
+  { id: 'pdf_report', label: 'PDF to Report', group: 'Practice' },
   { id: 'omfs_deep_dive', label: 'OMFS Deep Dive', group: 'Strategy' },
   { id: 'colleges', label: 'Colleges & Cutoffs', group: 'Strategy' },
   { id: 'after_result', label: 'After Result', group: 'Strategy' },
@@ -73,7 +75,8 @@ const SIMPLE_SCREENS: Record<Exclude<ScreenId, 'dashboard'>, LazyExoticComponent
   hidden_neglected: HiddenRulesScreen,
   watchlists: ChecklistsScreen,
   update_centre: UpdateCentreScreen,
-  settings: SettingsScreen
+  settings: SettingsScreen,
+  pdf_report: PdfReportScreen
 };
 
 type ThemeMode = 'dark' | 'light' | 'system';
