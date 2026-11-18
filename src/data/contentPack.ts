@@ -233,7 +233,7 @@ export const DEFAULT_CONTENT_PACK = {
     "automaticLoweringClause": "Per 2026 bulletin: If qualified candidates in any category are fewer than 3x the number of vacant seats, the Central Govt in consultation with DCI lowers the percentile so eligible applicants = 3x seats. Do not plan on revisions."
   },
   "cycle2026Timeline": {
-    "bulletinDate": "13 Mar 2026",
+    "bulletinDate": "March 2026 (sources vary between 11 Mar and 13 Mar; verify against official NBEMS PDF)",
     "applicationWindow": "14 Mar (3 pm) - 30 Mar 2026 (11:55 pm)",
     "correctionWindow": "4-6 Apr 2026",
     "finalImageEdit": "21-22 Apr 2026",

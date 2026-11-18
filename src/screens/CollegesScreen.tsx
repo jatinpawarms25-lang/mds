@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { GOVT_COLLEGES_DATA, type CollegeRow } from '../data/questions';
 import { useSyncCollection } from '../hooks/useSyncStore';
 
@@ -66,13 +66,31 @@ export default function CollegesScreen() {
     await putItem(b.id, { ...b.data, priority: idx + 1 });
   };
 
+  const [simRank, setSimRank] = useState<string>('');
+  const parsedRank = Number(simRank);
+  const hasSimRank = simRank.trim() !== '' && Number.isFinite(parsedRank) && parsedRank >= 1;
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto fluid-screen">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Colleges, Cutoffs & Required Marks</h1>
-        <p className="text-xs text-slate-400 mt-1">
-          2026 Baseline Cutoffs & Safe Marks out of 960. Set any college as your Primary Goal to drive your Today % Proximity Meter.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Colleges, Cutoffs & Required Marks</h1>
+          <p className="text-xs text-slate-400 mt-1">
+            2026 Baseline Cutoffs & Safe Marks. A rank reaches a seat only if Rank &lt;= Closing Rank.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label htmlFor="sim-rank-input" className="text-xs font-bold text-slate-300">Check AIR:</label>
+          <input
+            id="sim-rank-input"
+            type="number"
+            min={1}
+            value={simRank}
+            onChange={(e) => setSimRank(e.target.value)}
+            placeholder="e.g. 10"
+            className="w-28 bg-white/5 border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white"
+          />
+        </div>
       </div>
 
       <div className="glass-card rounded-3xl p-6 space-y-3 border border-sky-500/30">
@@ -131,7 +149,20 @@ export default function CollegesScreen() {
                     )}
                   </td>
                   <td className="py-2.5 px-3">{c.state}</td>
-                  <td className="py-2.5 px-3 font-mono text-sky-400">AIR {c.closingRank}</td>
+                  <td className="py-2.5 px-3 font-mono text-sky-400">
+                    AIR {c.closingRank}
+                    {hasSimRank && (
+                      <span
+                        className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                          parsedRank <= c.closingRank
+                            ? 'bg-emerald-500/20 text-emerald-300'
+                            : 'bg-rose-500/20 text-rose-300'
+                        }`}
+                      >
+                        {parsedRank <= c.closingRank ? 'Reachable' : 'Out'}
+                      </span>
+                    )}
+                  </td>
                   <td className="py-2.5 px-3 font-mono font-bold text-white">{reqMarks} / 960</td>
                   <td className="py-2.5 px-3 font-mono font-bold">
                     {diffPct === null ? (

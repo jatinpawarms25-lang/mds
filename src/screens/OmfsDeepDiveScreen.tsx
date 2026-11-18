@@ -26,7 +26,7 @@ export default function OmfsDeepDiveScreen() {
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
             <h3 className="text-sm font-bold text-white">Pederson Difficulty Index Calculator</h3>
-            <p className="text-xs text-slate-400">3-4 Easy, 5-6 Moderate, 7-10 Very Difficult (2024 recall: 1+2+3 = 6)</p>
+            <p className="text-xs text-slate-400">3-4 Slightly Difficult, 5-6 Moderately Difficult, 7-10 Very Difficult (Pederson 1988; some sources quote 5-7 / 8-10)</p>
           </div>
           <strong className="text-lg font-extrabold text-sky-400">
             {total} / 10 ({total <= 4 ? 'Easy' : total <= 6 ? 'Moderate' : 'Very Difficult'})

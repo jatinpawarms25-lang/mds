@@ -162,7 +162,7 @@ export default function App() {
       <aside className="hidden lg:flex flex-col w-64 shrink-0 glass-sidebar sticky top-0 h-screen z-20 p-4 justify-between">
         <div className="space-y-4 overflow-y-auto pr-1">
           <div className="px-2 pt-1 pb-2 border-b border-white/10">
-            <div className="text-xs font-bold uppercase tracking-widest text-sky-400">MDS OS</div>
+            <div className="text-xs font-bold uppercase tracking-widest text-sky-400">ApexMDS</div>
             <div className="text-sm font-extrabold text-white">Liquid Glass Edition</div>
           </div>
 
@@ -213,7 +213,7 @@ export default function App() {
         {/* Top Glass Bar */}
         <header className="glass-nav-bar sticky top-0 z-20 px-4 md:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 lg:hidden">
-            <span className="text-xs font-extrabold text-sky-400 uppercase tracking-wider">MDS OS</span>
+            <span className="text-xs font-extrabold text-sky-400 uppercase tracking-wider">ApexMDS</span>
           </div>
           <div className="hidden lg:block text-xs text-slate-400 font-semibold">
             {NAV_ITEMS.find((n) => n.id === activeScreen)?.label || 'Today'}

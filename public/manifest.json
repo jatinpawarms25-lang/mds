@@ -1,12 +1,18 @@
 {
-  "name": "NEET-MDS Top-10 Planner (MDS OS)",
-  "short_name": "MDS OS",
-  "description": "Offline-first NEET-MDS 2027 Top-10 study command centre with real-time Supabase sync",
+  "name": "ApexMDS - NEET-MDS Planner",
+  "short_name": "ApexMDS",
+  "description": "Offline-first NEET-MDS study command centre with real-time Supabase sync",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#090d16",
-  "theme_color": "#007aff",
+  "theme_color": "#0ea5e9",
   "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",

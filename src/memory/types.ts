@@ -31,7 +31,10 @@ export interface CardRecord {
   intervalDays: number;
   easeFactor: number; // SM-2 ease (default 2.5)
   stability: number; // FSRS S (days)
+  stabilityFast?: number; // FSRS-7 dual-trace fast stability
   difficulty: number; // FSRS D (1..10)
+  modelId?: 'fsrs-6' | 'fsrs-7';
+  weightsId?: string;
   reps: number;
   lapses: number;
   suspended: boolean;
@@ -47,6 +50,8 @@ export interface CardRecord {
 
 export interface DeckOptions {
   scheduler: SchedulerKind;
+  fsrsModel?: 'fsrs-6' | 'fsrs-7';
+  enableFuzz?: boolean;
   desiredRetention: number; // default 0.90
   maxIntervalDays: number; // default 36500
   learningStepsMin: number[]; // default [1, 10]
