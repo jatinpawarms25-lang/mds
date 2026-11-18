@@ -8,14 +8,19 @@
   --bg-base: #060a14;
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --card-bg: rgba(255, 255, 255, 0.08);
-  --card-border: rgba(255, 255, 255, 0.22);
-  --card-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -1px 12px rgba(255, 255, 255, 0.06);
-  --bar-bg: rgba(8, 13, 26, 0.68);
+  --card-bg: rgba(15, 23, 42, 0.86);
+  --solid-surface: rgba(15, 23, 42, 0.94);
+  --mat-ultra-thin: rgba(255, 255, 255, 0.04);
+  --mat-thin: rgba(255, 255, 255, 0.08);
+  --mat-regular: rgba(15, 23, 42, 0.78);
+  --mat-thick: rgba(8, 13, 26, 0.90);
+  --card-border: rgba(255, 255, 255, 0.18);
+  --card-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.30), inset 0 -1px 12px rgba(255, 255, 255, 0.05);
+  --bar-bg: rgba(8, 13, 26, 0.72);
   --accent: #007aff;
-  --ambient-1: rgba(14, 165, 233, 0.34);
-  --ambient-2: rgba(139, 92, 246, 0.28);
-  --ambient-3: rgba(16, 185, 129, 0.20);
+  --ambient-1: rgba(14, 165, 233, 0.28);
+  --ambient-2: rgba(139, 92, 246, 0.24);
+  --ambient-3: rgba(16, 185, 129, 0.18);
   --mem-again: #ef4444;
   --mem-hard: #f59e0b;
   --mem-good: #10b981;
@@ -27,14 +32,19 @@
   --bg-base: #eef2f9;
   --text-primary: #1c1c1e;
   --text-secondary: #48484a;
-  --card-bg: rgba(255, 255, 255, 0.76);
-  --card-border: rgba(255, 255, 255, 0.85);
-  --card-highlight: inset 0 1px 2px rgba(255, 255, 255, 0.98), inset 0 -2px 12px rgba(14, 165, 233, 0.08);
-  --bar-bg: rgba(242, 244, 250, 0.78);
+  --card-bg: rgba(255, 255, 255, 0.92);
+  --solid-surface: #ffffff;
+  --mat-ultra-thin: rgba(255, 255, 255, 0.50);
+  --mat-thin: rgba(255, 255, 255, 0.68);
+  --mat-regular: rgba(255, 255, 255, 0.84);
+  --mat-thick: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(15, 23, 42, 0.12);
+  --card-highlight: inset 0 1px 2px rgba(255, 255, 255, 0.98), inset 0 -2px 12px rgba(14, 165, 233, 0.06);
+  --bar-bg: rgba(242, 244, 250, 0.82);
   --accent: #007aff;
-  --ambient-1: rgba(56, 189, 248, 0.35);
-  --ambient-2: rgba(167, 139, 250, 0.30);
-  --ambient-3: rgba(52, 211, 153, 0.22);
+  --ambient-1: rgba(56, 189, 248, 0.30);
+  --ambient-2: rgba(167, 139, 250, 0.24);
+  --ambient-3: rgba(52, 211, 153, 0.18);
 }
 
 [data-theme="light"] .text-white,
@@ -65,7 +75,7 @@
 [data-theme="light"] .bg-white\/\[0\.04\],
 [data-theme="light"] .bg-white\/5,
 [data-theme="light"] .bg-white\/10 {
-  background-color: rgba(255, 255, 255, 0.88) !important;
+  background-color: rgba(255, 255, 255, 0.92) !important;
   border-color: rgba(0, 0, 0, 0.12) !important;
 }
 
@@ -83,11 +93,12 @@ body {
   background-color: var(--bg-base);
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
-  transition: background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
+  transition: background-color 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.25s ease;
 }
 
 .mono { font-family: var(--font-mono); }
 .num-tabular { font-variant-numeric: tabular-nums; }
+.cv-auto { content-visibility: auto; contain-intrinsic-size: 120px; }
 
 @keyframes liquid-drift-1 {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
@@ -101,13 +112,9 @@ body {
   0% { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.985); }
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.75; }
-  50% { opacity: 1; }
-}
 
 .fluid-screen {
-  animation: fluid-enter 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fluid-enter 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .ambient-canvas {
@@ -141,52 +148,55 @@ body {
   animation: liquid-drift-2 20s ease-in-out infinite;
 }
 
-/* Apple iOS 26 / macOS Tahoe Liquid Glass Surface */
+/* Solid clinical & question surface (Part 13: never glass-on-glass, >= 4.5:1 contrast) */
+.solid-clinical-card {
+  position: relative;
+  background: var(--solid-surface);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.22);
+}
+
 .glass-card, .material-regular {
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, var(--card-bg) 55%, rgba(255, 255, 255, 0.04) 100%);
-  backdrop-filter: blur(24px) saturate(190%) brightness(1.04);
-  -webkit-backdrop-filter: blur(24px) saturate(190%) brightness(1.04);
+  background: var(--card-bg);
   border: 1px solid var(--card-border);
-  box-shadow: var(--card-highlight), 0 12px 36px -8px rgba(0, 0, 0, 0.28);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease;
+  box-shadow: var(--card-highlight), 0 12px 32px -8px rgba(0, 0, 0, 0.24);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
   contain: layout style;
-}
-.glass-card:hover {
-  border-color: rgba(56, 189, 248, 0.35);
 }
 
 .liquid-pill {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%);
-  backdrop-filter: blur(20px) saturate(190%);
-  -webkit-backdrop-filter: blur(20px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 8px 24px rgba(0, 0, 0, 0.22);
+  background: var(--mat-regular);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid var(--card-border);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 8px 24px rgba(0, 0, 0, 0.22);
 }
 
+/* Glass belongs strictly to the navigation and control layer */
 .glass-nav-bar {
   background: var(--bar-bg);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  backdrop-filter: blur(20px) saturate(185%);
+  -webkit-backdrop-filter: blur(20px) saturate(185%);
   border-bottom: 1px solid var(--card-border);
   box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
 }
 .glass-sidebar {
   background: var(--bar-bg);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  backdrop-filter: blur(20px) saturate(185%);
+  -webkit-backdrop-filter: blur(20px) saturate(185%);
   border-right: 1px solid var(--card-border);
 }
 .glass-tab-bar {
   background: var(--bar-bg);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  backdrop-filter: blur(20px) saturate(185%);
+  -webkit-backdrop-filter: blur(20px) saturate(185%);
   border-top: 1px solid var(--card-border);
 }
 
-/* 60 fps Android mobile GPU optimization */
+/* Mobile 60 fps cap: blur <= 20px, no animated full-screen blurred canvases */
 @media (max-width: 767px) {
-  .glass-card, .material-regular, .glass-nav-bar, .glass-tab-bar {
+  .glass-nav-bar, .glass-tab-bar, .liquid-pill {
     backdrop-filter: blur(14px) saturate(165%);
     -webkit-backdrop-filter: blur(14px) saturate(165%);
   }
@@ -197,25 +207,45 @@ body {
 }
 
 .apple-press {
-  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease, box-shadow 0.22s ease;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
   cursor: pointer;
-  min-height: 36px;
+  min-height: 44px;
 }
 .apple-press:hover {
   transform: translateY(-1px);
 }
 .apple-press:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
   opacity: 0.90;
 }
 
 .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 16px), 16px); }
 
+/* Quality Tier Low or In-App Reduce Transparency */
+[data-glass="low"] .glass-nav-bar,
+[data-glass="low"] .glass-sidebar,
+[data-glass="low"] .glass-tab-bar,
+[data-glass="low"] .liquid-pill,
+[data-reduce-transparency="true"] .glass-nav-bar,
+[data-reduce-transparency="true"] .glass-sidebar,
+[data-reduce-transparency="true"] .glass-tab-bar,
+[data-reduce-transparency="true"] .liquid-pill {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--mat-thick) !important;
+}
+
 @media (prefers-reduced-transparency: reduce) {
   .glass-card, .material-regular, .glass-nav-bar, .glass-sidebar, .glass-tab-bar, .liquid-pill {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    background: var(--bg-base) !important;
+    background: var(--mat-thick) !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root, [data-theme="light"] {
+    --card-border: currentColor;
   }
 }
 

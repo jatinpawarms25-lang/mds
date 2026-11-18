@@ -97,6 +97,41 @@ export default function App() {
     return 'dark';
   }, [settingsRows]);
 
+  const glassQuality = useMemo<'auto' | 'high' | 'low'>(() => {
+    const found = settingsRows.find((r) => r.id === 'glassQuality');
+    const v = found?.data?.value;
+    if (v === 'high' || v === 'low' || v === 'auto') return v;
+    return 'auto';
+  }, [settingsRows]);
+
+  const reduceTransparency = useMemo<boolean>(() => {
+    const found = settingsRows.find((r) => r.id === 'reduceTransparency');
+    return Boolean(found?.data?.value);
+  }, [settingsRows]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-reduce-transparency', reduceTransparency ? 'true' : 'false');
+    if (glassQuality === 'high' || glassQuality === 'low') {
+      document.documentElement.setAttribute('data-glass', glassQuality);
+      return;
+    }
+    let rafId = 0;
+    let frames = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      frames += 1;
+      if (now - start < 1000) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        const avgMs = (now - start) / Math.max(1, frames);
+        document.documentElement.setAttribute('data-glass', avgMs > 24 ? 'low' : 'high');
+      }
+    };
+    document.documentElement.setAttribute('data-glass', 'high');
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [glassQuality, reduceTransparency]);
+
   useEffect(() => {
     const applyTheme = () => {
       let resolved: 'dark' | 'light' = themeMode === 'light' ? 'light' : 'dark';

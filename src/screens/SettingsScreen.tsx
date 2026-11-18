@@ -287,6 +287,35 @@ export default function SettingsScreen() {
         </div>
       )}
 
+      {/* Appearance & Glass Quality (Part 13) */}
+      <div className="glass-card rounded-3xl p-6 space-y-4">
+        <h2 className="text-base font-extrabold text-white">Appearance &amp; Glass Quality (Part 13)</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label className="text-slate-300 font-semibold block mb-1">Glass Quality</label>
+            <select
+              value={getSetting('glassQuality') || 'auto'}
+              onChange={(e) => setSetting('glassQuality', e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white"
+            >
+              <option value="auto" className="bg-slate-900">Auto (1-second FPS probe)</option>
+              <option value="high" className="bg-slate-900">High (Full Liquid Glass)</option>
+              <option value="low" className="bg-slate-900">Low (Solid Translucent)</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/10 w-full cursor-pointer">
+              <input
+                type="checkbox"
+                checked={getSetting('reduceTransparency') === 'true'}
+                onChange={(e) => setSetting('reduceTransparency', e.target.checked)}
+              />
+              <span className="text-slate-200 font-semibold">Reduce transparency (high contrast)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
       {/* Rule R4 Personal Settings (No Defaults in Code) */}
       <div className="glass-card rounded-3xl p-6 space-y-4">
         <h2 className="text-base font-extrabold text-white">Personal Exam Settings (Rule R4 - No Defaults)</h2>
