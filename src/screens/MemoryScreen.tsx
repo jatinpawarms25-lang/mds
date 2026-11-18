@@ -10,7 +10,36 @@ import { balanceIntervalLoad, optimizeFsrsParameters, simulateWorkload, type Opt
 import type { CardRecord, DeckOptions, NoteRecord, NoteType, Rating, SchedulerKind } from '../memory/types';
 import { getAllEvents } from '../sync/db';
 import { generateUuid, syncEngine } from '../sync/syncEngine';
+import { soundFX } from '../utils/audio';
 import { triggerHaptic } from '../utils/haptics';
+
+function renderClozeText(text: string, showAnswer: boolean) {
+  if (!text || !text.includes('{{c')) return text;
+  const parts = text.split(/(\{\{c\d+::.*?\}\})/g);
+  return (
+    <>
+      {parts.map((part, idx) => {
+        const match = part.match(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/);
+        if (match) {
+          const answer = match[1];
+          if (!showAnswer) {
+            return (
+              <span key={idx} className="inline-block px-2 py-0.5 mx-1 rounded bg-sky-500/30 text-sky-300 font-bold border border-sky-400/40">
+                [ ... ]
+              </span>
+            );
+          }
+          return (
+            <span key={idx} className="inline-block px-2 py-0.5 mx-1 rounded bg-emerald-500/30 text-emerald-300 font-bold border border-emerald-400/50">
+              {answer}
+            </span>
+          );
+        }
+        return part;
+      })}
+    </>
+  );
+}
 
 type MemoryTab = 'review' | 'add' | 'browse' | 'stats' | 'options';
 
@@ -87,6 +116,7 @@ export default function MemoryScreen() {
     setSessionReviewed((p) => p + 1);
     if (rating === 1) setSessionAgain((p) => p + 1);
     setShowAnswer(false);
+    soundFX.playTap();
     triggerHaptic(rating === 1 ? 'warning' : 'success');
     if (outcome.leechTriggered) {
       setStatusMsg(`Leech alert: card reached ${outcome.card.lapses} lapses and was tagged "leech".`);
@@ -172,8 +202,12 @@ export default function MemoryScreen() {
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) return;
       if (e.code === 'Space' || e.key === 'Enter') {
         e.preventDefault();
-        if (!showAnswer) setShowAnswer(true);
-        else void handleRate(3);
+        if (!showAnswer) {
+          soundFX.playCardFlip();
+          setShowAnswer(true);
+        } else {
+          void handleRate(3);
+        }
       } else if (showAnswer && (e.key === '1' || e.key === '2' || e.key === '3' || e.key === '4')) {
         e.preventDefault();
         void handleRate(Number(e.key) as Rating);
@@ -481,18 +515,21 @@ export default function MemoryScreen() {
                   </div>
                 )}
                 <div className="text-base md:text-lg font-bold text-white whitespace-pre-wrap leading-relaxed">
-                  {activeCard.front}
+                  {renderClozeText(activeCard.front, showAnswer)}
                 </div>
                 {showAnswer && (
                   <div className="pt-4 border-t border-white/10 text-sm md:text-base text-emerald-300 whitespace-pre-wrap leading-relaxed">
-                    {activeCard.back}
+                    {renderClozeText(activeCard.back, true)}
                   </div>
                 )}
               </div>
 
               {!showAnswer ? (
                 <button
-                  onClick={() => setShowAnswer(true)}
+                  onClick={() => {
+                    soundFX.playCardFlip();
+                    setShowAnswer(true);
+                  }}
                   className="w-full py-3.5 rounded-2xl bg-sky-500 text-white font-bold text-sm apple-press"
                 >
                   Show Answer (Space or Tap)

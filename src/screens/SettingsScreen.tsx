@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { useSyncCollection, useSyncConflicts, useSyncStatus } from '../hooks/useSyncStore';
 import { syncEngine } from '../sync/syncEngine';
+import { soundFX } from '../utils/audio';
 import { setHapticsEnabled, triggerHaptic } from '../utils/haptics';
 
 export default function SettingsScreen() {
@@ -331,6 +332,66 @@ export default function SettingsScreen() {
                 <span className="text-slate-400 text-[11px] block">Vibrate gently on card swipe, answer selection, and navigation taps on supported mobile devices</span>
               </div>
             </label>
+          </div>
+          <div className="flex items-end col-span-1 sm:col-span-2">
+            <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/10 w-full cursor-pointer min-h-[44px]">
+              <input
+                type="checkbox"
+                checked={soundFX.isEnabled()}
+                onChange={(e) => {
+                  const enabled = e.target.checked;
+                  soundFX.setEnabled(enabled);
+                  setSetting('soundEnabled', enabled);
+                  if (enabled) soundFX.playChime();
+                }}
+              />
+              <div>
+                <span className="text-slate-200 font-semibold block">Tactile Web Audio Sound Effects</span>
+                <span className="text-slate-400 text-[11px] block">Subtle mechanical click on card flip, soft positive chimes on timer & quiz completions</span>
+              </div>
+            </label>
+          </div>
+          <div>
+            <label className="text-slate-300 font-semibold block mb-1">
+              FSRS Desired Retention: {getSetting('retention') || '90'}%
+            </label>
+            <input
+              type="range"
+              min="80"
+              max="97"
+              value={getSetting('retention') || '90'}
+              onChange={(e) => {
+                setSetting('retention', e.target.value);
+                soundFX.playTap();
+              }}
+              className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-sky-400"
+            />
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-0.5">
+              <span>80% (Longer intervals)</span>
+              <span>90% (Recommended)</span>
+              <span>97% (Strict Exam Mode)</span>
+            </div>
+          </div>
+          <div>
+            <label className="text-slate-300 font-semibold block mb-1">
+              Question Text Font Size: {getSetting('fontSize') || '16'}px
+            </label>
+            <input
+              type="range"
+              min="13"
+              max="22"
+              value={getSetting('fontSize') || '16'}
+              onChange={(e) => {
+                setSetting('fontSize', e.target.value);
+                soundFX.playTap();
+              }}
+              className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-sky-400"
+            />
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-0.5">
+              <span>13px (Compact)</span>
+              <span>16px (Default)</span>
+              <span>22px (Large / High Legibility)</span>
+            </div>
           </div>
         </div>
       </div>

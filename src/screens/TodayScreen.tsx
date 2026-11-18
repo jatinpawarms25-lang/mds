@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { computeStudyAnalytics, type ErrorInput, type MockSummaryInput } from '../analytics/engine';
 import { GoalProximityMeter } from '../components/GoalProximityMeter';
 import { useSyncCollection } from '../hooks/useSyncStore';
 import type { CardRecord } from '../memory/types';
 import { syncEngine } from '../sync/syncEngine';
 import type { SyncSnapshotInfo } from '../sync/types';
+import { soundFX } from '../utils/audio';
 import { triggerHaptic } from '../utils/haptics';
 
 export type ScreenId =
@@ -40,6 +41,14 @@ const ROUTINE_BLOCKS = [
   { key: 'spaced_recall', hours: '1h', title: 'Spaced Repetition & Mistake Autopsy', desc: 'Review mistakes logged at +2, +7, and +21 days' }
 ];
 
+const DENTAL_TRIVIA = [
+  'Pierre Fauchard is recognized as the Father of Modern Dentistry after publishing "Le Chirurgien Dentiste" in 1728.',
+  'G.V. Black introduced modern cavity preparation principles and standardized amalgam formulation in 1896.',
+  'Horace Wells first demonstrated nitrous oxide anesthesia for tooth extraction in Hartford, Connecticut in 1844.',
+  'Wilhelm Conrad Roentgen discovered X-rays on Nov 8, 1895; Otto Walkhoff took the first dental radiograph 14 days later.',
+  'Per-Ingvar Branemark discovered osseointegration in titanium in 1952 while studying rabbit fibula blood flow.'
+];
+
 export default function TodayScreen({ onNavigate, syncInfo }: Props) {
   const todayKey = new Date().toISOString().slice(0, 10);
   const { items: settings } = useSyncCollection<{ value: unknown }>('settings');
@@ -63,6 +72,27 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
     const done = ROUTINE_BLOCKS.filter((b) => Boolean(todayRoutine[b.key])).length;
     return Math.round((done / ROUTINE_BLOCKS.length) * 100);
   }, [todayRoutine]);
+
+  // Pomodoro Study Timer State
+  const [pomoMinutes, setPomoMinutes] = useState(50);
+  const [pomoSeconds, setPomoSeconds] = useState(50 * 60);
+  const [pomoActive, setPomoActive] = useState(false);
+
+  useEffect(() => {
+    if (!pomoActive) return;
+    const interval = setInterval(() => {
+      setPomoSeconds((prev) => {
+        if (prev <= 1) {
+          setPomoActive(false);
+          soundFX.playTimerBell();
+          triggerHaptic('success');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [pomoActive]);
 
   const examDate = String(settingsMap.examDate || '');
   const dismissedWarning = Boolean(settingsMap.dismissedWarning);
@@ -203,6 +233,62 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
         </div>
 
         <div className="space-y-4">
+          {/* Pomodoro Study Timer */}
+          <div className="glass-card rounded-3xl p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Deep Study Pomodoro</h3>
+              <span className="text-[10px] text-sky-400 font-mono">Ultradian Rhythm</span>
+            </div>
+            <div className="text-center py-2">
+              <div className="text-3xl font-black text-white font-mono tracking-wider">
+                {Math.floor(pomoSeconds / 60)}:{String(pomoSeconds % 60).padStart(2, '0')}
+              </div>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                {pomoActive ? 'Focus Block in Progress...' : 'Session Paused'}
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 text-[10px] font-mono">
+              <button
+                type="button"
+                onClick={() => { setPomoMinutes(25); setPomoSeconds(25 * 60); setPomoActive(false); soundFX.playTap(); }}
+                className={`py-1 rounded-lg border ${pomoMinutes === 25 ? 'bg-sky-500/20 text-sky-300 border-sky-400/40' : 'bg-white/5 border-white/10 text-slate-300'}`}
+              >
+                25m Classic
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPomoMinutes(50); setPomoSeconds(50 * 60); setPomoActive(false); soundFX.playTap(); }}
+                className={`py-1 rounded-lg border ${pomoMinutes === 50 ? 'bg-sky-500/20 text-sky-300 border-sky-400/40' : 'bg-white/5 border-white/10 text-slate-300'}`}
+              >
+                50m Deep
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPomoMinutes(90); setPomoSeconds(90 * 60); setPomoActive(false); soundFX.playTap(); }}
+                className={`py-1 rounded-lg border ${pomoMinutes === 90 ? 'bg-sky-500/20 text-sky-300 border-sky-400/40' : 'bg-white/5 border-white/10 text-slate-300'}`}
+              >
+                90m Exam
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => { setPomoActive(!pomoActive); soundFX.playTap(); }}
+                className={`w-full py-2.5 rounded-xl font-bold text-xs ${pomoActive ? 'bg-amber-500 text-white' : 'bg-sky-500 text-white'}`}
+              >
+                {pomoActive ? 'Pause Timer' : 'Start Focus Timer'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPomoSeconds(pomoMinutes * 60); setPomoActive(false); soundFX.playTap(); }}
+                className="px-3 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Shortcuts */}
           <div className="glass-card rounded-3xl p-5 space-y-3">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">Quick Shortcuts</h3>
             <button onClick={() => onNavigate('memory')} className="w-full py-3 px-4 rounded-2xl bg-sky-500 text-white font-bold text-xs apple-press text-left">

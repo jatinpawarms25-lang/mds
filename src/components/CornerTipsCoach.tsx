@@ -3,6 +3,7 @@ import { useSyncCollection } from '../hooks/useSyncStore';
 import { buildCardsFromNote } from '../memory/notes';
 import type { CardRecord, NoteRecord } from '../memory/types';
 import { generateUuid } from '../sync/syncEngine';
+import { soundFX } from '../utils/audio';
 import { triggerHaptic } from '../utils/haptics';
 
 export interface StudyTip {
@@ -57,6 +58,7 @@ export const HIGH_YIELD_TIPS: StudyTip[] = [
 export function CornerTipsCoach() {
   const [idx, setIdx] = useState(0);
   const [savedTips, setSavedTips] = useState<Record<string, boolean>>({});
+  const [explainMode, setExplainMode] = useState(false);
   const { putItem: putNote } = useSyncCollection<NoteRecord>('notes');
   const { putItem: putCard } = useSyncCollection<CardRecord>('cards');
 
@@ -77,6 +79,7 @@ export function CornerTipsCoach() {
   const cur = HIGH_YIELD_TIPS[idx];
 
   const handleSaveTip = async () => {
+    soundFX.playChime();
     triggerHaptic('success');
     const nowIso = new Date().toISOString();
     const noteId = generateUuid();
@@ -129,7 +132,11 @@ export function CornerTipsCoach() {
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={() => setIdx((p) => (p + 1) % HIGH_YIELD_TIPS.length)}
+            onClick={() => {
+              soundFX.playTap();
+              setIdx((p) => (p + 1) % HIGH_YIELD_TIPS.length);
+              setExplainMode(false);
+            }}
             className="text-[10px] min-h-[32px] px-2 py-0.5 rounded bg-white/10 text-slate-200 font-bold hover:bg-white/20 active:scale-95 transition-all"
           >
             Next Tip

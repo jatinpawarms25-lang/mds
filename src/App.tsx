@@ -1,10 +1,12 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type LazyExoticComponent } from 'react';
+import { CommandPalette } from './components/CommandPalette';
 import { CornerTipsCoach, HIGH_YIELD_TIPS } from './components/CornerTipsCoach';
 import { SyncStatusChip } from './components/SyncStatusChip';
 import { useSyncCollection, useSyncStatus } from './hooks/useSyncStore';
 import type { CardRecord } from './memory/types';
 import type { ScreenId } from './screens/TodayScreen';
 import { syncEngine } from './sync/syncEngine';
+import { soundFX } from './utils/audio';
 import { triggerHaptic } from './utils/haptics';
 
 const TodayScreen = lazy(() => import('./screens/TodayScreen'));
@@ -146,7 +148,6 @@ export default function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerQuery, setDrawerQuery] = useState('');
   const [cmdOpen, setCmdOpen] = useState(false);
-  const [cmdQuery, setCmdQuery] = useState('');
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const syncInfo = useSyncStatus();
@@ -220,20 +221,75 @@ export default function App() {
     return () => mq.removeEventListener('change', handler);
   }, [themeMode]);
 
+  const navigate = useCallback((id: ScreenId) => {
+    soundFX.playTap();
+    triggerHaptic('light');
+    setActiveScreen(id);
+    setDrawerOpen(false);
+    setDrawerQuery('');
+    setCmdOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCmdOpen((v) => !v);
-        setCmdQuery('');
-      } else if (e.key === 'Escape') {
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
+        const keyMap: Record<string, ScreenId> = {
+          '1': 'dashboard',
+          '2': 'plan',
+          '3': 'memory',
+          '4': 'cbt_mock',
+          '5': 'volatile_vault',
+          '6': 'ibq_spotter',
+          '7': 'error_log',
+          '8': 'daily_quiz',
+          '9': 'colleges'
+        };
+        if (keyMap[e.key]) {
+          e.preventDefault();
+          navigate(keyMap[e.key]);
+          return;
+        }
+      }
+      if (e.key === 'Escape') {
         setCmdOpen(false);
         setDrawerOpen(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [navigate]);
+
+  // Global Drag-and-Drop listener for .apkg and .csv flashcard decks
+  useEffect(() => {
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const files = e.dataTransfer?.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        if (file.name.endsWith('.apkg') || file.name.endsWith('.csv')) {
+          navigate('memory');
+          soundFX.playChime();
+        }
+      }
+    };
+    window.addEventListener('dragover', handleDragOver);
+    window.addEventListener('drop', handleDrop);
+    return () => {
+      window.removeEventListener('dragover', handleDragOver);
+      window.removeEventListener('drop', handleDrop);
+    };
+  }, [navigate]);
 
   /* Lock body scroll when drawer is open on mobile */
   useEffect(() => {
@@ -250,23 +306,6 @@ export default function App() {
     const next: ThemeMode = themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark';
     void putSetting('theme', { value: next });
   };
-
-  const navigate = useCallback((id: ScreenId) => {
-    triggerHaptic('light');
-    setActiveScreen(id);
-    setDrawerOpen(false);
-    setDrawerQuery('');
-    setCmdOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
-  const filteredCmds = useMemo(() => {
-    const q = cmdQuery.trim().toLowerCase();
-    if (!q) return NAV_ITEMS;
-    return NAV_ITEMS.filter(
-      (item) => item.label.toLowerCase().includes(q) || item.group.toLowerCase().includes(q)
-    );
-  }, [cmdQuery]);
 
   const filteredDrawer = useMemo(() => {
     const q = drawerQuery.trim().toLowerCase();
@@ -529,38 +568,12 @@ export default function App() {
       </nav>
 
       {/* Command Palette (Cmd/Ctrl+K) */}
-      {cmdOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
-          onClick={() => setCmdOpen(false)}
-        >
-          <div
-            className="w-full max-w-lg glass-card rounded-3xl p-4 space-y-3 fluid-screen"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <input
-              type="text"
-              autoFocus
-              value={cmdQuery}
-              onChange={(e) => setCmdQuery(e.target.value)}
-              placeholder="Jump to screen (e.g. Mock, Atlas, Timetable, Colleges)..."
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-white min-h-[44px]"
-            />
-            <div className="max-h-72 overflow-y-auto space-y-1">
-              {filteredCmds.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => navigate(item.id)}
-                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/10 text-xs text-slate-200 flex items-center justify-between min-h-[44px]"
-                >
-                  <span className="font-bold">{item.label}</span>
-                  <span className="text-[10px] text-slate-400">{item.group}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <CommandPalette
+        isOpen={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        onNavigate={navigate}
+        onToggleTheme={cycleTheme}
+      />
     </div>
   );
 }

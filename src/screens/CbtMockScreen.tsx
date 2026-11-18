@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CBT_PART_A_MOCK_QUESTIONS, CBT_PART_B_MOCK_QUESTIONS } from '../data/questions';
 import { useSyncCollection } from '../hooks/useSyncStore';
 import { generateUuid, syncEngine } from '../sync/syncEngine';
+import { soundFX } from '../utils/audio';
 import { triggerHaptic } from '../utils/haptics';
 
 interface MockRecord {
@@ -35,8 +36,19 @@ export default function CbtMockScreen() {
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [marked, setMarked] = useState<Record<string, boolean>>({});
+  const [struckOptions, setStruckOptions] = useState<Record<string, boolean>>({});
+  const [scratchpadOpen, setScratchpadOpen] = useState(false);
+  const [scratchNotes, setScratchNotes] = useState('');
   const [qElapsed, setQElapsed] = useState(0);
   const [showPalette, setShowPalette] = useState(false);
+
+  const toggleStrikeOption = (e: React.MouseEvent, qId: string, oIdx: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const key = `${qId}-${oIdx}`;
+    setStruckOptions((prev) => ({ ...prev, [key]: !prev[key] }));
+    soundFX.playTap();
+  };
 
   useEffect(() => {
     if (!cbtActive) return;
@@ -139,6 +151,7 @@ export default function CbtMockScreen() {
   };
 
   const finishCbt = async () => {
+    soundFX.playChime();
     triggerHaptic('success');
     setCbtActive(false);
     let pAC = 0;
@@ -204,6 +217,13 @@ export default function CbtMockScreen() {
                 {Math.floor((cbtPart === 'A' ? timerA : timerB) / 60)}:
                 {String((cbtPart === 'A' ? timerA : timerB) % 60).padStart(2, '0')}
               </span>
+              <button
+                type="button"
+                onClick={() => setScratchpadOpen((v) => !v)}
+                className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold"
+              >
+                {scratchpadOpen ? 'Hide Scratchpad' : 'Scratchpad'}
+              </button>
               <button
                 type="button"
                 onClick={() => setShowPalette((v) => !v)}
@@ -275,23 +295,61 @@ export default function CbtMockScreen() {
             </div>
           )}
 
+          {/* Prometric Scratchpad Drawer */}
+          {scratchpadOpen && (
+            <div className="p-3 bg-black/40 rounded-2xl border border-white/10 space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-300">
+                <span className="font-bold">Digital Rough Scratchpad (White Sheet Simulation)</span>
+                <button type="button" onClick={() => setScratchNotes('')} className="text-[10px] text-slate-400 hover:text-white">Clear</button>
+              </div>
+              <textarea
+                value={scratchNotes}
+                onChange={(e) => setScratchNotes(e.target.value)}
+                placeholder="Jot down rough calculations: LA max mg limits, Pederson indices, Ceph norms..."
+                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white placeholder-slate-400 font-mono resize-y min-h-[75px]"
+              />
+            </div>
+          )}
+
           <div className="text-sm font-semibold text-white leading-relaxed">{q.num}. {q.q}</div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
-            {q.options.map((opt, oIdx) => (
-              <button
-                key={oIdx}
-                type="button"
-                onClick={() => handleSelectOption(q.id, oIdx)}
-                className={`p-3.5 rounded-xl border text-left min-h-[44px] transition-all apple-press ${
-                  answers[q.id] === oIdx
-                    ? 'bg-sky-500/25 border-sky-400 text-white font-bold shadow-sm'
-                    : 'bg-white/[0.02] border-white/10 text-slate-300 hover:bg-white/5'
-                }`}
-              >
-                <span className="font-mono font-bold mr-1.5">{String.fromCharCode(65 + oIdx)}.</span> {opt}
-              </button>
-            ))}
+            {q.options.map((opt, oIdx) => {
+              const strikeKey = `${q.id}-${oIdx}`;
+              const isStruck = Boolean(struckOptions[strikeKey]);
+              const isSelected = answers[q.id] === oIdx;
+
+              return (
+                <div key={oIdx} className="relative flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isStruck) handleSelectOption(q.id, oIdx);
+                    }}
+                    onContextMenu={(e) => toggleStrikeOption(e, q.id, oIdx)}
+                    className={`w-full p-3.5 pr-12 rounded-xl border text-left min-h-[44px] transition-all apple-press ${
+                      isStruck
+                        ? 'opacity-40 line-through bg-black/20 border-white/5 text-slate-500'
+                        : isSelected
+                        ? 'bg-sky-500/25 border-sky-400 text-white font-bold shadow-sm'
+                        : 'bg-white/[0.02] border-white/10 text-slate-300 hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="font-mono font-bold mr-1.5">{String.fromCharCode(65 + oIdx)}.</span> {opt}
+                  </button>
+                  <button
+                    type="button"
+                    title={isStruck ? 'Restore Option' : 'Strike distractor'}
+                    onClick={(e) => toggleStrikeOption(e, q.id, oIdx)}
+                    className={`absolute right-2 px-1.5 py-1 rounded text-[10px] font-mono transition-colors ${
+                      isStruck ? 'text-amber-400 hover:text-white bg-white/10' : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    {isStruck ? 'Undo' : 'Strike'}
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t border-white/10">
