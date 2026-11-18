@@ -51,7 +51,12 @@ export const HIGH_YIELD_TIPS: StudyTip[] = [
 
 export function CornerTipsCoach() {
   const [idx, setIdx] = useState(0);
-  const [minimized, setMinimized] = useState(false);
+  const [minimized, setMinimized] = useState(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      return true;
+    }
+    return false;
+  });
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -65,31 +70,44 @@ export function CornerTipsCoach() {
   if (minimized) {
     return (
       <button
+        type="button"
         onClick={() => setMinimized(false)}
-        className="fixed bottom-20 lg:bottom-5 right-4 z-30 liquid-pill px-3.5 py-2 rounded-full text-[11px] font-extrabold text-sky-300 apple-press"
+        aria-label="Show Rank-10 Tip"
+        className="fixed bottom-20 lg:bottom-5 right-3 lg:right-4 z-30 liquid-pill px-3.5 py-2 rounded-full text-[11px] font-extrabold text-sky-300 apple-press shadow-lg flex items-center gap-1.5 min-h-[44px]"
       >
-        + Rank-10 Tip
+        <svg className="w-3.5 h-3.5 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <span>+ Rank-10 Tip</span>
       </button>
     );
   }
 
   return (
-    <div className="fixed bottom-20 lg:bottom-5 right-4 z-30 max-w-xs w-[300px] liquid-pill rounded-2xl p-3.5 text-xs space-y-1.5 fluid-screen">
+    <aside
+      aria-label="High-Yield Study Coach"
+      className="fixed bottom-20 lg:bottom-5 right-3 lg:right-4 z-30 max-w-[calc(100vw-24px)] w-[300px] sm:w-[320px] liquid-pill rounded-2xl p-3.5 text-xs space-y-1.5 fluid-screen shadow-2xl"
+    >
       <div className="flex items-center justify-between gap-2">
         <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/25 text-sky-300">
           {cur.tag}
         </span>
         <div className="flex items-center gap-1.5">
           <button
+            type="button"
             onClick={() => setIdx((p) => (p + 1) % HIGH_YIELD_TIPS.length)}
-            className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-slate-200 font-bold hover:bg-white/20"
+            className="text-[10px] min-h-[32px] px-2 py-0.5 rounded bg-white/10 text-slate-200 font-bold hover:bg-white/20 active:scale-95 transition-all"
           >
             Next Tip
           </button>
           <button
+            type="button"
             onClick={() => setMinimized(true)}
-            className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 font-bold"
-            title="Minimize"
+            className="text-[10px] min-w-[32px] min-h-[32px] flex items-center justify-center rounded bg-white/5 text-slate-400 hover:text-white font-bold"
+            title="Minimize coach"
+            aria-label="Minimize coach"
           >
             -
           </button>
@@ -97,6 +115,6 @@ export function CornerTipsCoach() {
       </div>
       <div className="font-extrabold text-white text-xs">{cur.title}</div>
       <p className="text-[11px] text-slate-300 leading-relaxed">{cur.tip}</p>
-    </div>
+    </aside>
   );
 }
