@@ -5,6 +5,7 @@ import { useSyncCollection } from '../hooks/useSyncStore';
 import type { CardRecord } from '../memory/types';
 import { syncEngine } from '../sync/syncEngine';
 import type { SyncSnapshotInfo } from '../sync/types';
+import { triggerHaptic } from '../utils/haptics';
 
 export type ScreenId =
   | 'dashboard'
@@ -176,7 +177,11 @@ export default function TodayScreen({ onNavigate, syncInfo }: Props) {
               return (
                 <button
                   key={block.key}
-                  onClick={() => void putRoutine(todayKey, { ...todayRoutine, [block.key]: !checked })}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(checked ? 'light' : 'success');
+                    void putRoutine(todayKey, { ...todayRoutine, [block.key]: !checked });
+                  }}
                   className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-center gap-3 apple-press ${
                     checked ? 'bg-emerald-500/10 border-emerald-500/30 text-white' : 'bg-white/[0.02] border-white/10'
                   }`}

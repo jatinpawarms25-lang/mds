@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CBT_PART_A_MOCK_QUESTIONS, CBT_PART_B_MOCK_QUESTIONS } from '../data/questions';
 import { useSyncCollection } from '../hooks/useSyncStore';
 import { generateUuid, syncEngine } from '../sync/syncEngine';
+import { triggerHaptic } from '../utils/haptics';
 
 interface MockRecord {
   id: string;
@@ -33,16 +34,22 @@ export default function CbtMockScreen() {
   const [timerB, setTimerB] = useState(105 * 60);
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [marked, setMarked] = useState<Record<string, boolean>>({});
+  const [qElapsed, setQElapsed] = useState(0);
+  const [showPalette, setShowPalette] = useState(false);
 
   useEffect(() => {
     if (!cbtActive) return;
     const t = setInterval(() => {
+      setQElapsed((p) => p + 1);
       if (cbtPart === 'A') {
         setTimerA((p) => {
           if (p <= 1) {
             setPartALocked(true);
             setCbtPart('B');
             setIdx(0);
+            setQElapsed(0);
+            triggerHaptic('warning');
             return 0;
           }
           return p - 1;
@@ -55,8 +62,34 @@ export default function CbtMockScreen() {
   }, [cbtActive, cbtPart]);
 
   const calcScore = (aC + bC) * 4 - (aW + bW);
+  const totalWrong = aW + bW;
+  const partBWrongShare = totalWrong > 0 ? Math.round((bW / totalWrong) * 100) : 0;
+  const partBScore = bC * 4 - bW;
+
+  const tieBreakTier = useMemo(() => {
+    if (bW <= 8 && totalWrong <= 20) {
+      return {
+        level: 'Bulletproof Top-10 Safe',
+        badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+        desc: 'Fewer than 9 Part B wrongs. Under NBE Rule 15.2, your score will defeat 95%+ of tied candidates in counseling.'
+      };
+    }
+    if (bW <= 12 && totalWrong <= 24) {
+      return {
+        level: 'Competitive Defense',
+        badge: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
+        desc: 'Good control of clinical errors. Keep Part B guesses under strict 5p - 1 Expected Value threshold.'
+      };
+    }
+    return {
+      level: 'Tie-Break Vulnerable',
+      badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      desc: `${bW} wrongs in Part B (${partBWrongShare}% of total leakage). Tied scores will rank lower because NBE checks Part B wrongs first.`
+    };
+  }, [bW, totalWrong, partBWrongShare]);
 
   const handleLogMock = async () => {
+    triggerHaptic('success');
     const aU = Math.max(0, 100 - aC - aW);
     const bU = Math.max(0, 140 - bC - bW);
     const att = aC + bC + aW + bW;
@@ -81,14 +114,32 @@ export default function CbtMockScreen() {
       duration_ms: 180 * 60 * 1000,
       subject: 'Full Mock',
       kind: 'cbt_mock',
-      payload: { source, totalScore: calcScore }
+      payload: { source, totalScore: calcScore, tieBreakTier: tieBreakTier.level }
     });
   };
 
   const qList = cbtPart === 'A' ? CBT_PART_A_MOCK_QUESTIONS : CBT_PART_B_MOCK_QUESTIONS;
   const q = qList[idx] || qList[0];
 
+  const handleSelectOption = (qId: string, optIdx: number) => {
+    triggerHaptic('light');
+    setAnswers((p) => ({ ...p, [qId]: optIdx }));
+  };
+
+  const handleToggleMark = (qId: string) => {
+    triggerHaptic('medium');
+    setMarked((p) => ({ ...p, [qId]: !p[qId] }));
+  };
+
+  const handleJumpQuestion = (targetIdx: number) => {
+    triggerHaptic('light');
+    setIdx(targetIdx);
+    setQElapsed(0);
+    setShowPalette(false);
+  };
+
   const finishCbt = async () => {
+    triggerHaptic('success');
     setCbtActive(false);
     let pAC = 0;
     let pAW = 0;
@@ -120,69 +171,171 @@ export default function CbtMockScreen() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">CBT Simulator & Mocks</h1>
-        <p className="text-xs text-slate-400 mt-1">Part A: 100 Qs / 75 min strict lock. Part B: 140 Qs / 105 min. +4 / -1 / 0.</p>
+    <div className="space-y-6 max-w-6xl mx-auto fluid-screen">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">CBT Simulator &amp; Mocks</h1>
+          <p className="text-xs text-slate-400 mt-1">Part A: 100 Qs / 75 min strict lock. Part B: 140 Qs / 105 min. Official +4 / -1 / 0 NBE rule.</p>
+        </div>
       </div>
 
       {cbtActive ? (
-        <div className="glass-card rounded-3xl p-6 space-y-4 border border-sky-500/40">
+        <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 border border-sky-500/40">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
-            <div className="text-xs font-bold text-sky-400">
-              Part {cbtPart} ({partALocked ? 'Part A Locked' : 'Part A Active'}) - Q{idx + 1}/{qList.length}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold text-sky-400">
+                Part {cbtPart} ({partALocked ? 'Part A Locked' : 'Part A Active'}) - Q{idx + 1}/{qList.length}
+              </span>
+              <span
+                className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                  qElapsed > 60
+                    ? 'bg-rose-500/20 text-rose-300'
+                    : qElapsed > 45
+                    ? 'bg-amber-500/20 text-amber-300'
+                    : 'bg-emerald-500/20 text-emerald-300'
+                }`}
+              >
+                Pacing: {qElapsed}s (Target 45s)
+              </span>
             </div>
+
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm font-bold text-amber-300">
+              <span className="font-mono text-sm font-bold text-amber-300 bg-black/40 px-2.5 py-1 rounded-xl">
                 {Math.floor((cbtPart === 'A' ? timerA : timerB) / 60)}:
                 {String((cbtPart === 'A' ? timerA : timerB) % 60).padStart(2, '0')}
               </span>
+              <button
+                type="button"
+                onClick={() => setShowPalette((v) => !v)}
+                className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold"
+              >
+                {showPalette ? 'Hide Palette' : 'Palette'}
+              </button>
               {cbtPart === 'A' ? (
                 <button
+                  type="button"
                   onClick={() => {
                     setPartALocked(true);
                     setCbtPart('B');
                     setIdx(0);
+                    setQElapsed(0);
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-rose-500 text-white text-xs font-bold"
+                  className="px-3 py-1.5 rounded-xl bg-rose-500 text-white text-xs font-bold apple-press"
                 >
-                  Lock Part A & Start Part B
+                  Lock Part A &amp; Go to B
                 </button>
               ) : (
-                <button onClick={() => void finishCbt()} className="px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => void finishCbt()}
+                  className="px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold apple-press"
+                >
                   Submit CBT
                 </button>
               )}
             </div>
           </div>
 
-          <div className="text-sm font-semibold text-white">{q.num}. {q.q}</div>
+          {/* Prometric Question Palette Drawer */}
+          {showPalette && (
+            <div className="p-3 bg-black/30 rounded-2xl border border-white/10 space-y-2">
+              <div className="flex items-center justify-between text-[11px] text-slate-300">
+                <span className="font-bold">TCS iON Status Palette:</span>
+                <div className="flex items-center gap-2 text-[10px]">
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-emerald-500" /> Answered</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-purple-500" /> Review</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-slate-600" /> Unanswered</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-10 sm:grid-cols-15 md:grid-cols-20 gap-1.5 max-h-36 overflow-y-auto p-1">
+                {qList.map((item, qI) => {
+                  const isAns = answers[item.id] !== undefined;
+                  const isRev = Boolean(marked[item.id]);
+                  const isCur = qI === idx;
+                  const bg = isCur
+                    ? 'ring-2 ring-sky-400 bg-sky-500 text-white'
+                    : isRev
+                    ? 'bg-purple-600 text-white'
+                    : isAns
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-white/10 text-slate-300';
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleJumpQuestion(qI)}
+                      className={`h-7 rounded text-[10px] font-mono font-bold flex items-center justify-center transition-all ${bg}`}
+                    >
+                      {qI + 1}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="text-sm font-semibold text-white leading-relaxed">{q.num}. {q.q}</div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
             {q.options.map((opt, oIdx) => (
               <button
                 key={oIdx}
-                onClick={() => setAnswers((p) => ({ ...p, [q.id]: oIdx }))}
-                className={`p-3 rounded-xl border text-left ${
-                  answers[q.id] === oIdx ? 'bg-sky-500/25 border-sky-400 text-white font-bold' : 'bg-white/[0.02] border-white/10 text-slate-300'
+                type="button"
+                onClick={() => handleSelectOption(q.id, oIdx)}
+                className={`p-3.5 rounded-xl border text-left min-h-[44px] transition-all apple-press ${
+                  answers[q.id] === oIdx
+                    ? 'bg-sky-500/25 border-sky-400 text-white font-bold shadow-sm'
+                    : 'bg-white/[0.02] border-white/10 text-slate-300 hover:bg-white/5'
                 }`}
               >
-                {String.fromCharCode(65 + oIdx)}. {opt}
+                <span className="font-mono font-bold mr-1.5">{String.fromCharCode(65 + oIdx)}.</span> {opt}
               </button>
             ))}
           </div>
-          <div className="flex justify-between pt-2">
-            <button onClick={() => setIdx((p) => Math.max(0, p - 1))} className="px-3 py-1.5 rounded-xl bg-white/10 text-white text-xs font-bold">
+
+          <div className="flex items-center justify-between pt-2 border-t border-white/10">
+            <button
+              type="button"
+              onClick={() => {
+                setIdx((p) => Math.max(0, p - 1));
+                setQElapsed(0);
+              }}
+              className="px-3.5 py-2 rounded-xl bg-white/10 text-white text-xs font-bold min-h-[44px]"
+            >
               Prev
             </button>
-            <button onClick={() => setIdx((p) => Math.min(qList.length - 1, p + 1))} className="px-3 py-1.5 rounded-xl bg-white/10 text-white text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => handleToggleMark(q.id)}
+              className={`px-3.5 py-2 rounded-xl border text-xs font-bold min-h-[44px] ${
+                marked[q.id]
+                  ? 'bg-purple-500/30 border-purple-400 text-purple-200'
+                  : 'bg-white/5 border-white/10 text-slate-300'
+              }`}
+            >
+              {marked[q.id] ? 'Marked for Review' : 'Mark for Review'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIdx((p) => Math.min(qList.length - 1, p + 1));
+                setQElapsed(0);
+              }}
+              className="px-3.5 py-2 rounded-xl bg-white/10 text-white text-xs font-bold min-h-[44px]"
+            >
               Next
             </button>
           </div>
         </div>
       ) : (
-        <div className="glass-card rounded-3xl p-6 text-center space-y-3">
-          <h3 className="text-base font-bold text-white">Timed CBT Simulator (Part A 75m Lock)</h3>
+        <div className="glass-card rounded-2xl sm:rounded-3xl p-6 text-center space-y-3">
+          <h3 className="text-base font-bold text-white">Timed CBT Simulator (Part A 75m Lock + TCS iON Palette)</h3>
+          <p className="text-xs text-slate-400 max-w-md mx-auto">
+            Experience the real pressure: 100 questions in Part A strictly auto-locking after 75 minutes, followed by 140 questions in Part B.
+          </p>
           <button
+            type="button"
             onClick={() => {
               setCbtActive(true);
               setCbtPart('A');
@@ -191,80 +344,134 @@ export default function CbtMockScreen() {
               setTimerB(105 * 60);
               setIdx(0);
               setAnswers({});
+              setMarked({});
+              setQElapsed(0);
             }}
-            className="px-5 py-2.5 rounded-2xl bg-sky-500 text-white font-bold text-xs apple-press"
+            className="px-5 py-3 rounded-2xl bg-sky-500 text-white font-bold text-xs apple-press shadow-md"
           >
             Start Timed CBT Session
           </button>
         </div>
       )}
 
-      <div className="glass-card rounded-3xl p-6 space-y-4">
+      {/* Official NBE Rule 15.2 Tie-Break Index & Calculator */}
+      <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
-            <h3 className="text-sm font-bold text-white">Mock Score Calculator (+4 / -1 / 0)</h3>
-            <p className="text-xs text-slate-400">202 Correct & 22 Wrong = 786 / 960. Targets: 765 (AIR 10) & 790 (Goal).</p>
+            <h3 className="text-sm sm:text-base font-bold text-white">Mock Score Calculator (+4 / -1 / 0)</h3>
+            <p className="text-xs text-slate-400">202 Correct &amp; 22 Wrong = 786 / 960. Targets: 765 (AIR 10) &amp; 790 (Goal).</p>
           </div>
-          <strong className="text-lg font-extrabold text-emerald-400">{calcScore} / 960</strong>
+          <strong className="text-xl font-extrabold text-emerald-400 font-mono">{calcScore} / 960</strong>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 text-xs">
-          <input type="text" value={source} onChange={(e) => setSource(e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-2 text-white col-span-2 sm:col-span-1" />
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
-          <input type="number" min={0} max={100} value={aC} onChange={(e) => setAC(Number(e.target.value))} placeholder="Part A C" className="bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
-          <input type="number" min={0} max={100} value={aW} onChange={(e) => setAW(Number(e.target.value))} placeholder="Part A W" className="bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
-          <input type="number" min={0} max={140} value={bC} onChange={(e) => setBC(Number(e.target.value))} placeholder="Part B C" className="bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
-          <input type="number" min={0} max={140} value={bW} onChange={(e) => setBW(Number(e.target.value))} placeholder="Part B W" className="bg-white/5 border border-white/10 rounded-xl p-2 text-white" />
+          <div className="col-span-2 sm:col-span-1">
+            <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Source</label>
+            <input type="text" value={source} onChange={(e) => setSource(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-sm min-h-[44px]" />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Date</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-sm min-h-[44px]" />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Part A Correct</label>
+            <input type="number" min={0} max={100} value={aC} onChange={(e) => setAC(Number(e.target.value))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-sm min-h-[44px]" />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Part A Wrong</label>
+            <input type="number" min={0} max={100} value={aW} onChange={(e) => setAW(Number(e.target.value))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-sm min-h-[44px]" />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Part B Correct</label>
+            <input type="number" min={0} max={140} value={bC} onChange={(e) => setBC(Number(e.target.value))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-sm min-h-[44px]" />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Part B Wrong</label>
+            <input type="number" min={0} max={140} value={bW} onChange={(e) => setBW(Number(e.target.value))} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-sm min-h-[44px]" />
+          </div>
         </div>
-        <button onClick={() => void handleLogMock()} className="px-4 py-2 rounded-xl bg-sky-500 text-white font-bold text-xs apple-press">
+
+        <button
+          type="button"
+          onClick={() => void handleLogMock()}
+          className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-sky-500 text-white font-bold text-xs apple-press min-h-[44px]"
+        >
           + Log Mock to Cloud Sync
         </button>
       </div>
 
-      <div className="glass-card rounded-3xl p-6 space-y-4">
+      {/* NBE Rule 15.2 Tie-Break Index Card */}
+      <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 border border-sky-500/25">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
-            <h3 className="text-sm font-bold text-white">Marks-Leak &amp; Wrong-Answer Budget (Part 8)</h3>
+            <h3 className="text-sm sm:text-base font-bold text-white">NBE Official Tie-Break Defense Index (Rule 15.2)</h3>
             <p className="text-xs text-slate-400">
-              Total Wrong: {aW + bW} (Default budget &lt;= 22 per 240-Q mock) | Negative marks leaked: -{aW + bW} | What-if skipped: {calcScore + aW + bW} / 960
+              In NEET-MDS counseling, ties in marks are broken by: 1) Total wrong, 2) Higher Part B score, 3) Fewer Part B wrong.
             </p>
           </div>
-          <span className={`text-xs font-extrabold px-3 py-1 rounded-full ${aW + bW <= 22 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
-            {aW + bW <= 22 ? 'Within 22-Wrong Budget' : `Over Budget by ${aW + bW - 22}`}
+          <span className={`text-xs font-extrabold px-3 py-1 rounded-full border ${tieBreakTier.badge}`}>
+            {tieBreakTier.level}
           </span>
         </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs num-tabular">
-          <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10">
-            <div className="text-slate-400">Part A Pacing Target</div>
-            <div className="font-bold text-white mt-0.5">45s / Q (100 Qs / 75 min)</div>
+          <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Wrongs</span>
+            <div className="font-extrabold text-white text-base">
+              {totalWrong} <span className="text-xs font-normal text-slate-400">/ 22 target cap</span>
+            </div>
+            <p className="text-[11px] text-slate-400">Negative leak: -{totalWrong} marks</p>
           </div>
-          <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10">
-            <div className="text-slate-400">2026 AIR 10 Marker</div>
-            <div className="font-bold text-sky-400 mt-0.5">765 / 960 ({calcScore >= 765 ? `+${calcScore - 765}` : `${calcScore - 765}`})</div>
+
+          <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Part B Clinical Score</span>
+            <div className="font-extrabold text-sky-400 text-base font-mono">
+              {partBScore} <span className="text-xs font-normal text-slate-400">/ 560 max</span>
+            </div>
+            <p className="text-[11px] text-slate-400">Breaks tie if total score is equal</p>
           </div>
-          <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10">
-            <div className="text-slate-400">Working Target Marker</div>
-            <div className="font-bold text-emerald-400 mt-0.5">790 / 960 ({calcScore >= 790 ? `+${calcScore - 790}` : `${calcScore - 790}`})</div>
+
+          <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Part B Wrongs</span>
+            <div className="font-extrabold text-amber-300 text-base font-mono">
+              {bW} <span className="text-xs font-normal text-slate-400">({partBWrongShare}% of mistakes)</span>
+            </div>
+            <p className="text-[11px] text-slate-400">Rule 15.2(c) tie-break decider</p>
           </div>
         </div>
+
+        <p className="text-xs text-slate-300 leading-relaxed bg-white/[0.02] p-3 rounded-xl border border-white/5">
+          {tieBreakTier.desc}
+        </p>
       </div>
 
-      <div className="glass-card rounded-3xl p-6 space-y-3">
+      {/* Mock History */}
+      <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-3">
         <h3 className="text-sm font-bold text-white">Synced Mock History ({mocks.length})</h3>
-        {mocks.map((m) => (
-          <div key={m.id} className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between text-xs">
-            <div>
-              <div className="font-bold text-white">{m.data.source}</div>
-              <div className="text-slate-400">{m.data.date} - Accuracy {m.data.accuracy}%</div>
+        {mocks.length === 0 ? (
+          <p className="text-xs text-slate-400">No mock sessions logged yet. Enter your scores above or start a CBT session.</p>
+        ) : (
+          mocks.map((m) => (
+            <div key={m.id} className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between text-xs gap-3">
+              <div>
+                <div className="font-bold text-white">{m.data.source}</div>
+                <div className="text-slate-400 text-[11px]">
+                  {m.data.date} - Part A: {m.data.partA_C}C/{m.data.partA_W}W - Part B: {m.data.partB_C}C/{m.data.partB_W}W
+                </div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-base sm:text-lg font-extrabold text-sky-400 font-mono">{m.data.totalScore} / 960</div>
+                <button
+                  type="button"
+                  onClick={() => void deleteItem(m.id)}
+                  className="text-[11px] text-rose-400 hover:underline min-h-[30px]"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-lg font-extrabold text-sky-400">{m.data.totalScore} / 960</div>
-              <button onClick={() => void deleteItem(m.id)} className="text-[11px] text-rose-400 hover:underline">
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

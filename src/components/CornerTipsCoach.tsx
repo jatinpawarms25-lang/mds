@@ -1,4 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useSyncCollection } from '../hooks/useSyncStore';
+import { buildCardsFromNote } from '../memory/notes';
+import type { CardRecord, NoteRecord } from '../memory/types';
+import { generateUuid } from '../sync/syncEngine';
+import { triggerHaptic } from '../utils/haptics';
 
 export interface StudyTip {
   tag: string;
@@ -51,6 +56,10 @@ export const HIGH_YIELD_TIPS: StudyTip[] = [
 
 export function CornerTipsCoach() {
   const [idx, setIdx] = useState(0);
+  const [savedTips, setSavedTips] = useState<Record<string, boolean>>({});
+  const { putItem: putNote } = useSyncCollection<NoteRecord>('notes');
+  const { putItem: putCard } = useSyncCollection<CardRecord>('cards');
+
   const [minimized, setMinimized] = useState(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       return true;
@@ -66,6 +75,29 @@ export function CornerTipsCoach() {
   }, []);
 
   const cur = HIGH_YIELD_TIPS[idx];
+
+  const handleSaveTip = async () => {
+    triggerHaptic('success');
+    const nowIso = new Date().toISOString();
+    const noteId = generateUuid();
+    const note: NoteRecord = {
+      id: noteId,
+      deck: 'High-Yield Coach',
+      noteType: 'basic',
+      front: `[${cur.tag}] ${cur.title}\n\nWhat is the clinical / recall rule?`,
+      back: cur.tip,
+      tags: [cur.tag, 'coach-tip', 'high-yield'],
+      sourceRef: 'Corner Tips Coach',
+      createdAt: nowIso,
+      updatedAt: nowIso
+    };
+    const generated = buildCardsFromNote(note, nowIso);
+    await putNote(note.id, note);
+    for (const c of generated) {
+      await putCard(c.id, c);
+    }
+    setSavedTips((p) => ({ ...p, [cur.tag]: true }));
+  };
 
   if (minimized) {
     return (
@@ -115,6 +147,21 @@ export function CornerTipsCoach() {
       </div>
       <div className="font-extrabold text-white text-xs">{cur.title}</div>
       <p className="text-[11px] text-slate-300 leading-relaxed">{cur.tip}</p>
+      <div className="pt-1 flex items-center justify-between border-t border-white/10">
+        <button
+          type="button"
+          onClick={() => void handleSaveTip()}
+          disabled={Boolean(savedTips[cur.tag])}
+          className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
+            savedTips[cur.tag]
+              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+              : 'bg-white/10 hover:bg-white/15 text-sky-300 border-white/10'
+          }`}
+        >
+          {savedTips[cur.tag] ? 'Added to FSRS Deck' : '+ Save to Flashcards'}
+        </button>
+        <span className="text-[9px] text-slate-400 font-mono">Tip {idx + 1}/{HIGH_YIELD_TIPS.length}</span>
+      </div>
     </aside>
   );
 }

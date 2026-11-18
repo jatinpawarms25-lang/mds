@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { GOVT_COLLEGES_DATA, type CollegeRow } from '../data/questions';
 import { useSyncCollection } from '../hooks/useSyncStore';
+import { triggerHaptic } from '../utils/haptics';
 
 interface ShortlistEntry {
   id: string;
@@ -39,6 +40,7 @@ export default function CollegesScreen() {
   }, [settingsRows]);
 
   const handleSetGoalCollege = async (c: CollegeRow) => {
+    triggerHaptic('success');
     const reqMarks = estimateMarksForRank(c.closingRank);
     await putSetting('targetCollegeId', { value: c.id });
     await putSetting('targetCollegeName', { value: c.name });
@@ -48,6 +50,7 @@ export default function CollegesScreen() {
 
   const handleAdd = async (c: CollegeRow) => {
     if (sorted.some((s) => s.id === c.id)) return;
+    triggerHaptic('success');
     const reqMarks = estimateMarksForRank(c.closingRank);
     await putItem(c.id, {
       id: c.id,
@@ -60,6 +63,7 @@ export default function CollegesScreen() {
   const handleMove = async (idx: number, dir: -1 | 1) => {
     const targetIdx = idx + dir;
     if (targetIdx < 0 || targetIdx >= sorted.length) return;
+    triggerHaptic('light');
     const a = sorted[idx];
     const b = sorted[targetIdx];
     await putItem(a.id, { ...a.data, priority: targetIdx + 1 });

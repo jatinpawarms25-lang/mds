@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type TouchEvent } from 'react';
 import { DEFAULT_CONTENT_PACK } from '../data/contentPack';
 import { useSyncCollection } from '../hooks/useSyncStore';
 import { exportNotesToApkgZip, importNotesFromApkgZip } from '../memory/apkg';
@@ -10,6 +10,7 @@ import { balanceIntervalLoad, optimizeFsrsParameters, simulateWorkload, type Opt
 import type { CardRecord, DeckOptions, NoteRecord, NoteType, Rating, SchedulerKind } from '../memory/types';
 import { getAllEvents } from '../sync/db';
 import { generateUuid, syncEngine } from '../sync/syncEngine';
+import { triggerHaptic } from '../utils/haptics';
 
 type MemoryTab = 'review' | 'add' | 'browse' | 'stats' | 'options';
 
@@ -86,10 +87,82 @@ export default function MemoryScreen() {
     setSessionReviewed((p) => p + 1);
     if (rating === 1) setSessionAgain((p) => p + 1);
     setShowAnswer(false);
+    triggerHaptic(rating === 1 ? 'warning' : 'success');
     if (outcome.leechTriggered) {
       setStatusMsg(`Leech alert: card reached ${outcome.card.lapses} lapses and was tagged "leech".`);
     }
   };
+
+  const [touchDelta, setTouchDelta] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+
+  const handleTouchStart = (e: TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      time: Date.now()
+    };
+    setTouchDelta({ x: 0, y: 0 });
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!touchStartRef.current || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - touchStartRef.current.x;
+    const dy = e.touches[0].clientY - touchStartRef.current.y;
+    setTouchDelta({ x: dx, y: dy });
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartRef.current) return;
+    const { time } = touchStartRef.current;
+    const dx = touchDelta.x;
+    const dy = touchDelta.y;
+    const elapsed = Date.now() - time;
+    const dist = Math.hypot(dx, dy);
+
+    touchStartRef.current = null;
+    setTouchDelta({ x: 0, y: 0 });
+
+    if (dist < 12 && elapsed < 350) {
+      setShowAnswer((v) => !v);
+      triggerHaptic('light');
+      return;
+    }
+
+    if (dist > 60) {
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx < -60) {
+          triggerHaptic('warning');
+          void handleRate(1);
+        } else if (dx > 60) {
+          triggerHaptic('success');
+          void handleRate(3);
+        }
+      } else {
+        if (dy < -60) {
+          triggerHaptic('success');
+          void handleRate(4);
+        } else if (dy > 60) {
+          triggerHaptic('medium');
+          void handleRate(2);
+        }
+      }
+    }
+  };
+
+  const swipeAction = useMemo(() => {
+    const { x, y } = touchDelta;
+    if (Math.hypot(x, y) < 40) return null;
+    if (Math.abs(x) > Math.abs(y)) {
+      return x < 0
+        ? { label: 'AGAIN (1)', color: 'bg-rose-500/90 text-white border-rose-400' }
+        : { label: 'GOOD (3)', color: 'bg-emerald-500/90 text-white border-emerald-400' };
+    }
+    return y < 0
+      ? { label: 'EASY (4)', color: 'bg-sky-500/90 text-white border-sky-400' }
+      : { label: 'HARD (2)', color: 'bg-amber-500/90 text-white border-amber-400' };
+  }, [touchDelta]);
 
   // Keyboard shortcuts: Space/Enter to flip or Good; 1-4 to rate
   useEffect(() => {
@@ -351,7 +424,25 @@ export default function MemoryScreen() {
       {tab === 'review' && (
         <div className="space-y-4">
           {activeCard && preview ? (
-            <div className="glass-card p-6 md:p-8 space-y-6" style={{ borderRadius: 'var(--mem-card-radius)' }}>
+            <div
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              style={{
+                borderRadius: 'var(--mem-card-radius)',
+                transform:
+                  touchDelta.x !== 0 || touchDelta.y !== 0
+                    ? `translate3d(${touchDelta.x * 0.4}px, ${touchDelta.y * 0.4}px, 0) rotate(${touchDelta.x * 0.04}deg)`
+                    : undefined,
+                transition: touchDelta.x === 0 && touchDelta.y === 0 ? 'transform 0.22s ease' : 'none'
+              }}
+              className="glass-card relative p-6 md:p-8 space-y-6 select-none touch-pan-y"
+            >
+              {swipeAction && (
+                <div className={`absolute top-4 right-4 z-20 px-3 py-1 rounded-full border text-[11px] font-black uppercase tracking-wider shadow-lg ${swipeAction.color}`}>
+                  {swipeAction.label}
+                </div>
+              )}
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded-full bg-white/10 text-white font-bold">{activeCard.deck}</span>
@@ -404,7 +495,7 @@ export default function MemoryScreen() {
                   onClick={() => setShowAnswer(true)}
                   className="w-full py-3.5 rounded-2xl bg-sky-500 text-white font-bold text-sm apple-press"
                 >
-                  Show Answer (Space)
+                  Show Answer (Space or Tap)
                 </button>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -426,6 +517,10 @@ export default function MemoryScreen() {
                   ))}
                 </div>
               )}
+
+              <div className="text-center text-[10px] text-slate-400 pt-1 font-medium">
+                Tap card to flip | Swipe Left: Again | Right: Good | Down: Hard | Up: Easy
+              </div>
             </div>
           ) : (
             <div className="glass-card rounded-3xl p-8 text-center space-y-3">

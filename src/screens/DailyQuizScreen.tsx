@@ -7,6 +7,7 @@ import {
 } from '../analytics/calibration';
 import { DAILY_QUIZ_POOL } from '../data/questions';
 import { generateUuid, syncEngine } from '../sync/syncEngine';
+import { triggerHaptic } from '../utils/haptics';
 
 export default function DailyQuizScreen() {
   const [idx, setIdx] = useState(0);
@@ -26,6 +27,7 @@ export default function DailyQuizScreen() {
     if (selected !== null || skipped) return;
     setSelected(optIdx);
     const isCorrect = optIdx === q.correct;
+    triggerHaptic(isCorrect ? 'success' : 'warning');
     setScore((s) => s + (isCorrect ? 4 : -1));
     setAttempts((prev) => [...prev, { confidence, eliminatedCount: eliminated, skipped: false, isCorrect }]);
     await syncEngine.logImmutableEvent('attempts', {
@@ -42,6 +44,7 @@ export default function DailyQuizScreen() {
 
   const handleSkip = async () => {
     if (selected !== null || skipped) return;
+    triggerHaptic('light');
     setSkipped(true);
     setAttempts((prev) => [...prev, { confidence, eliminatedCount: eliminated, skipped: true, isCorrect: false }]);
     await syncEngine.logImmutableEvent('attempts', {

@@ -2,8 +2,10 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type
 import { CornerTipsCoach, HIGH_YIELD_TIPS } from './components/CornerTipsCoach';
 import { SyncStatusChip } from './components/SyncStatusChip';
 import { useSyncCollection, useSyncStatus } from './hooks/useSyncStore';
+import type { CardRecord } from './memory/types';
 import type { ScreenId } from './screens/TodayScreen';
 import { syncEngine } from './sync/syncEngine';
+import { triggerHaptic } from './utils/haptics';
 
 const TodayScreen = lazy(() => import('./screens/TodayScreen'));
 const DailyQuizScreen = lazy(() => import('./screens/DailyQuizScreen'));
@@ -149,6 +151,16 @@ export default function App() {
 
   const syncInfo = useSyncStatus();
   const { items: settingsRows, putItem: putSetting } = useSyncCollection<{ value: unknown }>('settings');
+  const { items: cardRows } = useSyncCollection<CardRecord>('cards');
+
+  const dueMemoryCount = useMemo(() => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    return cardRows.filter((c) => {
+      const card = c.data;
+      if (!card || card.suspended) return false;
+      return card.state === 'new' || (card.dueAt && card.dueAt.slice(0, 10) <= todayStr);
+    }).length;
+  }, [cardRows]);
 
   const themeMode = useMemo<ThemeMode>(() => {
     const found = settingsRows.find((r) => r.id === 'theme');
@@ -234,11 +246,13 @@ export default function App() {
   }, [drawerOpen]);
 
   const cycleTheme = () => {
+    triggerHaptic('light');
     const next: ThemeMode = themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark';
     void putSetting('theme', { value: next });
   };
 
   const navigate = useCallback((id: ScreenId) => {
+    triggerHaptic('light');
     setActiveScreen(id);
     setDrawerOpen(false);
     setDrawerQuery('');
@@ -370,17 +384,23 @@ export default function App() {
                     </div>
                     {groupItems.map((item) => {
                       const active = activeScreen === item.id;
+                      const hasDueBadge = item.id === 'memory' && dueMemoryCount > 0;
                       return (
                         <button
                           key={item.id}
                           onClick={() => navigate(item.id)}
-                          className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[44px] flex items-center ${
+                          className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[44px] flex items-center justify-between ${
                             active
                               ? 'bg-sky-500/20 text-sky-400 shadow-sm border border-sky-500/30'
                               : 'text-slate-300 hover:bg-white/5 hover:text-white border border-transparent'
                           }`}
                         >
-                          {item.label}
+                          <span className="truncate">{item.label}</span>
+                          {hasDueBadge && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-mono text-[10px] font-bold shrink-0">
+                              {dueMemoryCount} due
+                            </span>
+                          )}
                         </button>
                       );
                     })}
@@ -400,7 +420,10 @@ export default function App() {
           <div className="flex items-center gap-2 lg:hidden min-w-0">
             <button
               type="button"
-              onClick={() => setDrawerOpen(true)}
+              onClick={() => {
+                triggerHaptic('light');
+                setDrawerOpen(true);
+              }}
               aria-label="Open navigation menu"
               className="w-11 h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:scale-95 transition-transform shrink-0"
             >
@@ -474,6 +497,7 @@ export default function App() {
                 key={tab.id}
                 type="button"
                 onClick={() => {
+                  triggerHaptic('light');
                   if (isMenu) {
                     setDrawerOpen((v) => !v);
                   } else {
@@ -487,7 +511,14 @@ export default function App() {
                 }`}
                 aria-current={active ? 'page' : undefined}
               >
-                <TabIcon id={tab.id} active={active} />
+                <div className="relative">
+                  <TabIcon id={tab.id} active={active} />
+                  {tab.id === 'memory' && dueMemoryCount > 0 && (
+                    <span className="absolute -top-1.5 -right-2.5 px-1 min-w-[15px] h-[15px] rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center font-mono leading-none shadow-sm">
+                      {dueMemoryCount > 99 ? '99+' : dueMemoryCount}
+                    </span>
+                  )}
+                </div>
                 <span className={`text-[10px] font-bold leading-tight ${active ? 'text-sky-400' : 'text-slate-400'}`}>
                   {tab.label}
                 </span>

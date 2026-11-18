@@ -4,6 +4,7 @@ import { useSyncCollection } from '../hooks/useSyncStore';
 import { buildCardsFromNote } from '../memory/notes';
 import type { CardRecord, NoteRecord } from '../memory/types';
 import { generateUuid } from '../sync/syncEngine';
+import { triggerHaptic } from '../utils/haptics';
 
 interface ErrorEntry {
   id: string;
@@ -33,6 +34,7 @@ export default function ErrorLogScreen() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!topic.trim() || !correctFact.trim()) return;
+    triggerHaptic('success');
     const id = generateUuid();
     await putItem(id, {
       id,
@@ -53,6 +55,7 @@ export default function ErrorLogScreen() {
   };
 
   const handleCreateFlashcard = async (entry: ErrorEntry) => {
+    triggerHaptic('success');
     const nowIso = new Date().toISOString();
     const note: NoteRecord = {
       id: generateUuid(),

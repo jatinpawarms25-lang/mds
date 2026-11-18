@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { useSyncCollection, useSyncConflicts, useSyncStatus } from '../hooks/useSyncStore';
 import { syncEngine } from '../sync/syncEngine';
+import { setHapticsEnabled, triggerHaptic } from '../utils/haptics';
 
 export default function SettingsScreen() {
   const syncInfo = useSyncStatus();
@@ -311,6 +312,24 @@ export default function SettingsScreen() {
                 onChange={(e) => setSetting('reduceTransparency', e.target.checked)}
               />
               <span className="text-slate-200 font-semibold">Reduce transparency (high contrast)</span>
+            </label>
+          </div>
+          <div className="flex items-end col-span-1 sm:col-span-2">
+            <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/10 w-full cursor-pointer min-h-[44px]">
+              <input
+                type="checkbox"
+                checked={getSetting('disableHaptics') !== 'true'}
+                onChange={(e) => {
+                  const enabled = e.target.checked;
+                  setSetting('disableHaptics', !enabled);
+                  setHapticsEnabled(enabled);
+                  if (enabled) triggerHaptic('success');
+                }}
+              />
+              <div>
+                <span className="text-slate-200 font-semibold block">Tactile Haptic Feedback</span>
+                <span className="text-slate-400 text-[11px] block">Vibrate gently on card swipe, answer selection, and navigation taps on supported mobile devices</span>
+              </div>
             </label>
           </div>
         </div>
