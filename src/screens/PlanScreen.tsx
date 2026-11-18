@@ -29,12 +29,52 @@ export default function PlanScreen() {
   const [weakFocus, setWeakFocus] = useState(savedFocus);
   const [pasteJson, setPasteJson] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
+  const [scenario, setScenario] = useState<'expected' | 'earliest' | 'latest'>('expected');
+
+  const examDateStr = useMemo(() => {
+    const r = settingsRows.find((s) => s.id === 'examDate');
+    return r?.data?.value ? String(r.data.value) : '';
+  }, [settingsRows]);
+
+  const scenarioOffsetDays = scenario === 'earliest' ? -28 : scenario === 'latest' ? 28 : 0;
 
   const customSlots = useMemo<CustomSlot[]>(() => {
     const r = settingsRows.find((s) => s.id === 'customTimetableSlots');
     if (Array.isArray(r?.data?.value)) return r.data.value as CustomSlot[];
     return [];
   }, [settingsRows]);
+
+  const exportTimetableIcs = () => {
+    const slots = customSlots.length > 0 ? customSlots : [{ time: '07:00 - 09:00', block: 'Morning Theory', focus: weakFocus }];
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const lines = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//ApexMDS//Study Timetable//EN'
+    ];
+    slots.forEach((slot, i) => {
+      const [startStr, endStr] = slot.time.split('-').map((s) => s.trim().replace(':', '') + '00');
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:apexmds-slot-${today}-${i}@local`,
+        `DTSTAMP:${today}T000000Z`,
+        `DTSTART:${today}T${/^\d{6}$/.test(startStr || '') ? startStr : '070000'}`,
+        `DTEND:${today}T${/^\d{6}$/.test(endStr || '') ? endStr : '090000'}`,
+        `SUMMARY:${slot.block}`,
+        `DESCRIPTION:${slot.focus}`,
+        'END:VEVENT'
+      );
+    });
+    lines.push('END:VCALENDAR');
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `apexmds-timetable-${today}.ics`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    setStatusMsg('Exported .ics calendar file for Apple/Google Calendar.');
+  };
 
   const generateSmartTimetable = async () => {
     const total = Math.max(2, Math.min(16, Number(hoursInput) || 8));
@@ -96,12 +136,20 @@ export default function PlanScreen() {
             <h2 className="text-base font-extrabold text-white">Adaptive Daily Timetable Maker</h2>
             <p className="text-xs text-slate-400">Auto-allocates theory, 45s/Q sprints, image drills, and FSRS reviews around your hours.</p>
           </div>
-          <button
-            onClick={() => void generateSmartTimetable()}
-            className="px-4 py-2 rounded-2xl bg-sky-500 text-white text-xs font-extrabold apple-press"
-          >
-            Generate My Timetable
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={exportTimetableIcs}
+              className="px-3.5 py-2 rounded-2xl bg-white/10 text-white text-xs font-bold apple-press"
+            >
+              Export .ics
+            </button>
+            <button
+              onClick={() => void generateSmartTimetable()}
+              className="px-4 py-2 rounded-2xl bg-sky-500 text-white text-xs font-extrabold apple-press"
+            >
+              Generate My Timetable
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -173,11 +221,44 @@ export default function PlanScreen() {
         </details>
       </div>
 
-      {/* 23-Week Master Roadmap */}
+      {/* 3-Scenario Date-Driven 23-Week Roadmap (Part 10) */}
+      <div className="glass-card rounded-3xl p-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-extrabold text-white">Date-Driven 23-Week Reflow (3 Scenarios)</h2>
+          <p className="text-xs text-slate-400">
+            {examDateStr
+              ? `Backwards-scheduled from ${examDateStr} (${scenario} scenario). Final 30 days protect taper (no new topics).`
+              : 'Set your Exam Date in Settings to compute live backwards-scheduled week dates.'}
+          </p>
+        </div>
+        <div className="flex gap-1.5 text-xs">
+          {(['earliest', 'expected', 'latest'] as const).map((sc) => (
+            <button
+              key={sc}
+              onClick={() => setScenario(sc)}
+              className={`px-3 py-1.5 rounded-xl font-bold capitalize ${
+                scenario === sc ? 'bg-sky-500 text-white' : 'bg-white/10 text-slate-300'
+              }`}
+            >
+              {sc === 'earliest' ? 'Earliest (-4w)' : sc === 'latest' ? 'Latest (+4w)' : 'Expected'}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="space-y-4">
         {STUDY_PLAN_WEEKS.map((week) => {
           const id = String(week.week);
           const done = completedMap.get(id) ?? false;
+          const weeksBeforeExam = STUDY_PLAN_WEEKS.length - week.week;
+          let targetWeekDate = '';
+          if (examDateStr) {
+            const base = new Date(`${examDateStr}T09:00:00`);
+            if (!Number.isNaN(base.getTime())) {
+              base.setDate(base.getDate() + scenarioOffsetDays - weeksBeforeExam * 7);
+              targetWeekDate = base.toISOString().slice(0, 10);
+            }
+          }
           return (
             <div key={week.week} className="glass-card rounded-3xl p-5 space-y-3">
               <div className="flex items-center justify-between border-b border-white/10 pb-2">
@@ -186,6 +267,9 @@ export default function PlanScreen() {
                     Week {week.week}
                   </span>
                   <span className="text-xs font-bold text-white">{week.phaseName}</span>
+                  {targetWeekDate && (
+                    <span className="text-[11px] font-mono text-emerald-300">({targetWeekDate})</span>
+                  )}
                 </div>
                 <label className="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer">
                   <input
