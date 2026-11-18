@@ -1,0 +1,447 @@
+export interface ConceptRecord {
+  id: string;
+  subjectId: string;
+  topic: string;
+  name: string;
+  aliases: string[];
+  reviewedKeyFeatures: string;
+  citation: string;
+  differentials: string[];
+  examWeight: number;
+  status: 'seed' | 'active';
+}
+
+export const CONCEPTS_SEED: ConceptRecord[] = [
+  {
+    id: 'omr_soap_bubble',
+    subjectId: 'omr',
+    topic: 'Oral Radiology Patterns',
+    name: 'Soap-bubble radiolucency (Ameloblastoma)',
+    aliases: ['multilocular radiolucency mandible', 'soap bubble appearance jaw'],
+    reviewedKeyFeatures: 'Multilocular radiolucency with large compartments, cortical expansion, and knife-edge root resorption.',
+    citation: 'White & Pharoah Oral Radiology, Ch. 21',
+    differentials: ['omr_honeycomb', 'oralpath_okc', 'omr_ground_glass'],
+    examWeight: 1.5,
+    status: 'active'
+  },
+  {
+    id: 'omr_honeycomb',
+    subjectId: 'omr',
+    topic: 'Oral Radiology Patterns',
+    name: 'Honeycomb / Tennis-racket radiolucency (Odontogenic Myxoma)',
+    aliases: ['tennis racket appearance', 'odontogenic myxoma radiograph'],
+    reviewedKeyFeatures: 'Fine straight angular septa intersecting at right angles creating step-ladder or tennis-racket trabeculae.',
+    citation: 'White & Pharoah Oral Radiology, Ch. 21',
+    differentials: ['omr_soap_bubble', 'oralpath_okc', 'omr_ground_glass'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'omr_ground_glass',
+    subjectId: 'omr',
+    topic: 'Oral Radiology Patterns',
+    name: 'Ground-glass radiopacity (Fibrous Dysplasia)',
+    aliases: ['peau d orange bone', 'fibrous dysplasia maxilla'],
+    reviewedKeyFeatures: 'Ill-defined homogeneous ground-glass or orange-peel trabecular pattern blending into normal bone.',
+    citation: 'White & Pharoah Oral Radiology, Ch. 22',
+    differentials: ['omr_cotton_wool', 'omr_soap_bubble'],
+    examWeight: 1.4,
+    status: 'active'
+  },
+  {
+    id: 'omr_cotton_wool',
+    subjectId: 'omr',
+    topic: 'Oral Radiology Patterns',
+    name: 'Cotton-wool radiopacities (Paget Disease)',
+    aliases: ['paget disease skull jaw', 'cotton wool appearance'],
+    reviewedKeyFeatures: 'Patchy dense radiopaque masses in osteolytic bone with hypercementosis and loss of lamina dura.',
+    citation: 'White & Pharoah Oral Radiology, Ch. 22',
+    differentials: ['omr_ground_glass', 'omr_sunburst'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'omr_sunburst',
+    subjectId: 'omr',
+    topic: 'Oral Radiology Patterns',
+    name: 'Sunburst periosteal reaction (Osteosarcoma)',
+    aliases: ['sunray appearance mandible', 'osteosarcoma jaw radiograph'],
+    reviewedKeyFeatures: 'Radiating spicules of periosteal new bone perpendicular to cortex with asymmetric PDL widening (Garrington sign).',
+    citation: 'White & Pharoah Oral Radiology, Ch. 23',
+    differentials: ['omr_onion_skin', 'omr_cotton_wool'],
+    examWeight: 1.5,
+    status: 'active'
+  },
+  {
+    id: 'omr_onion_skin',
+    subjectId: 'omr',
+    topic: 'Oral Radiology Patterns',
+    name: 'Onion-skin periosteal reaction (Garre Osteomyelitis / Ewing)',
+    aliases: ['onion peel periosteal', 'garre osteomyelitis mandible'],
+    reviewedKeyFeatures: 'Concentric laminated layers of subperiosteal new bone parallel to the inferior border of mandible.',
+    citation: 'White & Pharoah Oral Radiology, Ch. 20',
+    differentials: ['omr_sunburst', 'omr_ground_glass'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'omr_stafne',
+    subjectId: 'omr',
+    topic: 'Oral Radiology Patterns',
+    name: 'Stafne bone cavity',
+    aliases: ['static bone cyst', 'submandibular salivary gland depression'],
+    reviewedKeyFeatures: 'Well-corticated unilocular radiolucency below the inferior alveolar nerve canal near mandibular angle.',
+    citation: 'White & Pharoah Oral Radiology, Ch. 20',
+    differentials: ['oralpath_okc', 'oralpath_dentigerous_cyst'],
+    examWeight: 1.2,
+    status: 'active'
+  },
+  {
+    id: 'omr_opg_landmarks',
+    subjectId: 'omr',
+    topic: 'Imaging Landmarks',
+    name: 'OPG Normal Anatomical Landmarks',
+    aliases: ['orthopantomogram landmarks', 'panoramic radiograph anatomy'],
+    reviewedKeyFeatures: 'Mental foramen, mandibular canal, coronoid process, zygomatic arch, maxillary sinus floor, hyoid bone.',
+    citation: 'White & Pharoah Oral Radiology, Ch. 10',
+    differentials: ['ortho_ceph_landmarks', 'omfs_mandibular_fracture'],
+    examWeight: 1.4,
+    status: 'active'
+  },
+  {
+    id: 'oralpath_ameloblastoma',
+    subjectId: 'oralpath',
+    topic: 'Odontogenic Tumors',
+    name: 'Ameloblastoma (Histopathology)',
+    aliases: ['follicular ameloblastoma', 'Vickers Gorlin criteria'],
+    reviewedKeyFeatures: 'Tall columnar ameloblast-like peripheral cells with reverse nuclear polarization and stellate reticulum-like central cells.',
+    citation: 'Shafer Textbook of Oral Pathology, Ch. 4',
+    differentials: ['oralpath_okc', 'oralpath_aot', 'oralpath_ceot'],
+    examWeight: 1.6,
+    status: 'active'
+  },
+  {
+    id: 'oralpath_okc',
+    subjectId: 'oralpath',
+    topic: 'Odontogenic Cysts',
+    name: 'Odontogenic Keratocyst (OKC)',
+    aliases: ['keratocystic odontogenic tumor', 'parakeratinized cyst'],
+    reviewedKeyFeatures: 'Corrugated parakeratinized stratified squamous epithelium 6-8 cells thick with palisaded basal layer and flat interface.',
+    citation: 'Shafer Textbook of Oral Pathology, Ch. 4',
+    differentials: ['oralpath_dentigerous_cyst', 'oralpath_ameloblastoma', 'omr_soap_bubble'],
+    examWeight: 1.6,
+    status: 'active'
+  },
+  {
+    id: 'oralpath_dentigerous_cyst',
+    subjectId: 'oralpath',
+    topic: 'Odontogenic Cysts',
+    name: 'Dentigerous Cyst',
+    aliases: ['follicular cyst impacted tooth', 'pericoronal radiolucency'],
+    reviewedKeyFeatures: 'Well-defined unilocular radiolucency attached to the CEJ of an unerupted tooth; 2-3 cell thick non-keratinized lining.',
+    citation: 'Shafer Textbook of Oral Pathology, Ch. 4',
+    differentials: ['oralpath_okc', 'oralpath_aot'],
+    examWeight: 1.4,
+    status: 'active'
+  },
+  {
+    id: 'oralpath_aot',
+    subjectId: 'oralpath',
+    topic: 'Odontogenic Tumors',
+    name: 'Adenomatoid Odontogenic Tumor (AOT)',
+    aliases: ['two thirds tumor', 'rosette pattern odontogenic'],
+    reviewedKeyFeatures: 'Duct-like / rosette structures of cuboidal-columnar cells with snowflake radiopacities around an impacted maxillary canine.',
+    citation: 'Shafer Textbook of Oral Pathology, Ch. 4',
+    differentials: ['oralpath_ceot', 'oralpath_dentigerous_cyst'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'oralpath_ceot',
+    subjectId: 'oralpath',
+    topic: 'Odontogenic Tumors',
+    name: 'Calcifying Epithelial Odontogenic Tumor (Pindborg)',
+    aliases: ['Pindborg tumor', 'Liesegang rings'],
+    reviewedKeyFeatures: 'Sheets of polyhedral epithelial cells with amyloid deposits (Congo red apple-green birefringence) and Liesegang rings.',
+    citation: 'Shafer Textbook of Oral Pathology, Ch. 4',
+    differentials: ['oralpath_aot', 'oralpath_ameloblastoma'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'oralpath_pleomorphic_adenoma',
+    subjectId: 'oralpath',
+    topic: 'Salivary Gland Tumors',
+    name: 'Pleomorphic Adenoma',
+    aliases: ['mixed salivary tumor', 'chondromyxoid stroma'],
+    reviewedKeyFeatures: 'Biphasic epithelial-myoepithelial ducts/sheets in chondromyxoid stroma surrounded by incomplete fibrous capsule.',
+    citation: 'Shafer Textbook of Oral Pathology, Ch. 5',
+    differentials: ['oralpath_oscc', 'oralpath_ameloblastoma'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'oralpath_oscc',
+    subjectId: 'oralpath',
+    topic: 'Malignant Neoplasms',
+    name: 'Oral Squamous Cell Carcinoma (OSCC)',
+    aliases: ['keratin pearls', 'squamous cell carcinoma tongue'],
+    reviewedKeyFeatures: 'Invasive nests of dysplastic squamous cells breaching basement membrane with keratin pearls and individual cell keratinization.',
+    citation: 'Shafer Textbook of Oral Pathology, Ch. 2',
+    differentials: ['oralpath_leukoplakia', 'oralpath_pleomorphic_adenoma'],
+    examWeight: 1.5,
+    status: 'active'
+  },
+  {
+    id: 'oralpath_leukoplakia',
+    subjectId: 'omr',
+    topic: 'Oral Medicine Clinical',
+    name: 'Oral Leukoplakia (Homogeneous & Speckled)',
+    aliases: ['oral leukoplakia', 'speckled leukoplakia'],
+    reviewedKeyFeatures: 'White patch/plaque that cannot be scraped off and cannot be characterized clinically/pathologically as any other disease.',
+    citation: 'Burket Oral Medicine, Ch. 5',
+    differentials: ['oralpath_lichen_planus', 'oralpath_oscc', 'omr_osmf'],
+    examWeight: 1.4,
+    status: 'active'
+  },
+  {
+    id: 'oralpath_lichen_planus',
+    subjectId: 'omr',
+    topic: 'Oral Medicine Clinical',
+    name: 'Oral Lichen Planus (Wickham Striae)',
+    aliases: ['reticular lichen planus', 'Wickham striae buccal mucosa'],
+    reviewedKeyFeatures: 'Bilateral interlacing white striae (Wickham striae) with saw-tooth rete ridges and band-like T-cell infiltrate.',
+    citation: 'Burket Oral Medicine, Ch. 5',
+    differentials: ['oralpath_leukoplakia', 'omr_pemphigus'],
+    examWeight: 1.4,
+    status: 'active'
+  },
+  {
+    id: 'omr_osmf',
+    subjectId: 'omr',
+    topic: 'Oral Medicine Clinical',
+    name: 'Oral Submucous Fibrosis (OSMF)',
+    aliases: ['submucous fibrosis', 'blanched mucosa fibrous bands'],
+    reviewedKeyFeatures: 'Blanched marble-like mucosa, palpable vertical fibrous bands in buccal mucosa, shrunken uvula, and progressive trismus.',
+    citation: 'Burket Oral Medicine, Ch. 5',
+    differentials: ['oralpath_leukoplakia', 'oralpath_oscc'],
+    examWeight: 1.4,
+    status: 'active'
+  },
+  {
+    id: 'omr_pemphigus',
+    subjectId: 'omr',
+    topic: 'Oral Medicine Clinical',
+    name: 'Pemphigus Vulgaris (Tzank / Intraepithelial Split)',
+    aliases: ['pemphigus vulgaris oral', 'suprabasal acantholysis'],
+    reviewedKeyFeatures: 'Positive Nikolsky sign, suprabasal intraepithelial split with acantholytic Tzanck cells and tombstone basal layer.',
+    citation: 'Burket Oral Medicine, Ch. 4',
+    differentials: ['oralpath_lichen_planus', 'oralpath_leukoplakia'],
+    examWeight: 1.4,
+    status: 'active'
+  },
+  {
+    id: 'perio_furcation',
+    subjectId: 'perio',
+    topic: 'Periodontal Defects',
+    name: 'Furcation Involvement & Nabers Probe',
+    aliases: ['furcation defect molar', 'Glickman furcation'],
+    reviewedKeyFeatures: 'Bone loss at molar root bifurcation/trifurcation; Nabers curved probe measures horizontal component.',
+    citation: 'Carranza Clinical Periodontology, Ch. 59',
+    differentials: ['perio_recession', 'perio_curette'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'perio_recession',
+    subjectId: 'perio',
+    topic: 'Periodontal Defects',
+    name: 'Gingival Recession (Miller / Cairo Classes)',
+    aliases: ['gingival recession', 'Miller class recession'],
+    reviewedKeyFeatures: 'Apical migration of gingival margin beyond CEJ; Class I/II have no interproximal bone loss (100% root coverage possible).',
+    citation: 'Carranza Clinical Periodontology, Ch. 63',
+    differentials: ['perio_furcation', 'perio_curette'],
+    examWeight: 1.2,
+    status: 'active'
+  },
+  {
+    id: 'perio_curette',
+    subjectId: 'perio',
+    topic: 'Periodontal Instruments',
+    name: 'Gracey Area-Specific Curettes',
+    aliases: ['Gracey curette', 'universal vs area specific curette'],
+    reviewedKeyFeatures: 'One cutting edge, 70-degree offset blade, rounded toe and back; 11/12 mesial posterior, 13/14 distal posterior.',
+    citation: 'Carranza Clinical Periodontology, Ch. 46',
+    differentials: ['perio_furcation', 'perio_recession'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'ortho_ceph_landmarks',
+    subjectId: 'ortho',
+    topic: 'Cephalometrics',
+    name: 'Lateral Cephalogram Landmarks (S, N, A, B, Po, Or)',
+    aliases: ['lateral cephalogram', 'Steiner cephalometric analysis'],
+    reviewedKeyFeatures: 'SNA (82 deg), SNB (80 deg), ANB (2 deg); Class II > 4 deg, Class III < 0 deg.',
+    citation: 'Proffit Contemporary Orthodontics, Ch. 6',
+    differentials: ['omr_opg_landmarks', 'ortho_cvmi'],
+    examWeight: 1.5,
+    status: 'active'
+  },
+  {
+    id: 'ortho_cvmi',
+    subjectId: 'ortho',
+    topic: 'Growth & Development',
+    name: 'Cervical Vertebrae Maturation Index (CVMI)',
+    aliases: ['CVMI stages', 'cervical vertebral maturation'],
+    reviewedKeyFeatures: 'C2, C3, C4 inferior border concavity and body shape (trapezoid -> horizontal -> square -> vertical) assess pubertal peak.',
+    citation: 'Proffit Contemporary Orthodontics, Ch. 3',
+    differentials: ['ortho_ceph_landmarks', 'ortho_angle_malocclusion'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'ortho_angle_malocclusion',
+    subjectId: 'ortho',
+    topic: 'Malocclusion',
+    name: 'Angle Classification of Malocclusion',
+    aliases: ['Angle class II division 1', 'Angle class III malocclusion'],
+    reviewedKeyFeatures: 'Based on anteroposterior relationship of maxillary and mandibular first permanent molars (mesiobuccal cusp to buccal groove).',
+    citation: 'Proffit Contemporary Orthodontics, Ch. 1',
+    differentials: ['ortho_ceph_landmarks', 'ortho_cvmi'],
+    examWeight: 1.2,
+    status: 'active'
+  },
+  {
+    id: 'prostho_kennedy',
+    subjectId: 'prostho',
+    topic: 'Removable Partial Dentures',
+    name: 'Kennedy Classification (Applegate Rules)',
+    aliases: ['Kennedy class I RPD', 'Kennedy partial denture'],
+    reviewedKeyFeatures: 'Class I bilateral distal extension, Class II unilateral distal, Class III tooth-borne, Class IV anterior crossing midline.',
+    citation: 'McCracken Removable Partial Prosthodontics, Ch. 3',
+    differentials: ['prostho_articulator'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'prostho_articulator',
+    subjectId: 'prostho',
+    topic: 'Occlusion & Articulators',
+    name: 'Semi-Adjustable Articulator (Arcon vs Non-Arcon)',
+    aliases: ['Hanau articulator', 'arcon articulator'],
+    reviewedKeyFeatures: 'Arcon has condylar guidance in upper member (mimics TMJ); facebow transfers maxillary arch-hinge axis relationship.',
+    citation: 'Boucher Prosthodontic Treatment, Ch. 12',
+    differentials: ['prostho_kennedy'],
+    examWeight: 1.2,
+    status: 'active'
+  },
+  {
+    id: 'cons_dens_invaginatus',
+    subjectId: 'cons',
+    topic: 'Dental Anomalies & Endo',
+    name: 'Dens Invaginatus (Dens in Dente)',
+    aliases: ['dens in dente', 'Oehlers classification'],
+    reviewedKeyFeatures: 'Enamel-lined invagination into crown/root most commonly affecting permanent maxillary lateral incisor.',
+    citation: 'Ingle Endodontics, Ch. 5',
+    differentials: ['cons_obturation', 'pedo_space_maintainer'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'cons_obturation',
+    subjectId: 'cons',
+    topic: 'Endodontic Therapy',
+    name: 'Root Canal Obturation & Working Length Radiograph',
+    aliases: ['endodontic working length', 'gutta percha obturation'],
+    reviewedKeyFeatures: 'Apical termination 0.5-1 mm short of radiographic apex (apical constriction / CDJ); SLOB rule separates canals.',
+    citation: 'Cohen Pathways of the Pulp, Ch. 8',
+    differentials: ['cons_dens_invaginatus', 'omr_opg_landmarks'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'pedo_space_maintainer',
+    subjectId: 'pedo',
+    topic: 'Pediatric Space Management',
+    name: 'Band and Loop / Distal Shoe Space Maintainer',
+    aliases: ['band and loop space maintainer', 'distal shoe appliance'],
+    reviewedKeyFeatures: 'Band-and-loop for premature unilateral loss of first primary molar; distal shoe guides erupting first permanent molar.',
+    citation: 'McDonald Dentistry for the Child, Ch. 22',
+    differentials: ['pedo_ssc', 'ortho_angle_malocclusion'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'pedo_ssc',
+    subjectId: 'pedo',
+    topic: 'Pediatric Restorations',
+    name: 'Stainless Steel Crown (Hall / Conventional)',
+    aliases: ['stainless steel crown primary molar', 'pediatric SSC'],
+    reviewedKeyFeatures: 'Indicated after pulpotomy/pulpectomy or multisurface caries in primary molars; featheredge subgingival margin.',
+    citation: 'McDonald Dentistry for the Child, Ch. 18',
+    differentials: ['pedo_space_maintainer', 'cons_obturation'],
+    examWeight: 1.2,
+    status: 'active'
+  },
+  {
+    id: 'omfs_le_fort',
+    subjectId: 'omfs',
+    topic: 'Maxillofacial Trauma',
+    name: 'Le Fort I, II, III Midface Fractures',
+    aliases: ['Le Fort fracture CT', 'Gu\u00e9rin fracture'],
+    reviewedKeyFeatures: 'All Le Fort fractures involve pterygoid plates; I = floating palate, II = pyramidal/infraorbital rim, III = craniofacial disjunction.',
+    citation: 'Peterson Contemporary OMFS, Ch. 24',
+    differentials: ['omfs_mandibular_fracture', 'omr_opg_landmarks'],
+    examWeight: 1.6,
+    status: 'active'
+  },
+  {
+    id: 'omfs_mandibular_fracture',
+    subjectId: 'omfs',
+    topic: 'Maxillofacial Trauma',
+    name: 'Mandibular & Condylar Fractures',
+    aliases: ['mandible angle fracture OPG', 'subcondylar fracture'],
+    reviewedKeyFeatures: 'Condyle is the most common mandibular fracture site overall; angle/body fractures follow Champy osteosynthesis lines.',
+    citation: 'Peterson Contemporary OMFS, Ch. 24',
+    differentials: ['omfs_le_fort', 'omfs_impaction'],
+    examWeight: 1.5,
+    status: 'active'
+  },
+  {
+    id: 'omfs_impaction',
+    subjectId: 'omfs',
+    topic: 'Dentoalveolar Surgery',
+    name: 'Impacted Third Molar (Winter & Pell-Gregory)',
+    aliases: ['impacted mandibular third molar', 'Pell Gregory classification'],
+    reviewedKeyFeatures: 'Winter (angulation) + Pell-Gregory (ramus I/II/III, depth A/B/C) feed Pederson difficulty index (3-10).',
+    citation: 'Peterson Contemporary OMFS, Ch. 9',
+    differentials: ['omfs_mandibular_fracture', 'oralpath_dentigerous_cyst'],
+    examWeight: 1.5,
+    status: 'active'
+  },
+  {
+    id: 'daoh_amelogenesis',
+    subjectId: 'daoh',
+    topic: 'Oral Histology',
+    name: 'Tooth Development (Bud, Cap, Bell Stages)',
+    aliases: ['bell stage tooth germ', 'dental lamina enamel organ'],
+    reviewedKeyFeatures: 'Inner enamel epithelium, stellate reticulum, stratum intermedium (ALP+), outer enamel epithelium, dental papilla.',
+    citation: 'Orban Oral Histology & Embryology, Ch. 2',
+    differentials: ['oralpath_ameloblastoma'],
+    examWeight: 1.3,
+    status: 'active'
+  },
+  {
+    id: 'pathmicro_actinomycosis',
+    subjectId: 'pathmicro',
+    topic: 'Infectious Pathology',
+    name: 'Cervicofacial Actinomycosis (Sulfur Granules)',
+    aliases: ['actinomycosis sulfur granules', 'lumpy jaw actinomyces'],
+    reviewedKeyFeatures: 'Chronic suppurative infection with multiple draining sinuses and yellow sulfur granules showing filamentous Gram+ rods.',
+    citation: 'Robbins Basic Pathology / Ananthanarayan Microbiology',
+    differentials: ['omfs_mandibular_fracture'],
+    examWeight: 1.2,
+    status: 'active'
+  }
+];

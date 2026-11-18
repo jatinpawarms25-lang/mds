@@ -1,4 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react';
+import { CONCEPTS_SEED } from '../data/conceptsSeed';
 import { DEFAULT_IMAGE_LIBRARY, type ImageEntry } from '../data/imageLibrary';
 import {
   buildImageOcclusionCards,
@@ -6,6 +7,7 @@ import {
   type ImageCandidate,
   type OcclusionMask
 } from '../data/imageOcclusion';
+import { checkLicenceGate } from '../data/licenceGate';
 import { useSyncCollection } from '../hooks/useSyncStore';
 import type { CardRecord, NoteRecord } from '../memory/types';
 import { generateUuid, syncEngine } from '../sync/syncEngine';
@@ -113,6 +115,11 @@ export default function ImageAtlasScreen() {
   };
 
   const handleApproveCandidate = async (item: ImageCandidate) => {
+    const licCheck = checkLicenceGate(item.licence);
+    if (!licCheck.allowed) {
+      setCandMsg(`Cannot publish (Rule R11 Licence Gate): ${licCheck.reason || 'unsupported licence'}`);
+      return;
+    }
     const check = validatePublishableImage({
       aiGenerated: item.aiGenerated,
       licence: item.licence,
@@ -128,6 +135,17 @@ export default function ImageAtlasScreen() {
     await putUserImage(item.id, { ...item, status: 'published' });
     setCandMsg(`Published "${item.title}" to Image Atlas.`);
   };
+
+  const conceptCoverage = useMemo(() => {
+    return CONCEPTS_SEED.map((c) => {
+      const count = publishedLibrary.filter(
+        (img) =>
+          img.diagnosis.toLowerCase().includes(c.name.split('(')[0].trim().toLowerCase()) ||
+          c.aliases.some((a) => img.title.toLowerCase().includes(a.toLowerCase()))
+      ).length;
+      return { ...c, count };
+    });
+  }, [publishedLibrary]);
 
   const handleCreateOcclusionCards = async () => {
     if (!zoomImg) return;
@@ -202,6 +220,28 @@ export default function ImageAtlasScreen() {
           ))}
         </div>
       )}
+
+      <div className="glass-card rounded-3xl p-5 space-y-3 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-bold text-white">Appendix B Concept Coverage Matrix ({conceptCoverage.filter((c) => c.count > 0).length} / {conceptCoverage.length} covered)</h3>
+          <span className="text-[11px] text-slate-400">Green = has verified image, Slate = gap to fill</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {conceptCoverage.map((c) => (
+            <span
+              key={c.id}
+              title={c.reviewedKeyFeatures}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                c.count > 0
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                  : 'bg-white/5 border-white/10 text-slate-400'
+              }`}
+            >
+              {c.name.split('(')[0].trim()} ({c.count})
+            </span>
+          ))}
+        </div>
+      </div>
 
       {drillQs.length > 0 && (
         <div className="glass-card rounded-3xl p-6 space-y-4 border border-sky-500/40">
