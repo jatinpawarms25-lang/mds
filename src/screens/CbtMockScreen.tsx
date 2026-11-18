@@ -221,6 +221,34 @@ export default function CbtMockScreen() {
         </button>
       </div>
 
+      <div className="glass-card rounded-3xl p-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+          <div>
+            <h3 className="text-sm font-bold text-white">Marks-Leak &amp; Wrong-Answer Budget (Part 8)</h3>
+            <p className="text-xs text-slate-400">
+              Total Wrong: {aW + bW} (Default budget &lt;= 22 per 240-Q mock) | Negative marks leaked: -{aW + bW} | What-if skipped: {calcScore + aW + bW} / 960
+            </p>
+          </div>
+          <span className={`text-xs font-extrabold px-3 py-1 rounded-full ${aW + bW <= 22 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
+            {aW + bW <= 22 ? 'Within 22-Wrong Budget' : `Over Budget by ${aW + bW - 22}`}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs num-tabular">
+          <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10">
+            <div className="text-slate-400">Part A Pacing Target</div>
+            <div className="font-bold text-white mt-0.5">45s / Q (100 Qs / 75 min)</div>
+          </div>
+          <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10">
+            <div className="text-slate-400">2026 AIR 10 Marker</div>
+            <div className="font-bold text-sky-400 mt-0.5">765 / 960 ({calcScore >= 765 ? `+${calcScore - 765}` : `${calcScore - 765}`})</div>
+          </div>
+          <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10">
+            <div className="text-slate-400">Working Target Marker</div>
+            <div className="font-bold text-emerald-400 mt-0.5">790 / 960 ({calcScore >= 790 ? `+${calcScore - 790}` : `${calcScore - 790}`})</div>
+          </div>
+        </div>
+      </div>
+
       <div className="glass-card rounded-3xl p-6 space-y-3">
         <h3 className="text-sm font-bold text-white">Synced Mock History ({mocks.length})</h3>
         {mocks.map((m) => (
